@@ -1,7 +1,117 @@
 import '../styles/globals.css'
+import PropTypes from 'prop-types';
+import { ThemeProvider } from '@material-ui/core/styles';
+import CssBaseline from '@material-ui/core/CssBaseline';
+import Head from 'next/head';
+import { useState, useEffect, React } from 'react';
+import { useRouter } from 'next/router';
+import jwt_decode from "jwt-decode";
+import useSWR, { SWRConfig } from 'swr';
+
+
+
+//https://jasonwatmore.com/post/2021/08/04/next-js-11-jwt-authentication-tutorial-with-example-app
 
 function MyApp({ Component, pageProps }) {
-  return <Component {...pageProps} />
+
+
+  const router = useRouter();
+  const [authorized, setAuthorized] = useState(false);
+
+  const path = router.asPath
+  console.log(path)
+
+  useEffect(() => {
+    // Remove the server-side injected CSS.
+    const jssStyles = document.querySelector('#jss-server-side');
+    if (jssStyles) {
+      jssStyles.parentElement.removeChild(jssStyles);
+    }
+
+    // run auth check on initial load
+    authCheck(router.asPath);
+
+    // set authorized to false to hide page content while changing routes
+    const hideContent = () => setAuthorized(false);
+    router.events.on('routeChangeStart', hideContent);
+
+    // run auth check on route change
+    router.events.on('routeChangeComplete', authCheck)
+
+    // unsubscribe from events in useEffect return function
+    return () => {
+      router.events.off('routeChangeStart', hideContent);
+      router.events.off('routeChangeComplete', authCheck);
+    }
+
+  }, []);
+
+   function validateToken(token) {
+
+     if(token == null) {
+       return false;
+     }
+
+     var decoded = jwt_decode(token);
+     let decodedToken = jwt_decode(token);
+     console.log("Decoded Token", decodedToken);
+     let currentDate = new Date();
+
+     // JWT exp is in seconds
+     if (decodedToken.exp * 1000 < currentDate.getTime()) {
+       console.log("Token expired.");
+       return false;
+     } else {
+       console.log("Token Valid.");
+       return true;
+     }
+  }
+
+  function authCheck(url) {
+    // redirect to login page if accessing a private page and not logged in
+    const publicPaths = ['/login'];
+    const path = url.split('?')[0];
+    
+    const token = localStorage.getItem("token")
+    const invalidToken = !validateToken(token)
+
+    if ( invalidToken && !publicPaths.includes(path)) {
+      setAuthorized(false);
+      router.push({
+        pathname: '/login',
+        query: { returnUrl: router.asPath }
+      });
+    } else {
+      setAuthorized(true);
+    }
+  }
+
+
+  function hideNavbar() {
+    const path_login = path.split('?')[0] == "/login"
+    const path_checkout = path.split('?')[0] == "/checkout"
+    const path_confirm = path.split('?')[0] == "/confirmation"
+
+    return path_login || path_checkout || path_confirm
+  }
+
+  return (
+      <>
+        <SWRConfig
+            value={{
+              refreshInterval: 90000,
+              fetcher: (resource, init) => fetch(resource, init).then(res => res.json())
+            }}
+        >
+          <Head>
+            <title>DataFlix</title>
+          </Head>
+
+          {authorized && <Component {...pageProps} />}
+
+        </SWRConfig>
+      </>
+    );
 }
 
 export default MyApp

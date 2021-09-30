@@ -1,0 +1,45 @@
+.movie-container {
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+    transition: 0.3s;
+    border-radius: 5px; /* 5px rounded corners */
+
+    min-height: 1150px;
+    min-width: 800px;
+
+    max-height: 1150px;
+    max-width: 800px;
+
+    margin: 20px auto 0;
+
+    display: grid;
+    grid-template-rows: 380px 80px 280px 320px auto;
+
+    margin-bottom: 25px;
+}
+
+
+.movie-row-1-background {
+    position: relative;
+    width: 100%;
+    height: 100%;
+
+}
+
+.movie-row-1-background > * > img {
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+
+    filter: blur(6px);
+    -webkit-filter: blur(6px);
+}
+
+.movie-background-poster {
+    position: absolute;
+    width: 160px;
+    height: 240px;
+
+    top: 80px;
+    left: 50px;
+
+    z-index: 2;
+}
