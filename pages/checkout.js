@@ -240,7 +240,7 @@ function CheckoutForm() {
                 }
             })
         };
-        const res = await fetch('http://localhost:8080/sale/add', requestOptions)
+        const res = await fetch('http://localhost:8080/sale/', requestOptions)
         const data = await  res.json()
 
         //.then(response => response.json())

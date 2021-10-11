@@ -16,7 +16,7 @@ const options = { revalidateAll: true }
 
 export const useGetUser = () => {
 
-    const url = "/customer/" + getUserId();
+    const url = "/customer/";
 
     console.log(url)
     const { data, error } = useSWR(url, fetcher, options)
@@ -38,7 +38,6 @@ export const useGetSales = (path) => {
 
     const url = "/sale/" + path
 
-
     const { data, error } = useSWR(url, fetcher, options)
 
     return {data, error}
@@ -56,7 +55,6 @@ export const useGetUserOrders = (path) => {
 export const useGetUserCart = (path) => {
     const url = "/cart/" + path
 
-    console.log(url)
     const { data, mutate, error } = useSWR(url, fetcher, options)
 
     return {data, mutate, error}

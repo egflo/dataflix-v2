@@ -3,7 +3,6 @@ import { useRouter } from 'next/router'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faBookmark } from '@fortawesome/free-solid-svg-icons'
 import { faBookmark as farBookmark } from '@fortawesome/free-regular-svg-icons'
-
 import CircularProgress from '@material-ui/core/CircularProgress'
 import {useGetMovieMeta} from '../pages/api/Service'
 import IconButton from '@material-ui/core/IconButton';
@@ -25,13 +24,13 @@ export default function Bookmark({id}) {
 
     const router = useRouter();
     const classes = useStyles();
-    const { data, error, mutate } = useGetMovieMeta("/bookmark/customer/" + id);
+    const { data, error, mutate } = useGetMovieMeta("/bookmark/"+id);
 
     async function handleBookmark() {
         const token = localStorage.getItem("token")
         // POST request using fetch with set headers
         const requestOptions = {
-            method: 'POST',
+            method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': 'Bearer ' + token,
@@ -42,7 +41,7 @@ export default function Bookmark({id}) {
                 movieId:id,
             })
         };
-        const res = await fetch('http://localhost:8080/bookmark/update', requestOptions)
+        const res = await fetch('http://localhost:8080/bookmark/', requestOptions)
         if(res.status < 300) {
             console.log("Bookmark");
         }

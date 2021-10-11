@@ -34,7 +34,6 @@ const useStyles = makeStyles((theme) => ({
 //https://egghead.io/lessons/react-optimistically-update-swr-s-cache-with-client-side-data
 //https://stackoverflow.com/questions/64245201/revalidating-data-using-mutate-in-swr-which-should-i-use
 export default function CartRow({content}) {
-    //const { refreshInterval, mutate, cache, ...restConfig } = useSWRConfig();
     const {id, userId, movieId, createdDate, price, quantity, movie} = content;
 
     const classes = useStyles();
@@ -61,7 +60,7 @@ export default function CartRow({content}) {
         const token = localStorage.getItem("token")
         // POST request using fetch with set headers
         const requestOptions = {
-            method: 'POST',
+            method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': 'Bearer ' + token,
@@ -73,12 +72,12 @@ export default function CartRow({content}) {
                 movieId:movieId, 
                 qty: value })
         };
-        const res = await fetch('http://localhost:8080/cart/update', requestOptions)
+        const res = await fetch('http://localhost:8080/cart/', requestOptions)
             //.then(response => response.json())
             //.then(data => console.log(data));
         if(res.status < 300) {
-            console.log(mutate('/cart/'+ getUserId()))
-            console.log(mutate('/checkout/'+ getUserId()))
+            mutate('/cart/')
+            mutate('/checkout/')
             setAlert({
                 type: 'success',
                 message: 'Updated Cart'
@@ -86,7 +85,6 @@ export default function CartRow({content}) {
             setState({ open: true, vertical: 'top', horizontal: 'center'});
         }
         else {
-            console.log(res)
             setAlert({
                 type: 'error',
                 message: 'Unable to update Cart. Try again later.'
@@ -99,7 +97,7 @@ export default function CartRow({content}) {
         const token = localStorage.getItem("token")
         // POST request using fetch with set headers
         const requestOptions = {
-            method: 'POST',
+            method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': 'Bearer ' + token,
@@ -107,11 +105,11 @@ export default function CartRow({content}) {
             },
             body: JSON.stringify({ id: id})
         };
-        const res = await fetch('http://localhost:8080/cart/delete', requestOptions)
+        const res = await fetch('http://localhost:8080/cart/', requestOptions)
 
         if(res.status < 300) {
-            console.log(mutate('/cart/'+ getUserId()))
-            console.log(mutate('/checkout/'+ getUserId()))
+            mutate('/cart/')
+            mutate('/checkout/')
             setAlert({
                 type: 'success',
                 message: 'Removed from Cart'
@@ -120,7 +118,6 @@ export default function CartRow({content}) {
 
         }
         else {
-            console.log(res)
             setAlert({
                 type: 'error',
                 message: 'Unable to remove from Cart. Try again later.'

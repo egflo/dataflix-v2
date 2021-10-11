@@ -26,7 +26,7 @@ export default function Cart() {
 
     const router = useRouter();
     const classes = useStyles();
-    const { data, error } = useGetUserCart(getUserId());
+    const { data, error } = useGetUserCart("");
 
     if (error) return <h1>Something went wrong!</h1>
     if (!data) return(

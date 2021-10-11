@@ -11,22 +11,41 @@ import validator from 'validator'
 import { makeStyles } from '@material-ui/core/styles';
 
 const useStyles = makeStyles((theme) => ({
-    backdrop: {
-        zIndex: theme.zIndex.drawer + 1,
-        color: '#fff',
+
+    orderRow: {
+        display: 'grid',
+        gridTemplateColumns: '115px 600px auto',
+        boxShadow: '0 4px 8px 0 rgba(0,0,0,0.2)',
+        marginTop: '20px',
     },
 
-    reviewCard: {
-        minWidth: '385px',
-        height: '280px',
-        margin: '5px',
-        borderRadius: '5px',
-        border: '2px solid white',
-        boxShadow: '0 4px 8px 0 rgba(0,0,0,0.2)',
-        transition: '0.3s',
-        '&:hover': {
-            border: '2px solid dodgerblue',
-        },
+    orderImage: {
+        position:'relative',
+        width: '100%',
+        height: '100%',
+        '& > * > img' : {
+            borderBottomLeftRadius: '5px',
+            borderTopLeftRadius: '5px',
+
+        }
+    },
+
+    orderInformation: {
+      paddingRight: '10px',
+      paddingLeft: '10px',
+      '& > *': {
+          marginBottom: '4px',
+      },
+    },
+
+    orderButtons : {
+        paddingTop: '18px',
+    },
+
+    buttonContainer: {
+        position: 'relative',
+        height: '40px',
+        margin: '10px',
     },
 
 }));
@@ -35,8 +54,9 @@ export default function OrderRowDetailed({content}) {
 
     const { id, orderId, movieId, quantity, listPrice} = content
 
-    const router = useRouter()
-    var { data, error } = useGetMovieId(movieId)
+    const router = useRouter();
+    const classes = useStyles();
+    var { data, error } = useGetMovieId(movieId);
 
     if (error) return <h1>Something went wrong!</h1>
     if (!data) return(
@@ -55,8 +75,8 @@ export default function OrderRowDetailed({content}) {
     }
 
     return (
-        <div className="order-view-content-row">
-            <div className="order-view-row-image">
+        <div className={classes.orderRow}>
+            <div className={classes.orderImage}>
                 <Image
                     src={poster == null || !validator.isURL(poster) ? NoImage:poster}
                     layout='fill'
@@ -65,28 +85,28 @@ export default function OrderRowDetailed({content}) {
                 />
             </div>
 
-            <div className="order-column-1">
+            <div className={classes.orderInformation}>
                 <h3 className="order-row-title">
                     <a href={"/movie/"+ movieId}>{title}</a>
                 </h3>
 
-                <p className="order-row-headline">
+                <p className="order-row-subheadline">
                     {year} - {rated} - {formatRuntime(runtime)}
                 </p>
 
-                <p className="order-row-headline1">
+                <p className="order-row-sku">
                     <b>SKU: {movieId} </b>
                 </p>
 
-                <p className="order-row-headline2">
+                <p className="order-row-qty">
                     <b>Qty: {quantity} </b>
                 </p>
 
-                <p className="order-row-headline3">
+                <p className="order-row-price">
                     <b>Price: {formatCurrency(listPrice)} </b>
                 </p>
 
-                <div className="order-row-headline4">
+                <div className="order-row-button">
                     <Button onClick= {handleBuyAgain} size="md">
                         <FontAwesomeIcon icon={faRedo} size="1x" /> Buy it Again
                     </Button>
@@ -94,16 +114,24 @@ export default function OrderRowDetailed({content}) {
             </div>
 
 
-            <div className="order-buttons">
-                <Button className="btn-block" variant="primary" size="md">
-                    Track Package
-                </Button>
-                <Button className="btn-block" variant="primary" size="md">
-                    Return or replace items
-                </Button>
-                <Button className="btn-block" variant="primary" size="md">
-                    Write a Review
-                </Button>
+            <div className={classes.orderButtons}>
+                <div className={classes.buttonContainer}>
+                    <Button className="btn-block" variant="primary" size="md">
+                        Track Package
+                    </Button>
+                </div>
+
+                <div className={classes.buttonContainer}>
+                    <Button className="btn-block" variant="primary" size="md">
+                        Return or replace items
+                    </Button>
+                </div>
+
+                <div className={classes.buttonContainer}>
+                    <Button className="btn-block" variant="primary" size="md">
+                        Write a Review
+                    </Button>
+                </div>
             </div>
 
         </div>

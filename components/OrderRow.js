@@ -8,14 +8,40 @@ import { faRedo } from '@fortawesome/free-solid-svg-icons'
 import { Button } from 'react-bootstrap';
 import {formatRuntime,formatCurrency} from '../utils/helpers'
 import validator from 'validator'
+import { makeStyles } from '@material-ui/core/styles';
 
+
+const useStyles = makeStyles((theme) => ({
+
+    orderRow: {
+        height: '180px',
+        display: 'grid',
+        gridTemplateColumns: '120px auto',
+        marginBottom: '10px',
+    },
+
+    orderImage: {
+        position: 'relative',
+
+    },
+
+    orderContent: {
+        paddingLeft: '10px',
+        '& > *': {
+            margin: '0',
+            textAlign: 'left',
+        },
+    },
+
+}));
 
 export default function OrderRow({content}) {
 
-    const { id, orderId, movieId, quantity, listPrice} = content
+    const { id, orderId, movieId, quantity, listPrice} = content;
 
-    const router = useRouter()
-    var { data, error } = useGetMovieId(movieId)
+    const router = useRouter();
+    const classes = useStyles();
+    var { data, error } = useGetMovieId(movieId);
 
     if (error) return <h1>Something went wrong!</h1>
     if (!data) return(
@@ -34,8 +60,8 @@ export default function OrderRow({content}) {
     }
 
     return (
-        <div className="order-content-row">
-            <div className="order-row-image">
+        <div className={classes.orderRow}>
+            <div className={classes.orderImage}>
                 <Image
                     src={poster == null || !validator.isURL(poster) ? NoImage:poster}
                     layout='fill'
@@ -44,7 +70,7 @@ export default function OrderRow({content}) {
                 />
             </div>
 
-            <div className="order-column-1">
+            <div className={classes.orderContent}>
                 <h3 className="order-row-title">
                     <a href={"/movie/"+movieId}>{title}</a>
                 </h3>

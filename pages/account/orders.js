@@ -31,8 +31,9 @@ function Orders() {
     const ref = useRef(null);
     var [page, setPage] = useState(0);
 
-    const { data, error } = useGetSales("customer/" + getUserId() +"?page=" + page)
-    
+   // const { data, error } = useGetSales("/customer" + getUserId() +"?page=" + page)
+    const { data, error } = useGetSales("?page=" + page)
+
     if (error) return <h1>Something went wrong!</h1>
     if (!data) return(
         <div>
@@ -50,7 +51,6 @@ function Orders() {
         //     pathname: '/results/' + term,
         //     query: {type: type, page: page, order: order},
         // })
-
     }
 
     return (

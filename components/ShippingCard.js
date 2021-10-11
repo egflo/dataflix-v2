@@ -63,11 +63,11 @@ export default function ShippingCard({address}) {
         vertical: 'top',
         horizontal: 'center',
     });
+    
     const { vertical, horizontal, openSnack } = state;
-
     const [alert, setAlert] = useState({
         type: 'success',
-        message: 'Added to Cart!'
+        message: 'Updated'
     });
     
     const [open, setOpen] = useState(false);
@@ -113,9 +113,6 @@ export default function ShippingCard({address}) {
     async function handleSubmit(values) {
         values['id'] = getUserId();
         const form_object = JSON.stringify(values, null, 2);
-        //alert(form_object)
-        //return
-        //alert(object)
 
         const token = localStorage.getItem("token")
         // POST request using fetch with set headers
@@ -128,12 +125,11 @@ export default function ShippingCard({address}) {
             },
             body: form_object
         };
-        const res = await fetch('http://localhost:8080/customer/update', requestOptions)
+        const res = await fetch('http://localhost:8080/customer/update/address', requestOptions)
         const data = await  res.json()
 
-
         if(res.status < 300) {
-            mutate("/customer/" + getUserId());
+            mutate("/customer/");
             setAlert({
                 type: 'success',
                 message: 'Address Information Updated.'
@@ -142,7 +138,6 @@ export default function ShippingCard({address}) {
 
         }
         else {
-            console.log(res)
             setAlert({
                 type: 'error',
                 message: 'Unable tp update Address Information. Try Again Later.'
@@ -161,8 +156,7 @@ export default function ShippingCard({address}) {
         state: address.state,
         zip: address.postcode
     }
-
-
+    
     return (
         <>
             <button onClick={handleToggle} className="edit-address">Change</button>

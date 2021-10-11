@@ -24,16 +24,56 @@ import Navigation from '../../../components/Navbar'
 
 
 const useStyles = makeStyles((theme) => ({
-    popover: {
-        pointerEvents: 'none',
+    orderContainter: {
+        width: '1000px',
+        margin: '50px auto 0',
+
     },
-    paper: {
-        padding: theme.spacing(1),
+    orderContent: {
+        borderRadius: '5px',
+        boxShadow: '0 4px 8px 0 rgba(0,0,0,0.2)',
+        padding: '15px',
     },
+
+    orderHeader: {
+        display: 'grid',
+        gridTemplateColumns: '33% 33% 33%',
+    },
+
+    orderShipping: {
+        '& > p': {
+            margin: 0,
+        }
+    },
+
+    orderPayment: {
+        '& > div': {
+            display:'grid',
+            gridTemplateColumns: '60px auto',
+        },
+        '& > div > p': {
+            marginTop: '12px',
+        },
+    },
+
+    orderSummary: {
+        '& > *': {
+            margin: 0,
+            textAlign: 'right',
+        },
+    },
+
+    cardImage: {
+        position: 'relative',
+        width: '50px',
+        height: '50px',
+    },
+
 }));
 
 function OrderDetails({orderId}) {
 
+    const classes = useStyles();
     const { data, error } = useGetSales(orderId);
 
     if (error) return <h1>Something went wrong!</h1>
@@ -61,7 +101,7 @@ function OrderDetails({orderId}) {
             card = discover;
         }
         return (
-            <div className="order-view-payment-card">
+            <div className={classes.cardImage}>
                 <Image
                     src={card}
                     layout='fill'
@@ -82,12 +122,12 @@ function OrderDetails({orderId}) {
     return (
         <>
             <Navigation />
-            <div className="order-detail-view-content">
+            <div className={classes.orderContainter}>
                 <h2>Order Details</h2>
                 <p>{formatDate()} | {"Order# " + orderId}</p>
-                <div className="order-detail-view">
-                    <div className="order-header-view">
-                        <div className="order-shipping-view">
+                <div className={classes.orderContent}>
+                    <div className={classes.orderHeader}>
+                        <div className={classes.orderShipping}>
                             <h5>Shipping</h5>
                             <p>{shipping.firstName + " " + shipping.lastName}</p>
                             <p>{shipping.address}</p>
@@ -95,16 +135,16 @@ function OrderDetails({orderId}) {
                             United States
                         </div>
 
-                        <div className="order-payment-view">
+                        <div className={classes.orderPayment}>
                             <h5>Payment Method</h5>
-                            <div className="card-display">
+                            <div className="">
                                 <CardImage/>
                                 <p>{"**** " + last4}</p>
                             </div>
 
                         </div>
 
-                        <div className="order-summary-view">
+                        <div className={classes.orderSummary}>
                             <h5>Order Summary</h5>
                             <p>item(s) Subtotal: {formatCurrency(subTotal)}</p>
                             <p>Shipping & Handling: $0.00</p>

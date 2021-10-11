@@ -15,6 +15,9 @@ import ClickAwayListener from '@material-ui/core/ClickAwayListener';
 import {getUserId} from '../utils/helpers'
 import Switch from '@material-ui/core/Switch';
 import useSWR, { mutate } from 'swr'
+import Alert from '@mui/material/Alert';
+import Snackbar from '@mui/material/Snackbar';
+
 
 const useStyles = makeStyles((theme) => ({
     backdrop: {
@@ -58,6 +61,17 @@ export default function EmailCard() {
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(false);
 
+    const [state, setState] = useState({
+        openSnack: false,
+        vertical: 'top',
+        horizontal: 'center',
+    });
+    const { vertical, horizontal, openSnack } = state;
+    const [alert, setAlert] = useState({
+        type: 'success',
+        message: 'Updated'
+    });
+
     const handleClickAway = () => {
         setOpen(false);
     };
@@ -68,6 +82,10 @@ export default function EmailCard() {
 
     const handleToggle = () => {
         setOpen(!open);
+    };
+
+    const handleClose = () => {
+        setState({ ...state, openSnack: false });
     };
 
     useEffect(() => {
@@ -109,11 +127,27 @@ export default function EmailCard() {
         const data = await  res.json()
 
         if(res.status < 300) {
-            console.log(data)
-            mutate("/customer/" + getUserId());
+            mutate("/customer/");
+            setAlert({
+                type: 'success',
+                message: 'Email Updated.'
+            })
+            setState({ openSnack: true, vertical: 'top', horizontal: 'center'});
+        }
+
+        if(res.status == 404) {
+            setAlert({
+                type: 'error',
+                message: 'Incorrect Password.'
+            })
+            setState({ openSnack: true, vertical: 'top', horizontal: 'center'});
         }
         else {
-            console.log(res)
+            setAlert({
+                type: 'error',
+                message: 'Unable to update Password. Try Again Later.'
+            })
+            setState({ openSnack: true, vertical: 'top', horizontal: 'center'});
         }
     }
 
@@ -223,6 +257,18 @@ export default function EmailCard() {
                     </Formik>
                 </div>
             </Backdrop>
+
+            <Snackbar
+                open={openSnack}
+                anchorOrigin={{ vertical, horizontal }}
+                autoHideDuration={6000}
+                key={vertical + horizontal}
+                onClose={handleClose}>
+
+                <Alert onClose={handleClose} severity={alert.type} sx={{ width: '100%' }}>
+                    {alert.message}
+                </Alert>
+            </Snackbar>
         </>
     );
 }

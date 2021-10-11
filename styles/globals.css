@@ -15,46 +15,6 @@ a {
   box-sizing: border-box;
 }
 
-.movie_card {
-  /* Add shadows to create the "card" effect */
-  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
-  transition: 0.3s;
-  border-radius: 5px; /* 5px rounded corners */
-
-  min-width: 220px;
-  min-height: 500px;
-  max-width: 220px;
-  max-height: 500px;
-
-  display: grid;
-  grid-template-rows: 330px 100px 50px ;
-
-  margin-right: 21px
-}
-
-/* On mouse-over, add a deeper shadow */
-.card:hover {
-  box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
-}
-
-
-.movie-image {
-  position: relative;
-  border-top-left-radius: 5px;
-}
-
-
-
-.card-body {
-  text-align: center;
-  color: grey;
-
-  min-height: 50px;
-  max-height: 50px;
-
-  min-width: 210px;
-  max-width: 210px;
-}
 
 .card-button {
   background-color: white;
@@ -70,6 +30,7 @@ a {
   margin: 0 auto;
 }
 
+
 .card-button:hover {
   background: dodgerblue;
   color: white;
@@ -80,10 +41,6 @@ a {
   margin: 0 auto;
 }
 
-.button-search {
-  background-color: dodgerblue;
-
-}
 
 
 
@@ -92,18 +49,14 @@ a {
   transition: 0.3s;
   border-radius: 5px; /* 5px rounded corners */
 
-  min-height: 1055px;
-  max-height: 1055px;
 
-  min-width: 800px;
-  max-width: 800px;
-
-  margin: 20px auto 0;
+  min-width: 805px;
+  max-width: 805px;
 
   display: grid;
-  grid-template-rows: 380px 280px 320px 70px;
+  grid-template-rows: 380px 50px 280px 320px auto;
+  margin: 20px auto 25px;
 
-  margin-bottom: 25px;
 }
 
 .movie-title-bookmark {
@@ -140,12 +93,16 @@ a {
 }
 
 .movie-image {
+  position: relative;
+  border-top-left-radius: 5px;
+
   min-height: 380px;
   min-width: 250px;
 
   max-height: 380px;
   max-width: 250px;
 }
+
 
 .cast-row-container {
   max-width: 800px;
@@ -157,14 +114,10 @@ a {
   grid-row: 3;
 }
 
-
-
 .movie-information {
   display: grid;
   padding-left: 5px;
-
   grid-template-rows: 60px 30px 245px 60px;
-
 }
 
 .movie-title {
@@ -224,7 +177,6 @@ a {
 
 }
 
-
 /* Genre Styles */
 
 .genre-container {
@@ -243,67 +195,10 @@ button.btn{
   height: 100%;
 }
 
-.genre-button {
-  background-color: white;
-  border: 2px solid dodgerblue;
-  color: dodgerblue;
-
-  text-align: center;
-  text-decoration: none;
-  transition-duration: 0.4s;
-  cursor: pointer;
-  border-radius: 5px;
-
-  margin-right: 7px
-}
-
-.genre-button h3 {
-  margin: 0 auto;
-  padding: 5px 15px;
-}
-
-.genre-button:hover {
-  background: dodgerblue;
-  color: white;
-}
-
-
 /* Cart Styles */
-
-.cart-button {
-  background-color: white;
-  border: 2px solid dodgerblue;
-  color: dodgerblue;
-
-  text-align: center;
-  text-decoration: none;
-  transition-duration: 0.4s;
-  cursor: pointer;
-  border-radius: 5px;
-  padding: 10px 40px;
-
-  width: 98%;
-}
-
-.cart-button h3 {
-  margin: 0 auto;
-}
-
-.cart-button:hover {
-  background: dodgerblue;
-  color: white;
-}
-
 
 
 /* Review Styles */
-
-
-
-
-
-
-
 
 .metacritic {
   margin: 0 auto;
@@ -327,8 +222,6 @@ button.btn{
 }
 
 
-
-
 .ratings-row {
   display: flex;
   align-items:center;
@@ -339,14 +232,6 @@ button.btn{
   height: 40px;
   padding: 5px;
 }
-
-
-
-
-
-
-
-
 
 .border-row {
   display: grid;
@@ -379,9 +264,6 @@ button.btn{
   grid-template-columns: 120px 600px auto;
   box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
 }
-
-
-
 
 .movie-row-image {
   border-radius: 5px;
@@ -452,27 +334,22 @@ button.btn{
 }
 
 .movie_rating-row > * {
-
   margin: 0 auto 5px;
 }
 
 .movie_rating-row > p {
-
   margin-left: 2px;
 }
 
 
-.filmography {
-  width: 0;
-  margin-left: 25px;
-}
 
 
-
+/*
+Index Slideshow
+*/
 
 .background-content {
-  margin: 0 auto;
-  margin-top: 20px;
+  margin: 20px auto 0;
 
   overflow: hidden;
 
@@ -492,55 +369,6 @@ button.btn{
   min-width: 1200px;
 
 }
-
-.movie-background {
-  transition: 0.3s;
-
-  /*
-  max-width: 1200px;
-  min-width: 1200px;
-  height: 500px;
-  */
-
-  display: inline-block;
-
-}
-
-.background-image {
-  border-radius: 5px; /* 5px rounded corners */
-
-  width:100%;
-  max-height:100%;
-
-  object-fit: cover;
-  margin: auto;
-  display: block;
-
-  z-index: -1;
-}
-
-.movie-background > p {
-  color: white;
-  position: absolute;
-  z-index: 1;
-
-  text-shadow: 2px 2px black;
-}
-
-.background-headline {
-  top: 70%;
-  font-size: 50px;
-  margin-left: 20px;
-}
-
-.background-subheadline {
-  top: 84%;
-  margin-left: 25px;
-  font-size: 20px
-}
-
-
-/* Buttons */
 
 .slideshowDots {
   z-index: 99;
@@ -567,46 +395,11 @@ button.btn{
   background-color: dodgerblue;
 }
 
-.list-box {
-  display: grid;
-  grid-template-columns: 50px auto;
-}
 
-.list-box-text {
-  margin-left: 5px;
-  margin-top: 4px;
-}
-.list-box-text > h4 {
-  font-size: 18px;
-  margin-bottom: 1px;
-
-}
-
-.list-box-text > p {
-  color: gray;
-  margin-top: 1px;
-  margin-bottom: 1px;
-}
-
-.list-box > img {
-  border-radius: 5px;
-  width: 100%;
-  height: 100%;
-}
+/* Buttons */
 
 .main-content {
   margin-bottom: 25px;
-}
-
-
-
-.review-expand {
-  height: 100%;
-  position: absolute;
-  left: 0;
-  width: 100%;
-  overflow: hidden;
-  z-index: 99;
 }
 
 
@@ -620,9 +413,6 @@ button.btn{
   height: 75px;
   z-index: 99;
 }
-
-
-
 
 
 .login-alert {
@@ -683,7 +473,6 @@ button.btn{
 }
 
 
-
 .loading-container {
   display: flex;
   justify-content: center;
@@ -693,58 +482,6 @@ button.btn{
   margin-bottom: 5px;
 }
 
-.user-container {
-  border-radius: 5px;
-  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
-
-  width: 1000px;
-  padding-top: 25px;
-  padding-bottom: 25px;
-
-  margin: 0 auto;
-  margin-top: 50px;
-}
-
-
-
-
-
-
-.order-content-row {
-  height: 170px;
-  width: 100% ;
-
-  display: grid;
-  grid-template-columns: 110px 650px ;
-
-  margin-bottom: 10px;
-
-}
-
-.order-column-1 {
-  padding-right: 10px;
-  padding-left: 10px;
-}
-.order-column-1 > * {
-  margin-bottom: 4px;
-}
-
-.order-row-image {
-  position: relative;
-  width: 100%;
-  height: 100%;
-}
-
-.order-buttons {
-  height: 40px;
-}
-
-
-.button-order {
-  width: 80%;
-  margin-bottom: 10px;
-  float: right;
-}
 
 .order-pagination {
   margin-top: 25px;
@@ -753,10 +490,6 @@ button.btn{
 .MuiPopover-paper	 {
   background-color: red;
 }
-
-
-
-
 
 
 .cart-content-row {
@@ -794,7 +527,6 @@ button.btn{
   align-items: center;
 }
 
-
 .cart-qty {
   display: flex;
   justify-content: center;
@@ -813,10 +545,6 @@ button.btn{
   cursor: pointer;
 }
 
-
-.checkout-button {
-  width: 100%;
-}
 
 /* input,  */
 .StripeElement {
@@ -839,7 +567,6 @@ input::placeholder {
   color: #aab7c4;
 }
 
-
 /* input:focus*/
 .StripeElement--focus {
   box-shadow: rgba(50, 50, 93, 0.109804) 0px 4px 6px,
@@ -857,19 +584,6 @@ input::placeholder {
 .StripeElement.PaymentRequestButton {
   height: 40px;
 }
-
-
-.checkout-container {
-  margin: 50px auto 0;
-
-  max-width: 800px;
-  min-width: 800px;
-  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
-
-  padding: 10px;
-}
-
-
 
 
 .edit-address {
@@ -896,91 +610,40 @@ input::placeholder {
 
 
 
-.order-detail-view-content {
-  width: 1000px;
-  margin: 50px auto 0;
-}
-
-.order-detail-view {
-  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
-  width: 100%;
-  border-radius: 5px;
-  padding: 15px;
-}
-
-.order-header-view {
-  width: 100%;
-  display: grid;
-
-  grid-template-columns: 33% 33% 33%;
-}
-
-.order-shipping-view > p{
-  margin: 0;
-}
-
-
-.order-summary-view > p {
-  margin: 0;
-}
-
-.order-summary-view > * {
-  text-align: right;
-}
 
 
 
-
-
-.order-view-payment-card {
-  position: relative;
-  width: 50px;
-  height: 50px;
-}
-
-.card-display {
-  display: grid;
-  grid-template-columns: 60px auto;
-}
-
-.card-display > p {
-  margin-top: 12px;
-}
-
-.order-view-content-row {
-  display: grid;
-  grid-template-columns: 115px 600px auto;
-  width: 1000px;
-
-  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
-  margin-top: 20px;
-
-}
-
-.order-view-row-image {
-  position: relative;
+.dropbtn {
+  background-color: dodgerblue;
+  color: white;
+  font-size: 20px;
+  border: none;
+  cursor: pointer;
   width: 100%;
   height: 100%;
 }
 
-.order-view-row-image > * {
-  border-bottom-left-radius: 5px;
-  border-top-left-radius: 5px;
+.dropdown {
+  position: relative;
+  display: inline-block;
+  transition: 0.3s;
 }
 
-.order-view-buttons {
-  display: grid;
-  grid-template-rows: 25% 25% 25%;
+.dropdown-content {
+  position: absolute;
+  background-color: #f9f9f9;
+  min-width: 100%;
+  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+  z-index: 99;
+  padding: 10px;
+  transition: 0.3s;
+
 }
 
-.order-view-buttons > .btn {
-  width: 95%;
-
-}
+.dropdown-content a:hover {background-color: #f1f1f1}
 
 
 
-
-.buy-button {
-  width: 97%;
+.dropdown:hover .dropbtn {
+  background-color: dodgerblue;
 }

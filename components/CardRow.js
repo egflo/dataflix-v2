@@ -3,11 +3,9 @@ import {useGetMovieMeta} from '../pages/api/Service'
 import MovieCard from '../components/MovieCard'
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { makeStyles } from '@material-ui/core/styles';
-
 import IconButton from '@material-ui/core/IconButton';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faChevronRight, faChevronLeft } from '@fortawesome/free-solid-svg-icons'
-
 import  React, {useRef, useState, useEffect, useCallback} from 'react'
 import axios from "axios";
 import getMovies from '../components/InfiniteScroll'
@@ -53,7 +51,19 @@ const useStyles = makeStyles((theme) => ({
 
     chevronColor: {
         color: 'dodgerblue',
-    }
+    },
+
+
+    title: {
+        display: 'flex',
+    },
+
+    shape: {
+        height: '50px',
+        width: '10px',
+        backgroundColor: 'dodgerblue',
+        marginRight: '5px',
+    },
 }));
 
 export default function CardRow({meta}) {
@@ -124,7 +134,10 @@ export default function CardRow({meta}) {
    // if (totalElements == 0) return (<div></div>);
     return (
         <div className={classes.cardRow}>
-            <h1 className="card-row-title">{title}</h1>
+            <div className={classes.title}>
+                <div className={classes.shape}></div>
+                <h1> {title} </h1>
+            </div>
             <div className={left ? classes.chevronHide : classes.chevronLeft}>
                 <IconButton onClick={handleLeftClick}>
                     <FontAwesomeIcon icon={faChevronLeft} size="3x" className={classes.chevronColor}/>

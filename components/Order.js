@@ -2,18 +2,16 @@ import 'bootstrap/dist/css/bootstrap.min.css'
 import '@fontsource/roboto';
 
 import { useRouter } from 'next/router'
-
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import  React, {useRef, useState, useEffect} from 'react';
 import Image from 'next/image'
 import OrderRow from '../components/OrderRow'
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Pagination from '@material-ui/lab/Pagination';
-
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import { Button, Overlay, Popover } from 'react-bootstrap';
-import  {formatCurrency, getUserId} from '../utils/helpers';
+import {formatCurrency, getUserId} from '../utils/helpers';
 import moment from 'moment';
 
 const useStyles = makeStyles((theme) => ({
@@ -67,7 +65,9 @@ const useStyles = makeStyles((theme) => ({
         paddingLeft: '15px',
     },
 
-
+    orderButtons: {
+        height: '40px',
+    }
 }));
 
 export default function Order({content}) {
@@ -149,7 +149,7 @@ export default function Order({content}) {
                     ))}
                 </div>
 
-                <div className="order-buttons">
+                <div className={classes.orderButtons}>
                     <Button className="btn-block" variant="primary"  size="md" onClick={handleOrderClick}>
                         View Order Details
                     </Button>

@@ -1,8 +1,5 @@
 import { useRouter } from 'next/router'
 
-import Alert from '@mui/material/Alert';
-import Snackbar from '@mui/material/Snackbar';
-
 import Popover from 'react-bootstrap/Popover';
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import Overlay from 'react-bootstrap/Overlay';
@@ -17,8 +14,10 @@ import { Button, Row, Col} from 'react-bootstrap';
 import ClickAwayListener from '@material-ui/core/ClickAwayListener';
 import {getUserId} from '../utils/helpers'
 import Switch from '@material-ui/core/Switch';
-
+import Alert from '@mui/material/Alert';
+import Snackbar from '@mui/material/Snackbar';
 import PasswordStrengthBar from 'react-password-strength-bar';
+import useSWR, { mutate } from 'swr'
 
 const useStyles = makeStyles((theme) => ({
     backdrop: {
@@ -65,7 +64,10 @@ export default function PasswordCard() {
         horizontal: 'center',
     });
     const { vertical, horizontal, openSnack } = state;
-
+    const [alert, setAlert] = useState({
+        type: 'success',
+        message: 'Updated'
+    });
 
     const handleClickAway = () => {
         setOpen(false);
@@ -124,11 +126,19 @@ export default function PasswordCard() {
         const data = await  res.json()
 
         if(res.status < 300) {
-            console.log("Submit Sucess")
-            console.log(data)
+            mutate("/customer/");
+            setAlert({
+                type: 'success',
+                message: 'Password Updated.'
+            })
+            setState({ openSnack: true, vertical: 'top', horizontal: 'center'});
         }
         else {
-            console.log(res)
+            setAlert({
+                type: 'error',
+                message: 'Unable to update Password. Try Again Later.'
+            })
+            setState({ openSnack: true, vertical: 'top', horizontal: 'center'});
         }
     }
 

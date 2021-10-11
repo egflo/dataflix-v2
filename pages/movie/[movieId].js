@@ -11,13 +11,14 @@ import  React, {useRef, useState} from 'react'
 import { makeStyles } from '@material-ui/core/styles';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faBookmark, faShoppingCart } from '@fortawesome/free-solid-svg-icons'
+import { faChevronUp,  faChevronDown} from '@fortawesome/free-solid-svg-icons'
 import IconButton from '@material-ui/core/IconButton';
 
 import CircularProgress from '@material-ui/core/CircularProgress'
 import Rating from '@material-ui/lab/Rating'
 import Popover from 'react-bootstrap/Popover'
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger'
+import Dropdown from 'react-bootstrap/Dropdown'
 import Overlay from 'react-bootstrap/Overlay'
 import Button from 'react-bootstrap/Button'
 import NoImage from '../../public/no_image.jpg'
@@ -124,8 +125,8 @@ const useStyles = makeStyles((theme) => ({
         '& > * > img': {
             borderTopLeftRadius: '5px',
             borderTopRightRadius: '5px',
-            filter: 'blur(5px)',
-            webkitFilter: 'blur(5px)',
+            //filter: 'blur(5px)',
+            //webkitFilter: 'blur(5px)',
         }
     },
 
@@ -158,10 +159,10 @@ const useStyles = makeStyles((theme) => ({
 
 //https://medium.com/geekculture/how-to-use-react-router-useparams-436851fd5ef6
 export default function Movie() {
-    const router = useRouter()
+    const router = useRouter();
     const classes = useStyles();
 
-    const { movieId } = router.query
+    const { movieId } = router.query;
 
     const ref = useRef(null);
     const [state, setState] = useState({
@@ -176,6 +177,8 @@ export default function Movie() {
         message: 'Added to Cart!'
     });
 
+    const [dropdown, setDropdown] = useState(false);
+
     const { data, error } = useGetMovieId(movieId)
 
     if (error) return <h1>Something went wrong!</h1>
@@ -187,7 +190,7 @@ export default function Movie() {
         </div>
     );
 
-    const { id, title, year, director, poster, plot, runtime, language, background, rated, cast, ratings, genres, writer, production, price } = data
+    const { id, title, year, director, poster, plot, runtime, background, rated, cast, ratings, genres, language, writer, awards, boxOffice, production, country, price } = data
 
     function RatingRow() {
         var numVotes = 0;
@@ -217,18 +220,18 @@ export default function Movie() {
 
     function IMDB () {
         var rating = ratings['imdb'];
-
+        var style = {display: 'block'}
         if(rating != null) {
             const split = rating.split("/")
             rating = split[0]
         }
 
         else {
-            rating = "N/A"
+            style = {display: 'none'}
         }
 
         return (
-            <div className="imdb-container">
+            <div style={style} className="imdb-container">
                 <div className={classes.imdb}>
                     <div className={classes.imdbImage}>
                         <Image
@@ -255,6 +258,7 @@ export default function Movie() {
         var rottenTomatoesAudienceStatus = ratings['rottenTomatoesAudienceStatus'];
 
         var rottenImage = "/rotten_none.png";
+        var style = {display: 'grid'};
 
         if (rottenTomatoes != null){
 
@@ -269,8 +273,9 @@ export default function Movie() {
             }
 
             else {
-                rottenImage = "/rotten_none.png";
+                style = {display: 'none'}
             }
+            //rottenImage = "/rotten_none.png";
         }
 
         if (rottenTomatoesStatus != null){
@@ -291,7 +296,7 @@ export default function Movie() {
         }
 
         if(rottenTomatoes == null) {
-            rottenTomatoes = "N/A";
+            style = {display: 'none'}
         }
 
         else {
@@ -300,9 +305,9 @@ export default function Movie() {
 
 
         var rottenAudienceRow = ""
-        if (rottenTomatoesAudienceStatus != null && rottenTomatoesAudience != null){
+        if ((rottenTomatoesAudienceStatus != null && rottenTomatoesAudience != null) && (rottenTomatoesAudience.length > 0 && rottenTomatoesAudience.length > 0)){
 
-            var rottenAudienceImage = ""
+            var rottenAudienceImage = "/rotten_upright.png"
 
             if(rottenTomatoesAudienceStatus == "Upright") {
 
@@ -335,7 +340,7 @@ export default function Movie() {
         }
 
         return (
-            <div className={classes.rottenTomatoes}>
+            <div style={style} className={classes.rottenTomatoes}>
                 <div className={classes.rottenImages}>
                     <Image
                         src={rottenImage}
@@ -355,16 +360,18 @@ export default function Movie() {
 
     function Metacritic() {
         var rating = ratings['metacritic'];
-        if(rating == null || isNaN(rating) || rating.length == 0) {
-            rating = "N/A"
+        var style = {display: 'grid'};
+
+        if(rating == null || rating.length == 0) {
+            style = {display: 'none'};
         }
 
         else {
-            rating = parseInt(rating)
+            rating = parseInt(rating);
         }
 
         return (
-            <div className={classes.metacritic}>
+            <div style={style} className={classes.metacritic}>
                 <div className={classes.metacriticImage}>
                     <Image
                         src="/metacritic.png"
@@ -424,7 +431,6 @@ export default function Movie() {
         );
     }
 
-
     function handleButtonClick(event) {
         const genre_name = event.target.innerText
 
@@ -449,9 +455,11 @@ export default function Movie() {
                 movieId:id,
                 qty: 1 })
         };
-        const res = await fetch('http://localhost:8080/cart/add', requestOptions)
+        const res = await fetch('http://localhost:8080/cart/', requestOptions)
         if(res.status < 300) {
-            console.log(mutate('/cart/'+ getUserId()))
+            mutate('/cart/qty')
+
+            console.log(res.body)
             setAlert({
                 type: 'success',
                 message: 'Added to Cart'
@@ -460,7 +468,6 @@ export default function Movie() {
 
         }
         else {
-            console.log(res)
             setAlert({
                 type: 'error',
                 message: 'Unable to Add to Cart'
@@ -469,9 +476,21 @@ export default function Movie() {
         }
     }
 
+    function formatInformation(data) {
+        if(data == null || data.length == 0) {
+            return "No information avaliable.";
+        }
+        else {
+            return  data;
+        }
+    }
 
     const handleClose = () => {
         setState({ ...state, open: false });
+    };
+
+    const dropdownClick = () => {
+        setDropdown(!dropdown);
     };
 
     function Background() {
@@ -487,7 +506,6 @@ export default function Movie() {
 
                             >
                             </Image>
-
 
                             <div className={classes.backgroundPoster}>
                                 <Image
@@ -623,15 +641,48 @@ export default function Movie() {
 
                 <Background></Background>
 
-                <div className="movie-row-2">
+                <div className="dropdown">
+                    <button onClick={dropdownClick} className="dropbtn">
+                        More Details
+                        <FontAwesomeIcon icon={dropdown ? faChevronUp: faChevronDown} size="1x" style={{color: "white", marginLeft: "10px"}} />
+                    </button>
+                    <div style={{display: dropdown ? 'block':'none'}} className="dropdown-content">
+                        <p className="">
+                            <b>Director: </b> {formatInformation(director)}
+                        </p>
+
+                        <p className="">
+                            <b>Writers: </b> {formatInformation(writer)}
+                        </p>
+
+                        <p className="">
+                            <b>Boxoffice: </b> {formatInformation(boxOffice)}
+                        </p>
+
+                        <p className="">
+                            <b>Production: </b> {formatInformation(production)}
+                        </p>
+
+                        <p className="">
+                            <b>Language(s): </b> {formatInformation(language)}
+                        </p>
+
+                        <p className="">
+                            <b>Country(s): </b> {formatInformation(country)}
+                        </p>
+
+                    </div>
+                </div>
+
+                <div className="cast-row">
                     <CastRow id={id}></CastRow>
                 </div>
 
-                <div className="movie-row-3">
+                <div className="review-row">
                     <ReviewRow id={id}></ReviewRow>
                 </div>
 
-                <div className="movie-row-4">
+                <div className="button-row">
                     <div className="buy-button">
                         <Button onClick={handleAddCart} className="btn-block" >
                             <h3>Add to Bag for {formatCurrency(price)}</h3>

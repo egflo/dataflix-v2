@@ -2,7 +2,6 @@ import 'bootstrap/dist/css/bootstrap.min.css'
 import '@fontsource/roboto';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import Rating from '@material-ui/lab/Rating';
 import { useRouter } from 'next/router'
 import {useGetCast} from '../api/Service'
 import ResultRow from '../../components/ResultRow'
@@ -32,6 +31,7 @@ const useStyles = makeStyles((theme) => ({
     castRow1: {
         display: 'grid',
         gridTemplateColumns: '300px auto',
+        padding: '25px',
     },
 
     castRow2: {

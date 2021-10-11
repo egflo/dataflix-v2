@@ -37,7 +37,7 @@ export default function Navigation() {
     const router = useRouter()
     //const [qty, setQty] = useState(0);
     //const { data, error } = useGetUserCart("qty/" + getUserId())
-    const { data, error } = useGetUserCart(getUserId())
+    const { data, error } = useGetUserCart("")
     var qty = 0;
 
     if(!data) return  (<h1>Loading</h1>);
