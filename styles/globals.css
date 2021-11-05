@@ -55,8 +55,10 @@ a {
 
   display: grid;
   grid-template-rows: 380px 50px 280px 320px auto;
-  margin: 20px auto 25px;
-
+  margin: 15px auto;
+  z-index: 50;
+  position: relative;
+  background-color: white;
 }
 
 .movie-title-bookmark {
@@ -105,13 +107,15 @@ a {
 
 
 .cast-row-container {
-  max-width: 800px;
+  width: 805px;
   height: 100%;
 
   overflow: auto;
   white-space: nowrap;
 
   grid-row: 3;
+
+  background-color: white;
 }
 
 .movie-information {
@@ -593,7 +597,7 @@ input::placeholder {
 
 
 
-.search-input > input[type="text"] {
+.search-input > input[type="search"] {
   border-top-left-radius:5px;
   border-bottom-left-radius:5px;
   height: 35px;
@@ -614,7 +618,7 @@ input::placeholder {
 
 
 .dropbtn {
-  background-color: dodgerblue;
+  background-color: #0d6efd;
   color: white;
   font-size: 20px;
   border: none;
@@ -626,7 +630,8 @@ input::placeholder {
 .dropdown {
   position: relative;
   display: inline-block;
-  transition: 0.3s;
+  -webkit-transition: all 150ms ease;
+  transition: all 150ms ease;
 }
 
 .dropdown-content {
@@ -636,7 +641,8 @@ input::placeholder {
   box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
   z-index: 99;
   padding: 10px;
-  transition: 0.3s;
+  -webkit-transition: all 150ms ease;
+  transition: all 150ms ease;
 
 }
 
@@ -645,5 +651,5 @@ input::placeholder {
 
 
 .dropdown:hover .dropbtn {
-  background-color: dodgerblue;
+  background-color:  #0d6efd;
 }

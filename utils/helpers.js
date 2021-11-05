@@ -42,7 +42,6 @@ export const getUserId = () => {
     // Update the document title using the browser API
     if (typeof window !== 'undefined') {
         const token = localStorage.getItem("token");
-        var decoded = jwt_decode(token);
         let decodedToken = jwt_decode(token);
 
         const {sub, iss, iat} = decodedToken;
