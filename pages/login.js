@@ -7,8 +7,8 @@ import { useEffect, useState } from "react";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faExclamationTriangle } from '@fortawesome/free-solid-svg-icons'
 import { useRouter } from 'next/router'
-import * as Yup from 'yup';
-import jwt_decode from "jwt-decode";
+import Alert from '@mui/material/Alert';
+import Snackbar from '@mui/material/Snackbar';
 
 
 //https://stackoverflow.com/questions/54604505/redirecting-from-server-side-in-nextjs
@@ -20,8 +20,21 @@ export default function Login() {
 
     const [headline, setHeadline] = useState('');
     const [message, setMessage] = useState('');
-    const [alert, setAlert] = useState(false);
+    const [state, setState] = useState({
+        open: false,
+        vertical: 'top',
+        horizontal: 'center',
+    });
+    const { vertical, horizontal, open } = state;
 
+    const [alert, setAlert] = useState({
+        type: 'failure',
+        message: 'Incorrect Email/Password!'
+    });
+
+    const handleClose = () => {
+        setState({ ...state, open: false });
+    };
 
     const loginUser = async event => {
         event.preventDefault()
@@ -42,16 +55,24 @@ export default function Login() {
 
         const result = await res.json()
         if(res.ok) {
-            setAlert(false)
             localStorage.setItem("token", result['token'])
-            router.push({
+            await router.push({
                 pathname: '/',
             })
         }
+        else if(res.status == 401) {
+            setAlert({
+                type: 'error',
+                message: 'Authorization Failed.'
+            })
+            setState({ open: true, vertical: 'top', horizontal: 'center'});
+        }
         else {
-            setHeadline("Error")
-            setMessage("Authorization Failed")
-            setAlert(true)
+            setAlert({
+                type: 'error',
+                message: 'Unable to connect to Database.Try Again Later.'
+            })
+            setState({ open: true, vertical: 'top', horizontal: 'center'});
         }
     }
 
@@ -77,7 +98,6 @@ export default function Login() {
 
     return(
         <div className="login-body">
-            {loginAlert()}
             <Form onSubmit={loginUser} className="login-form">
                 <Form.Group className="mb-3" controlId="formBasicEmail">
                     <Form.Label>Email Address</Form.Label>
@@ -103,6 +123,19 @@ export default function Login() {
                     </Button>
                 </div>
             </Form>
+
+
+            <Snackbar
+                open={open}
+                anchorOrigin={{ vertical, horizontal }}
+                autoHideDuration={6000}
+                key={vertical + horizontal}
+                onClose={handleClose}>
+
+                <Alert onClose={handleClose} severity={alert.type} sx={{ width: '100%' }}>
+                    {alert.message}
+                </Alert>
+            </Snackbar>
         </div>
     )
 }

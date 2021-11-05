@@ -14,7 +14,6 @@ import useSWR, { SWRConfig } from 'swr';
 
 function MyApp({ Component, pageProps }) {
 
-
   const router = useRouter();
   const [authorized, setAuthorized] = useState(false);
 
@@ -48,11 +47,12 @@ function MyApp({ Component, pageProps }) {
 
    function validateToken(token) {
 
-     if(token == null) {
+     if (token == undefined || token == null || token == "null" )  {
+       console.log("token is undefined")
+
        return false;
      }
 
-     var decoded = jwt_decode(token);
      let decodedToken = jwt_decode(token);
      console.log("Decoded Token", decodedToken);
      let currentDate = new Date();
@@ -74,7 +74,7 @@ function MyApp({ Component, pageProps }) {
     
     const token = localStorage.getItem("token")
     const invalidToken = !validateToken(token)
-
+    console.log("Token", invalidToken)
     if ( invalidToken && !publicPaths.includes(path)) {
       setAuthorized(false);
       router.push({
@@ -86,21 +86,26 @@ function MyApp({ Component, pageProps }) {
     }
   }
 
-
-  function hideNavbar() {
-    const path_login = path.split('?')[0] == "/login"
-    const path_checkout = path.split('?')[0] == "/checkout"
-    const path_confirm = path.split('?')[0] == "/confirmation"
-
-    return path_login || path_checkout || path_confirm
-  }
-
   return (
-      <>
+      <div>
         <SWRConfig
             value={{
               refreshInterval: 90000,
-              fetcher: (resource, init) => fetch(resource, init).then(res => res.json())
+              fetcher: (resource, init) => fetch(resource, init).then(res => res.json()),
+              onError: (error, key) => {
+                if (error.status !== 403 && error.status !== 404) {
+                  // We can send the error to Sentry,
+                  // or show a notification UI.
+                  if(error.status == 500) {
+                    router.push("/error")
+
+                  }
+                  if(error.status == 401) {
+                    router.push("/login")
+
+                  }
+                }
+              }
             }}
         >
           <Head>
@@ -110,7 +115,7 @@ function MyApp({ Component, pageProps }) {
           {authorized && <Component {...pageProps} />}
 
         </SWRConfig>
-      </>
+      </div>
     );
 }
 

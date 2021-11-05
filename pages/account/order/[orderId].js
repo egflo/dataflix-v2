@@ -158,7 +158,9 @@ function OrderDetails({orderId}) {
 
                 <div className="order-content-view">
                     {orders.map(order => (
-                        <OrderRowDetailed key={order.id} content={order}/>
+                        <div style={{ marginTop:'20px', boxShadow:'0 4px 8px 0 rgba(0,0,0,0.2)'}}>
+                            <OrderRowDetailed key={order.id} content={order}/>
+                        </div>
                     ))}
                 </div>
 

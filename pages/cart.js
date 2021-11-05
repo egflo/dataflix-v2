@@ -1,16 +1,12 @@
 import 'bootstrap/dist/css/bootstrap.min.css'
 import '@fontsource/roboto';
 
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useRouter } from 'next/router'
-import {useState} from 'react'
-import Image from 'next/image'
 import CircularProgress from '@material-ui/core/CircularProgress';
-
 import CartRow from'../components/CartRow'
 import {useGetUserCart} from '../pages/api/Service'
 import { Button } from 'react-bootstrap';
-import  {formatCurrency, getUserId} from '../utils/helpers'
+import  {formatCurrency} from '../utils/helpers'
 import Navigation from '../components/Navbar'
 import { makeStyles } from '@material-ui/core/styles';
 
@@ -26,14 +22,12 @@ export default function Cart() {
 
     const router = useRouter();
     const classes = useStyles();
-    const { data, error } = useGetUserCart(getUserId());
+    const { data, error } = useGetUserCart("");
 
     if (error) return <h1>Something went wrong!</h1>
     if (!data) return(
-        <div>
-            <div className={classes.cartContainer}>
-                <div className="loading-container"><CircularProgress/></div>
-            </div>
+        <div className={classes.cartContainer}>
+            <div className="loading-container"><CircularProgress/></div>
         </div>
     );
 

@@ -9,29 +9,21 @@ import Image from 'next/image'
 import { useRouter } from 'next/router'
 import  React, {useRef, useState} from 'react'
 import { makeStyles } from '@material-ui/core/styles';
-
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faChevronUp,  faChevronDown} from '@fortawesome/free-solid-svg-icons'
-import IconButton from '@material-ui/core/IconButton';
-
 import CircularProgress from '@material-ui/core/CircularProgress'
 import Rating from '@material-ui/lab/Rating'
-import Popover from 'react-bootstrap/Popover'
-import OverlayTrigger from 'react-bootstrap/OverlayTrigger'
-import Dropdown from 'react-bootstrap/Dropdown'
-import Overlay from 'react-bootstrap/Overlay'
 import Button from 'react-bootstrap/Button'
 import NoImage from '../../public/no_image.jpg'
 import NoBackground from '../../public/movie_background.png'
-
-
-import {useGetMovieId} from '../api/Service'
+import {useGetMovieId, getBaseURL} from '../api/Service'
 import CastRow from '../../components/CastRow'
 import ReviewRow from '../../components/ReviewRow'
 import {formatRuntime, numFormatter, getUserId, formatCurrency} from '../../utils/helpers'
 import validator from 'validator'
 import Navigation from '../../components/Navbar'
 import Bookmark from '../../components/Bookmark'
+import ReviewCard from '../../components/ReviewCard'
 import useSWR, { mutate } from 'swr'
 
 
@@ -131,12 +123,14 @@ const useStyles = makeStyles((theme) => ({
     },
 
     backgroundPoster: {
-        position: 'absolute',
-        height: '260px',
+        position: 'relative',
+        height: '300px',
         width: '170px',
         top: '65px',
         left: '50px',
-        zIndex: 99,
+        '& > *': {
+            borderRadius:'5px',
+        }
     },
 
     backgroundContent: {
@@ -144,7 +138,6 @@ const useStyles = makeStyles((theme) => ({
         width: '525px',
         top: '58px',
         left: '225px',
-        zIndex: 99,
         paddingLeft: '5px',
         '& > *': {
             margin: 0,
@@ -153,7 +146,17 @@ const useStyles = makeStyles((theme) => ({
         }
     },
 
-    
+    backdrop: {
+        position: 'relative',
+        height: '100%',
+        width: '100%',
+        padding: '15px',
+        zIndex: 1,
+        '& > * > img': {
+            filter: 'blur(5px)',
+            webkitFilter: 'blur(5px)',
+        }
+    },
 }));
 
 
@@ -161,10 +164,7 @@ const useStyles = makeStyles((theme) => ({
 export default function Movie() {
     const router = useRouter();
     const classes = useStyles();
-
     const { movieId } = router.query;
-
-    const ref = useRef(null);
     const [state, setState] = useState({
         open: false,
         vertical: 'top',
@@ -178,7 +178,6 @@ export default function Movie() {
     });
 
     const [dropdown, setDropdown] = useState(false);
-
     const { data, error } = useGetMovieId(movieId)
 
     if (error) return <h1>Something went wrong!</h1>
@@ -455,9 +454,10 @@ export default function Movie() {
                 movieId:id,
                 qty: 1 })
         };
-        const res = await fetch('http://localhost:8080/cart/add', requestOptions)
+        const res = await fetch(getBaseURL() + '/cart/', requestOptions)
         if(res.status < 300) {
-            console.log(mutate('/cart/'+ getUserId()))
+            await mutate('/cart/')
+
             setAlert({
                 type: 'success',
                 message: 'Added to Cart'
@@ -466,7 +466,6 @@ export default function Movie() {
 
         }
         else {
-            console.log(res)
             setAlert({
                 type: 'error',
                 message: 'Unable to Add to Cart'
@@ -477,7 +476,7 @@ export default function Movie() {
 
     function formatInformation(data) {
         if(data == null || data.length == 0) {
-            return "No information avaliable.";
+            return "No information available.";
         }
         else {
             return  data;
@@ -507,15 +506,18 @@ export default function Movie() {
                             </Image>
 
                             <div className={classes.backgroundPoster}>
-                                <Image
-                                    src={poster == null || !validator.isURL(poster) ? NoImage : poster}
-                                    layout='fill'
-                                    objectFit="cover"
-                                    alt="Not Found"
-                                >
-                                </Image>
+                                    <Image
+                                        src={poster == null || !validator.isURL(poster) ? NoImage : poster}
+                                        alt="Not Found"
+                                        width={170}
+                                        height={260}
+                                    >
+                                    </Image>
 
-                                <Bookmark id={movieId}></Bookmark>
+                                <div style={{display:'flex',alignItems:'center',justifyContent:'center', height:'35px', backgroundColor:'rgba(60, 60, 60, 0.8)', paddingLeft: '20px'}}>
+                                    <Bookmark id={movieId} button={false}></Bookmark>
+                                    <ReviewCard id={movieId}></ReviewCard>
+                                </div>
                             </div>
 
 
@@ -525,11 +527,11 @@ export default function Movie() {
                                 </h1>
 
 
-                                <p> {year} - {rated} - {formatRuntime(runtime)}</p>
+                                <p style={{fontWeight:'bold'}}> {year} - {rated} - {formatRuntime(runtime)}</p>
 
                                 <RatingRow></RatingRow>
 
-                                <p>
+                                <p style={{fontWeight:'bold'}}>
                                     {plot}
                                 </p>
 
@@ -634,62 +636,64 @@ export default function Movie() {
 
     return (
         <>
-            <Navigation />
 
-            <div className="movie-container">
+                <Navigation />
 
-                <Background></Background>
+                <div className="movie-container">
 
-                <div className="dropdown">
-                    <button onClick={dropdownClick} className="dropbtn">
-                        More Details
-                        <FontAwesomeIcon icon={dropdown ? faChevronUp: faChevronDown} size="1x" style={{color: "white", marginLeft: "10px"}} />
-                    </button>
-                    <div style={{display: dropdown ? 'block':'none'}} className="dropdown-content">
-                        <p className="">
-                            <b>Director: </b> {formatInformation(director)}
-                        </p>
+                    <Background></Background>
 
-                        <p className="">
-                            <b>Writers: </b> {formatInformation(writer)}
-                        </p>
+                    <div className="dropdown">
+                        <button onClick={dropdownClick} className="dropbtn">
+                            More Details
+                            <FontAwesomeIcon icon={dropdown ? faChevronUp: faChevronDown} size="1x" style={{color: "white", marginLeft: "10px"}} />
+                        </button>
+                        <div style={{display: dropdown ? 'block':'none'}} className="dropdown-content">
+                            <p className="">
+                                <b>Director: </b> {formatInformation(director)}
+                            </p>
 
-                        <p className="">
-                            <b>Boxoffice: </b> {formatInformation(boxOffice)}
-                        </p>
+                            <p className="">
+                                <b>Writers: </b> {formatInformation(writer)}
+                            </p>
 
-                        <p className="">
-                            <b>Production: </b> {formatInformation(production)}
-                        </p>
+                            <p className="">
+                                <b>Boxoffice: </b> {formatInformation(boxOffice)}
+                            </p>
 
-                        <p className="">
-                            <b>Language(s): </b> {formatInformation(language)}
-                        </p>
+                            <p className="">
+                                <b>Production: </b> {formatInformation(production)}
+                            </p>
 
-                        <p className="">
-                            <b>Country(s): </b> {formatInformation(country)}
-                        </p>
+                            <p className="">
+                                <b>Language(s): </b> {formatInformation(language)}
+                            </p>
 
+                            <p className="">
+                                <b>Country(s): </b> {formatInformation(country)}
+                            </p>
+
+                        </div>
                     </div>
-                </div>
 
-                <div className="cast-row">
-                    <CastRow id={id}></CastRow>
-                </div>
-
-                <div className="review-row">
-                    <ReviewRow id={id}></ReviewRow>
-                </div>
-
-                <div className="button-row">
-                    <div className="buy-button">
-                        <Button onClick={handleAddCart} className="btn-block" >
-                            <h3>Add to Bag for {formatCurrency(price)}</h3>
-                        </Button>
+                    <div className="cast-row">
+                        <CastRow id={id}></CastRow>
                     </div>
+
+                    <div className="review-row">
+                        <ReviewRow id={id}></ReviewRow>
+                    </div>
+
+                    <div className="button-row">
+                        <div className="buy-button">
+                            <Button onClick={handleAddCart} className="btn-block" >
+                                <h3>Add to Bag for {formatCurrency(price)}</h3>
+                            </Button>
+                        </div>
+                    </div>
+
                 </div>
 
-            </div>
 
             <Snackbar
                 open={open}

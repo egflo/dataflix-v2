@@ -28,7 +28,8 @@ const useStyles = makeStyles((theme) => ({
         float: 'right',
         textAlign: 'center',
         minWidth: 120
-    }
+    },
+
 }));
 
 export default function Results() {

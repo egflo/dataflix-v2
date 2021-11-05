@@ -16,6 +16,7 @@ import EmailCard from '../../components/EmailCard';
 import PasswordCard from '../../components/PasswordCard';
 import Navigation from '../../components/Navbar'
 import { makeStyles } from '@material-ui/core/styles';
+import React from "react";
 
 const useStyles = makeStyles((theme) => ({
 
@@ -52,7 +53,16 @@ export default function User() {
         </div>
     );
 
-    const {id, firstName, lastName, address, unit, email, city, state, postcode} = data;
+    const {id, firstName, lastName, email, primaryAddressId, addresses} = data;
+
+    var primary_address  = "No addresses found"
+    if(primaryAddressId != null) {
+        primary_address = addresses.find(element => element.id == primaryAddressId);
+    }
+
+    function handleToggle() {
+        router.push("/account/addresses");
+    }
 
     return (
         <>
@@ -63,9 +73,9 @@ export default function User() {
 
                     <div className={classes.settingsSection}>
                         <h5>Primary Address</h5>
-                        <p>{address + ", " + city + ", " + state + " " + postcode}</p>
+                        <p>{primary_address.address + ", " + primary_address.city + ", " + primary_address.state + " " + primary_address.postcode}</p>
 
-                        <ShippingCard address={data}/>
+                        <button onClick={handleToggle} className="edit-address">Change</button>
                     </div>
 
                     <hr></hr>

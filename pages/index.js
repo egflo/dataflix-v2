@@ -30,6 +30,7 @@ const useStyles = makeStyles((theme) => ({
         overflow: 'hidden',
         position: 'relative',
         margin: '20px auto 0',
+        marginBottom: '20px',
     },
 
     slideshowSlider: {
@@ -80,7 +81,7 @@ export default function Home() {
     }, [index]);
 
       return (
-        <div className='main-content'>
+          <div>
             <Navigation />
             
             <div className={classes.backgroundContent}>
