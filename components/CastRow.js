@@ -11,9 +11,7 @@ export default function CastRow({id}) {
 
     if (error) return <h1>Something went wrong!</h1>
     if (!data) return(
-        <div className="cast-row-container">
-            <div className="loading-container"><CircularProgress/></div>
-        </div>
+        <div className="loading-container"><CircularProgress/></div>
     );
 
     return (

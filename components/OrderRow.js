@@ -87,7 +87,11 @@ export default function OrderRow({content}) {
                     <b>Price: {formatCurrency(listPrice)} </b>
                 </p>
 
-                <div className="order-row-headline3">
+                <p className="order-row-headline3">
+                    <b>SKU: {movieId} </b>
+                </p>
+
+                <div className="order-row-headline4">
                     <Button onClick= {handleBuyAgain} size="md">
                         <FontAwesomeIcon icon={faRedo} size="1x" /> Buy it Again
                     </Button>

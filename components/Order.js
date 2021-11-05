@@ -2,17 +2,14 @@ import 'bootstrap/dist/css/bootstrap.min.css'
 import '@fontsource/roboto';
 
 import { useRouter } from 'next/router'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import  React, {useRef, useState, useEffect} from 'react';
-import Image from 'next/image'
 import OrderRow from '../components/OrderRow'
-import CircularProgress from '@material-ui/core/CircularProgress';
-import Pagination from '@material-ui/lab/Pagination';
-import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import { Button, Overlay, Popover } from 'react-bootstrap';
 import {formatCurrency, getUserId} from '../utils/helpers';
-import moment from 'moment';
+import ReviewCardDetailed from "./ReviewCardDetailed";
+import OrderRowDetailed from "./OrderRowDetailed";
+import Link from 'next/link'
 
 const useStyles = makeStyles((theme) => ({
     popover: {
@@ -35,7 +32,7 @@ const useStyles = makeStyles((theme) => ({
     orderHeadline: {
         display: 'grid',
         borderTop: '5px',
-        gridTemplateColumns: '200px 150px 100px auto',
+        gridTemplateColumns: '200px 150px 400px auto',
         height: '60px',
         backgroundColor: 'whitesmoke',
         paddingLeft: '10px',
@@ -48,15 +45,15 @@ const useStyles = makeStyles((theme) => ({
         }
     },
     orderHeadlineColumnOrderNumber: {
-        '& > p': {
-            marginTop: '20px',
-            float: 'right',
+        '& > div > *': {
+           // marginTop: '20px',
+            margin: '4px 4px 4px 0px',
         }
     },
 
     orderContent: {
         display: 'grid',
-        gridTemplateColumns: '700px auto',
+        gridTemplateColumns: 'auto',
         height: '100%',
         width: '100%',
         marginTop: '10px',
@@ -137,7 +134,10 @@ export default function Order({content}) {
                 </div>
 
                 <div className={classes.orderHeadlineColumnOrderNumber}>
-                    <p>ORDER # {id}</p>
+                    <div style={{float:"right"}}>
+                        <p>ORDER # {id}</p>
+                        <Link href={"/account/order/" + id}>Order Details</Link>
+                    </div>
                 </div>
 
             </div>
@@ -145,21 +145,14 @@ export default function Order({content}) {
             <div className={classes.orderContent}>
                 <div className="order-rows">
                     {orders.map(order => (
-                        <OrderRow key={order.id} content={order}/>
+                        <>
+                            <OrderRowDetailed key={order.id} content={order}/>
+                            <hr></hr>
+                        </>
+
                     ))}
                 </div>
 
-                <div className={classes.orderButtons}>
-                    <Button className="btn-block" variant="primary"  size="md" onClick={handleOrderClick}>
-                        View Order Details
-                    </Button>
-                    <Button className="btn-block" variant="primary" size="md">
-                        Return or replace items
-                    </Button>
-                    <Button className="btn-block" variant="primary"  size="md" >
-                        Write a Review
-                    </Button>
-                </div>
 
             </div>
         </div>

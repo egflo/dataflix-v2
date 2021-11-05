@@ -11,19 +11,22 @@ import axios from "axios";
 import getMovies from '../components/InfiniteScroll'
 
 const useStyles = makeStyles((theme) => ({
-    cardRow: {
-        position: 'relative',
-        width: '600px',
-        height: '550px',
-        margin: '15px auto',
+    container: {
+        margin: '0 auto',
         maxWidth: '1200px',
         minWidth: '1200px',
+    },
+
+    cardRow: {
+        position: 'relative',
+        height: '500px',
+
     },
 
     cardContainer: {
         display: 'flex',
         flexWrap: 'no-wrap',
-        overflowX: 'hidden',
+        overflowX: 'auto',
         overflowY: 'hidden',
         scrollBehavior: 'smooth',
         height: '100%'
@@ -133,26 +136,35 @@ export default function CardRow({meta}) {
 
    // if (totalElements == 0) return (<div></div>);
     return (
-        <div className={classes.cardRow}>
+        <div className={classes.container}>
             <div className={classes.title}>
                 <div className={classes.shape}></div>
                 <h1> {title} </h1>
             </div>
-            <div className={left ? classes.chevronHide : classes.chevronLeft}>
-                <IconButton onClick={handleLeftClick}>
-                    <FontAwesomeIcon icon={faChevronLeft} size="3x" className={classes.chevronColor}/>
-                </IconButton>
-            </div>
-            <div className={right ? classes.chevronHide : classes.chevronRight}>
-                <IconButton onClick={handleRightClick}>
-                    <FontAwesomeIcon icon={faChevronRight} size="3x" className={classes.chevronColor}/>
-                </IconButton>
-            </div>
-            <div ref={ref} onScroll={onScroll} className={classes.cardContainer}>
-                {list.map((meta,index) => (
-                    <MovieCard key={index} meta={meta} />
-                ))}
+
+            <div className={classes.cardRow}>
+                {/* whenClicked is a property not an event, per se.
+
+                                <div className={left ? classes.chevronHide : classes.chevronLeft}>
+                    <IconButton onClick={handleLeftClick}>
+                        <FontAwesomeIcon icon={faChevronLeft} size="3x" className={classes.chevronColor}/>
+                    </IconButton>
+                </div>
+                <div className={right ? classes.chevronHide : classes.chevronRight}>
+                    <IconButton onClick={handleRightClick}>
+                        <FontAwesomeIcon icon={faChevronRight} size="3x" className={classes.chevronColor}/>
+                    </IconButton>
+                </div>
+
+                */}
+
+                <div ref={ref} onScroll={onScroll} className={classes.cardContainer}>
+                    {list.map((meta,index) => (
+                        <MovieCard key={index} meta={meta} />
+                    ))}
+                </div>
             </div>
         </div>
+
     )
 }

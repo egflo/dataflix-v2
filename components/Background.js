@@ -41,8 +41,9 @@ export default function Background({movieId}) {
     const classes = useStyles();
     const { data, error } = useGetMovieId(movieId);
 
-    if (error) return <h1>Something went wrong!</h1>
-    if (!data) return <h1>Loading...</h1>
+    if (error) return <h1>{error.info.message}</h1>
+
+    if (!data) return  <div className="loading-container"><CircularProgress/></div>
 
     const { id, title, year, runtime, rated, background } = data
 

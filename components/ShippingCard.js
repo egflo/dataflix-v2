@@ -1,8 +1,6 @@
 import { useRouter } from 'next/router'
 
-import Popover from 'react-bootstrap/Popover';
-import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
-import Overlay from 'react-bootstrap/Overlay';
+
 import Backdrop from '@material-ui/core/Backdrop';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { makeStyles } from '@material-ui/core/styles';
@@ -11,12 +9,10 @@ import { Formik, Field, ErrorMessage } from "formik";
 import * as yup from 'yup';
 import  React, {useRef, useState, useEffect} from 'react';
 import { Button, Row, Col} from 'react-bootstrap';
-import ClickAwayListener from '@material-ui/core/ClickAwayListener';
-import {getUserId} from '../utils/helpers'
 import useSWR, { mutate } from 'swr'
-
 import Alert from '@mui/material/Alert';
 import Snackbar from '@mui/material/Snackbar';
+import {getBaseURL} from "../pages/api/Service";
 
 
 const useStyles = makeStyles((theme) => ({
@@ -52,22 +48,22 @@ const schema = yup.object().shape({
 });
 
 
-export default function ShippingCard({address}) {
-
+export default function ShippingCard({address,insert}) {
     const classes = useStyles();
     const router = useRouter()
     const ref = useRef(null);
+    const formikRef = useRef(null);
 
     const [state, setState] = useState({
         openSnack: false,
         vertical: 'top',
         horizontal: 'center',
     });
+    
     const { vertical, horizontal, openSnack } = state;
-
     const [alert, setAlert] = useState({
         type: 'success',
-        message: 'Added to Cart!'
+        message: 'Updated'
     });
     
     const [open, setOpen] = useState(false);
@@ -89,6 +85,10 @@ export default function ShippingCard({address}) {
         setState({ ...state, openSnack: false });
     };
 
+    function handleReset() {
+        formikRef.current.resetForm();
+    }
+
     // useOutsideAlerter(ref, open)
     useEffect(() => {
         /**
@@ -97,6 +97,7 @@ export default function ShippingCard({address}) {
         function handleClickOutside(event) {
             if (ref.current && !ref.current.contains(event.target) && open) {
                 setOpen(!open);
+                handleReset();
 
             }
         }
@@ -109,18 +110,15 @@ export default function ShippingCard({address}) {
         };
     }, [ref, open]);
 
-
     async function handleSubmit(values) {
-        values['id'] = getUserId();
+        if(!insert) {
+            values['id'] = address['id'];
+        }
         const form_object = JSON.stringify(values, null, 2);
-        //alert(form_object)
-        //return
-        //alert(object)
-
         const token = localStorage.getItem("token")
         // POST request using fetch with set headers
         const requestOptions = {
-            method: 'POST',
+            method: (insert == true)? 'POST':'PUT',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': 'Bearer ' + token,
@@ -128,12 +126,11 @@ export default function ShippingCard({address}) {
             },
             body: form_object
         };
-        const res = await fetch('http://localhost:8080/customer/update', requestOptions)
+        const res = await fetch(getBaseURL() + '/address/', requestOptions)
         const data = await  res.json()
 
-
         if(res.status < 300) {
-            mutate("/customer/" + getUserId());
+            await mutate("/customer/");
             setAlert({
                 type: 'success',
                 message: 'Address Information Updated.'
@@ -142,34 +139,45 @@ export default function ShippingCard({address}) {
 
         }
         else {
-            console.log(res)
             setAlert({
                 type: 'error',
-                message: 'Unable tp update Address Information. Try Again Later.'
+                message: 'Unable to update Address Information. Try Again Later.'
             })
             setState({ openSnack: true, vertical: 'top', horizontal: 'center'});
         }
-
-    }
-
-    const initalValues = {
-        firstName: address.firstName,
-        lastName: address.lastName,
-        unit: address.unit,
-        address: address.address,
-        city: address.city,
-        state: address.state,
-        zip: address.postcode
     }
 
 
+    let initalValues = {
+        firstName: "",
+        lastName: "",
+        unit: "",
+        address: "",
+        city: "",
+        state: "",
+        zip: ""
+    }
+
+    if(!insert) {
+        initalValues = {
+            firstName: address.firstName,
+            lastName: address.lastName,
+            unit: address.unit,
+            address: address.address,
+            city: address.city,
+            state: address.state,
+            zip: address.postcode
+        }
+
+    }
     return (
         <>
-            <button onClick={handleToggle} className="edit-address">Change</button>
+            <button onClick={handleToggle} className="edit-address">{(insert == true)? 'Add Address':'Change'}</button>
 
             <Backdrop className={classes.backdrop}  open={open}>
                     <div className={classes.card} ref={ref}>
                         <Formik
+                            innerRef={formikRef}
                             validationSchema={schema}
                             initialValues={initalValues}
                             onSubmit={async (values) => {
@@ -233,7 +241,6 @@ export default function ShippingCard({address}) {
                                                 type="text"
                                                 name="unit"
                                                 placeholder="Apt, suit, building, floor, etc."
-                                                name="unit"
                                                 value={values.unit}
                                                 onChange={handleChange}
                                             />
@@ -308,7 +315,7 @@ export default function ShippingCard({address}) {
 
                                     <Row className="justify-content-center">
                                         <Button variant="primary" type="submit">
-                                            Use this Address
+                                            {(insert == true)? 'Use this Address':'Update this Address'}
                                         </Button>
                                         {loading ? <CircularProgress/> : null}
                                     </Row>

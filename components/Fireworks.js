@@ -20,6 +20,7 @@ export default class Fireworks extends React.Component {
         this.isAnimationEnabled = false;
         this.animationInstance = null;
         this.intervalId = null;
+        this.timer = null;
     }
 
     getAnimationSettings(originXA, originXB) {
@@ -71,9 +72,16 @@ export default class Fireworks extends React.Component {
         this.stopAnimation();
     }
 
+    componentDidMount() {
+        this.startAnimation();
+        this.timer = setTimeout(() => this.pauseAnimation(), 9000)
+
+    }
+
     componentWillUnmount() {
         this.isAnimationEnabled = false;
         this.intervalId && clearInterval(this.intervalId);
+        clearTimeout(this.timer);
     }
 
     getInstance = (instance) => {
@@ -83,11 +91,6 @@ export default class Fireworks extends React.Component {
     render() {
         return (
             <>
-                <div>
-                    <button onClick={this.handlerClickStart}>Start</button>
-                    <button onClick={this.handlerClickPause}>Pause</button>
-                    <button onClick={this.handlerClickStop}>Stop</button>
-                </div>
                 <ReactCanvasConfetti refConfetti={this.getInstance} style={canvasStyles}/>
             </>
         );

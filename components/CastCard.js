@@ -14,9 +14,9 @@ const useStyles = makeStyles((theme) => ({
         border: '2px solid white',
         boxShadow: '0 4px 8px 0 rgba(0,0,0,0.2)',
         transition: '0.3s',
-        border: '2px solid white',
         borderRadius: '5px',
         margin: '10px 5px 5px 5px',
+        backgroundColor: '#fafafa',
 
         '&:hover': {
             border: '2px solid dodgerblue',

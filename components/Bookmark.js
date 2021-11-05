@@ -1,20 +1,20 @@
 
 import { useRouter } from 'next/router'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faBookmark } from '@fortawesome/free-solid-svg-icons'
+import { faBookmark, faPlus, faMinus } from '@fortawesome/free-solid-svg-icons'
 import { faBookmark as farBookmark } from '@fortawesome/free-regular-svg-icons'
 import CircularProgress from '@material-ui/core/CircularProgress'
-import {useGetMovieMeta} from '../pages/api/Service'
+import {getBaseURL, useGetMovieMeta} from '../pages/api/Service'
 import IconButton from '@material-ui/core/IconButton';
 import {getUserId} from '../utils/helpers'
 import { makeStyles } from '@material-ui/core/styles';
 
 const useStyles = makeStyles((theme) => ({
     bookmarkMovie: {
-        position: 'absolute',
+        //position: 'absolute',
         zIndex: 99,
         '& > *': {
-            padding: '0px',
+            padding: '0',
         },
     },
 
@@ -24,13 +24,13 @@ export default function Bookmark({id}) {
 
     const router = useRouter();
     const classes = useStyles();
-    const { data, error, mutate } = useGetMovieMeta("/bookmark/customer/" + id);
+    const { data, error, mutate } = useGetMovieMeta("/bookmark/"+id);
 
     async function handleBookmark() {
         const token = localStorage.getItem("token")
         // POST request using fetch with set headers
         const requestOptions = {
-            method: 'POST',
+            method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': 'Bearer ' + token,
@@ -41,7 +41,7 @@ export default function Bookmark({id}) {
                 movieId:id,
             })
         };
-        const res = await fetch('http://localhost:8080/bookmark/update', requestOptions)
+        const res = await fetch(getBaseURL() + '/bookmark/', requestOptions)
         if(res.status < 300) {
             console.log("Bookmark");
         }
@@ -50,8 +50,7 @@ export default function Bookmark({id}) {
 
         }
 
-        console.log(mutate)
-        mutate(data)
+        await mutate(data)
     }
 
     // Call this function whenever you want to
@@ -60,11 +59,15 @@ export default function Bookmark({id}) {
         router.replace(router.asPath);
     }
 
+    function RateStatus() {
+
+    }
+
     function BookmarkStatus() {
         if (error) return (
             <div className={classes.bookmarkMovie}>
                 <IconButton onClick={handleBookmark} aria-label="bookmark">
-                    <FontAwesomeIcon icon={farBookmark} size="2x" style={{color: "dodgerblue"}} />
+                    <FontAwesomeIcon icon={faPlus} size="lg" style={{color: "#0d6efd"}} />
                 </IconButton>
             </div>
         );
@@ -77,7 +80,7 @@ export default function Bookmark({id}) {
             return (
                 <div className={classes.bookmarkMovie}>
                     <IconButton onClick={handleBookmark} aria-label="bookmark">
-                        <FontAwesomeIcon icon={faBookmark} size="2x" style={{color: "dodgerblue"}} />
+                        <FontAwesomeIcon icon={faMinus} size="lg" style={{color: "#0d6efd"}} />
                     </IconButton>
                 </div>
             );

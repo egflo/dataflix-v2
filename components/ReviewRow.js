@@ -1,6 +1,6 @@
 import { useRouter } from 'next/router'
 import {useGetMovieReviews} from '../pages/api/Service'
-import ReviewCard from '../components/ReviewCard'
+import Review from '../components/Review'
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { makeStyles } from '@material-ui/core/styles';
 
@@ -12,7 +12,6 @@ const useStyles = makeStyles((theme) => ({
         overflow: 'auto',
         display: 'flex',
         alignItems: 'center',
-        height: '100%',
         marginLeft: '5px',
     },
 
@@ -53,7 +52,7 @@ export default function ReviewRow({id}) {
             return (
                 <div className={classes.reviewContainer}>
                     {data.content.map(review => (
-                        <ReviewCard key={review.id} review={review} />
+                        <Review key={review.id} review={review} />
                     ))}
                 </div>
             );

@@ -2,7 +2,6 @@
 import { Button, Navbar, Nav, NavDropdown, Form, FormControl, Dropdown} from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faFilm, faShoppingCart, faUserCircle} from '@fortawesome/free-solid-svg-icons'
-import {useGetMovies} from '../pages/api/Service'
 import Search from '../components/Search'
 import { useRouter } from 'next/router'
 import ShoppingCartIcon from '@material-ui/icons/Shoppingcart';
@@ -12,8 +11,7 @@ import { withStyles } from '@material-ui/core/styles';
 import NoSsr from '@material-ui/core/NoSsr';
 import {useGetUserCart} from '../pages/api/Service'
 import  React, {useRef, useState, useEffect} from 'react';
-import { faBars } from '@fortawesome/free-solid-svg-icons'
-import  {getUserId} from '../utils/helpers'
+import CircularProgress from "@material-ui/core/CircularProgress";
 
 
 const StyledBadge = withStyles((theme) => ({
@@ -28,19 +26,17 @@ const StyledBadge = withStyles((theme) => ({
 //https://stackoverflow.com/questions/67540393/next-js-material-ui-warning-prop-classname-did-not-match
 //https://stackoverflow.com/questions/36426521/what-does-export-default-do-in-jsx
 //https://dev.to/debosthefirst/how-to-use-cookies-for-persisting-users-in-nextjs-4617
-
 //https://github.com/itsfaqih/react-swr-auth
-
 
 export default function Navigation() {
 
     const router = useRouter()
     //const [qty, setQty] = useState(0);
     //const { data, error } = useGetUserCart("qty/" + getUserId())
-    const { data, error } = useGetUserCart(getUserId())
+    const { data, error } = useGetUserCart("")
     var qty = 0;
 
-    if(!data) return  (<h1>Loading</h1>);
+    if(!data) return <div className="loading-container"><CircularProgress/></div>;
     if(data || !error) {
         qty = data.map(li => li.quantity).reduce((sum, val) => sum + val, 0);
         //setQty(data.map(li => li.quantity).reduce((sum, val) => sum + val, 0));
@@ -56,6 +52,14 @@ export default function Navigation() {
     function handleClickCart() {
         router.push({
             pathname: '/cart'
+        })
+    }
+
+    function handleLogout() {
+        localStorage.removeItem("token");
+
+        router.push({
+            pathname: '/login'
         })
     }
 
@@ -83,7 +87,11 @@ export default function Navigation() {
                         <Dropdown.Item href="/account/orders">Orders</Dropdown.Item>
                         <Dropdown.Item href="/account/settings">Settings</Dropdown.Item>
                         <Dropdown.Divider />
-                        <Dropdown.Item href="/login">Sign Out</Dropdown.Item>
+                        <Dropdown.Item href="">
+                            <div onClick={handleLogout}>
+                                Sign Out
+                            </div>
+                        </Dropdown.Item>
                     </Dropdown.Menu>
                 </Dropdown>
 

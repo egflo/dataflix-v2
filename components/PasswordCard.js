@@ -1,8 +1,5 @@
 import { useRouter } from 'next/router'
 
-import Alert from '@mui/material/Alert';
-import Snackbar from '@mui/material/Snackbar';
-
 import Popover from 'react-bootstrap/Popover';
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import Overlay from 'react-bootstrap/Overlay';
@@ -17,8 +14,11 @@ import { Button, Row, Col} from 'react-bootstrap';
 import ClickAwayListener from '@material-ui/core/ClickAwayListener';
 import {getUserId} from '../utils/helpers'
 import Switch from '@material-ui/core/Switch';
-
+import Alert from '@mui/material/Alert';
+import Snackbar from '@mui/material/Snackbar';
 import PasswordStrengthBar from 'react-password-strength-bar';
+import useSWR, { mutate } from 'swr'
+import {getBaseURL} from "../pages/api/Service";
 
 const useStyles = makeStyles((theme) => ({
     backdrop: {
@@ -50,10 +50,10 @@ const schema = yup.object().shape({
 
 
 export default function PasswordCard() {
-
     const classes = useStyles();
-    const router = useRouter();
     const ref = useRef(null);
+    const formikRef = useRef(null);
+
 
     const [checked, setChecked] = React.useState(false);
     const [open, setOpen] = useState(false);
@@ -65,7 +65,10 @@ export default function PasswordCard() {
         horizontal: 'center',
     });
     const { vertical, horizontal, openSnack } = state;
-
+    const [alert, setAlert] = useState({
+        type: 'success',
+        message: 'Updated'
+    });
 
     const handleClickAway = () => {
         setOpen(false);
@@ -90,6 +93,7 @@ export default function PasswordCard() {
         function handleClickOutside(event) {
             if (ref.current && !ref.current.contains(event.target) && open) {
                 setOpen(!open);
+                handleReset();
             }
         }
 
@@ -120,20 +124,32 @@ export default function PasswordCard() {
             },
             body: form_object
         };
-        const res = await fetch('http://localhost:8080/customer/update/password', requestOptions)
+        const res = await fetch(getBaseURL() + '/customer/update/password', requestOptions)
         const data = await  res.json()
 
         if(res.status < 300) {
-            console.log("Submit Sucess")
-            console.log(data)
+            mutate("/customer/");
+            setAlert({
+                type: 'success',
+                message: 'Password Updated.'
+            })
+            setState({ openSnack: true, vertical: 'top', horizontal: 'center'});
         }
         else {
-            console.log(res)
+            setAlert({
+                type: 'error',
+                message: 'Unable to update Password. Try Again Later.'
+            })
+            setState({ openSnack: true, vertical: 'top', horizontal: 'center'});
         }
     }
 
     function handleSwitch(event) {
         setChecked(event.target.checked);
+    }
+
+    function handleReset() {
+        formikRef.current.resetForm();
     }
 
     const initalValues = {
@@ -149,6 +165,7 @@ export default function PasswordCard() {
             <Backdrop className={classes.backdrop}  open={open}>
                 <div className={classes.card} ref={ref}>
                     <Formik
+                        innerRef={formikRef}
                         validationSchema={schema}
                         initialValues={initalValues}
                         onSubmit={async (values) => {

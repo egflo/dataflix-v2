@@ -46,7 +46,18 @@ const useStyles = makeStyles((theme) => ({
         margin: '0',
         color: 'white',
         display: 'block',
-    }
+    },
+
+    image: {
+        position:'relative',
+        width: '100%',
+        height: '100%',
+        '& > * > img' : {
+            borderBottomLeftRadius: '5px',
+            borderTopLeftRadius: '5px',
+
+        }
+    },
 }));
 
 
@@ -104,7 +115,7 @@ export default function ResultRow({content}) {
     return (
         <div className="border-row">
             <div onMouseOver={MouseOver} onMouseOut={MouseOut} onClick={handleClick} className="content-row">
-                <div className="movie-row-image">
+                <div className={classes.image}>
                     <Image
                         src={poster == null || !validator.isURL(poster) ? NoImage:poster}
                         layout='fill'

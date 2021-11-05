@@ -16,6 +16,7 @@ import { faThumbsUp, faStar } from '@fortawesome/free-regular-svg-icons'
 import IconButton from "@material-ui/core/IconButton";
 import Rating from '@material-ui/lab/Rating'
 import {getUserId} from "../utils/helpers";
+import OrderRow from "./OrderRow";
 
 
 const useStyles = makeStyles((theme) => ({
@@ -41,21 +42,22 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const schema = yup.object().shape({
+    movie: yup.string()
+        .required("Movie is required."),
     title: yup.string()
         .required("Title is required."),
     text: yup.string()
         .required("No text was inserted."),
     rating: yup.number()
         .required('Rating is required.')
-        //.min(1),
+    //.min(1),
 });
 
 
-export default function ReviewCard({id,button}) {
+export default function ReviewCardDetailed({items}) {
     const classes = useStyles();
-    const formikRef = useRef(null);
     const ref = useRef(null);
-
+    const [type, setType] = useState("Dictamen");
     const [rating, setRating] = useState(0);
     const [state, setState] = useState({
         openSnack: false,
@@ -96,7 +98,7 @@ export default function ReviewCard({id,button}) {
         function handleClickOutside(event) {
             if (ref.current && !ref.current.contains(event.target) && open) {
                 setOpen(!open);
-                handleReset();
+
             }
         }
 
@@ -129,7 +131,7 @@ export default function ReviewCard({id,button}) {
         const data = await  res.json()
 
         if(res.status < 300) {
-            await mutate("/movie/");
+            await mutate("/movie/" + id);
             setAlert({
                 type: 'success',
                 message: 'Review Added.'
@@ -138,7 +140,6 @@ export default function ReviewCard({id,button}) {
 
         }
         else {
-
             setAlert({
                 type: 'error',
                 message: 'Unable to add review. Try Again Later.'
@@ -151,48 +152,26 @@ export default function ReviewCard({id,button}) {
         text: "",
         rating: 0,
         title: "",
+        movie: "",
     }
 
-    function ToggleType() {
-        if(button) {
 
-            return (
-                <Button onClick={handleToggle} className="btn-block" variant="primary" size="md">
-                    Write a Review
-                </Button>
-            );
-
-        }
-        else {
-
-            return (
-                <div classes={classes.rateMovie}>
-                    <IconButton onClick={handleToggle} aria-label="rate" >
-                        <FontAwesomeIcon icon={faThumbsUp} size="md" style={{color: "#0d6efd"}} />
-                    </IconButton>
-                </div>
-            );
-        }
-    }
-
-    function handleReset() {
-        setRating(0);
-        formikRef.current.resetForm();
-    }
     return (
         <>
-            <ToggleType></ToggleType>
+            <Button onClick={handleToggle} className="btn-block" variant="primary" size="md">
+                Write a Review
+            </Button>
+
             <Backdrop className={classes.backdrop}  open={open}>
                 <div className={classes.card} ref={ref}>
                     <Formik
-                        innerRef={formikRef}
                         validationSchema={schema}
                         initialValues={initalValues}
                         onSubmit={async (values) => {
 
                             setLoading(true);
                             await new Promise((r) => setTimeout(r, 500));
-                            await handleSubmit(values);
+                            handleSubmit(values);
                             setLoading(false);
                         }}
                     >{({
@@ -206,9 +185,35 @@ export default function ReviewCard({id,button}) {
                        }) => (
                         <Form noValidate onSubmit={handleSubmit}>
                             <Row className="justify-content-center">
-                                <Form.Group as={Col} md="11" controlId="validationFormik01">
-                                    <Form.Label><b>Overall rating</b></Form.Label>
-                                    {<br></br>}
+                                <Row className="justify-content-center">
+                                    <Form.Group as={Col} md="11" controlId="formBasicSelect">
+                                        <Form.Control
+                                            as="select"
+                                            name="movie"
+                                            value={type}
+                                            isValid={touched.movie && !errors.movie}
+                                            isInvalid={!!errors.movie}
+                                            feedback={errors.movie}
+                                            onChange={e => {
+                                                console.log("e.target.value", e.target.value);
+                                                setType(e.target.value);
+                                            }}
+                                        >
+                                            <option value="">Select a item</option>
+                                            {items.map(item => (
+                                                <option value={item.movieId} key={item.movieId}>{item.movieId}</option>
+                                            ))}
+
+                                        </Form.Control>
+
+                                        <Form.Control.Feedback>Looks good!</Form.Control.Feedback>
+                                        <Form.Control.Feedback type="invalid">
+                                            {errors.movie}
+                                        </Form.Control.Feedback>
+                                    </Form.Group>
+                                </Row>
+
+                                <Form.Group as={Col} md="11" controlId="validationFormik02">
                                     <Rating
                                         placeholderRating={0}
                                         max={10}
@@ -233,12 +238,11 @@ export default function ReviewCard({id,button}) {
                             </Row>
 
                             <Row className="justify-content-center">
-                                <Form.Group as={Col} md="11" controlId="validationFormik02">
-                                    <Form.Label><b>Add a headline</b></Form.Label>
+                                <Form.Group as={Col} md="11" controlId="validationFormik03">
                                     <Form.Control
                                         type="text"
                                         name="title"
-                                        placeholder="What's most important to know?"
+                                        placeholder="Title.."
                                         value={values.title}
                                         onChange={handleChange}
                                         isValid={touched.title && !errors.title}
@@ -254,14 +258,13 @@ export default function ReviewCard({id,button}) {
                             </Row>
 
                             <Row className="justify-content-center">
-                                <Form.Group as={Col} md="11" controlId="validationFormik03">
-                                    <Form.Label><b>Add a written review</b></Form.Label>
+                                <Form.Group as={Col} md="11" controlId="validationFormik04">
                                     <Form.Control
                                         as="textarea"
                                         rows={3}
                                         type="textarea"
                                         name="text"
-                                        placeholder="What did you like or dislike?"
+                                        placeholder="Text.."
                                         value={values.text}
                                         onChange={handleChange}
                                         isValid={touched.text && !errors.text}
@@ -280,10 +283,6 @@ export default function ReviewCard({id,button}) {
                                     Submit
                                 </Button>
                                 {loading ? <CircularProgress/> : null}
-
-                                <Button onClick={handleReset} variant="primary" type="reset">
-                                    Reset
-                                </Button>
                             </Row>
                         </Form>
                     )}

@@ -1,11 +1,6 @@
 import { useRouter } from 'next/router'
-import {useGetMovieId} from '../pages/api/Service'
 import Image from 'next/image'
-import CircularProgress from '@material-ui/core/CircularProgress';
 import NoImage from '../public/no_image.jpg'
-import { Button } from 'react-bootstrap';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faRedo } from '@fortawesome/free-solid-svg-icons'
 import Select from '@material-ui/core/Select';
 import { makeStyles } from '@material-ui/core/styles';
 import {useState} from 'react'
@@ -15,7 +10,7 @@ import Link from 'next/link'
 import validator from 'validator'
 import {formatRuntime,getUserId} from '../utils/helpers'
 import useSWR, { mutate } from 'swr'
-import useSWRConfig from 'swr'
+import {getBaseURL} from '../pages/api/Service'
 
 
 import Alert from '@mui/material/Alert';
@@ -34,11 +29,8 @@ const useStyles = makeStyles((theme) => ({
 //https://egghead.io/lessons/react-optimistically-update-swr-s-cache-with-client-side-data
 //https://stackoverflow.com/questions/64245201/revalidating-data-using-mutate-in-swr-which-should-i-use
 export default function CartRow({content}) {
-    //const { refreshInterval, mutate, cache, ...restConfig } = useSWRConfig();
     const {id, userId, movieId, createdDate, price, quantity, movie} = content;
-
     const classes = useStyles();
-    const router = useRouter();
     const [qty, setQty] = useState(quantity);
     const [state, setState] = useState({
         open: false,
@@ -61,7 +53,7 @@ export default function CartRow({content}) {
         const token = localStorage.getItem("token")
         // POST request using fetch with set headers
         const requestOptions = {
-            method: 'POST',
+            method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': 'Bearer ' + token,
@@ -73,12 +65,12 @@ export default function CartRow({content}) {
                 movieId:movieId, 
                 qty: value })
         };
-        const res = await fetch('http://localhost:8080/cart/update', requestOptions)
+        const res = await fetch(getBaseURL() + '/cart/', requestOptions)
             //.then(response => response.json())
             //.then(data => console.log(data));
         if(res.status < 300) {
-            console.log(mutate('/cart/'+ getUserId()))
-            console.log(mutate('/checkout/'+ getUserId()))
+            await mutate('/cart/')
+            await mutate('/checkout/')
             setAlert({
                 type: 'success',
                 message: 'Updated Cart'
@@ -86,7 +78,6 @@ export default function CartRow({content}) {
             setState({ open: true, vertical: 'top', horizontal: 'center'});
         }
         else {
-            console.log(res)
             setAlert({
                 type: 'error',
                 message: 'Unable to update Cart. Try again later.'
@@ -99,7 +90,7 @@ export default function CartRow({content}) {
         const token = localStorage.getItem("token")
         // POST request using fetch with set headers
         const requestOptions = {
-            method: 'POST',
+            method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': 'Bearer ' + token,
@@ -107,11 +98,11 @@ export default function CartRow({content}) {
             },
             body: JSON.stringify({ id: id})
         };
-        const res = await fetch('http://localhost:8080/cart/delete', requestOptions)
+        const res = await fetch(getBaseURL() + '/cart/', requestOptions)
 
         if(res.status < 300) {
-            console.log(mutate('/cart/'+ getUserId()))
-            console.log(mutate('/checkout/'+ getUserId()))
+            await mutate('/cart/')
+            await mutate('/checkout/')
             setAlert({
                 type: 'success',
                 message: 'Removed from Cart'
@@ -120,7 +111,6 @@ export default function CartRow({content}) {
 
         }
         else {
-            console.log(res)
             setAlert({
                 type: 'error',
                 message: 'Unable to remove from Cart. Try again later.'

@@ -9,14 +9,15 @@ import { Button } from 'react-bootstrap';
 import {formatRuntime,formatCurrency} from '../utils/helpers'
 import validator from 'validator'
 import { makeStyles } from '@material-ui/core/styles';
+import ReviewCard from "./ReviewCard";
 
 const useStyles = makeStyles((theme) => ({
 
     orderRow: {
         display: 'grid',
         gridTemplateColumns: '115px 600px auto',
-        boxShadow: '0 4px 8px 0 rgba(0,0,0,0.2)',
-        marginTop: '20px',
+        //boxShadow: '0 4px 8px 0 rgba(0,0,0,0.2)',
+        //marginTop: '20px',
     },
 
     orderImage: {
@@ -128,9 +129,7 @@ export default function OrderRowDetailed({content}) {
                 </div>
 
                 <div className={classes.buttonContainer}>
-                    <Button className="btn-block" variant="primary" size="md">
-                        Write a Review
-                    </Button>
+                    <ReviewCard id={movieId} button={true}/>
                 </div>
             </div>
 

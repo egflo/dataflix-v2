@@ -12,7 +12,6 @@ import Autocomplete from "@material-ui/lab/Autocomplete";
 import CircularProgress from '@material-ui/core/CircularProgress';
 import NoSsr from '@material-ui/core/NoSsr';
 import { makeStyles } from '@material-ui/core/styles';
-import {Form, Button} from 'react-bootstrap'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faSearch } from '@fortawesome/free-solid-svg-icons'
 import {formatRuntime} from '../utils/helpers'
@@ -75,7 +74,6 @@ export default function Search() {
     }
 
     function handleSubmit() {
-        console.log("SUBMIT")
         console.log(inputValue)
         router.push({
             pathname: '/results/[term]',
@@ -96,7 +94,7 @@ export default function Search() {
                         onClose={() => {
                             setOpen(false);
                         }}
-                        getOptionLabel={(option) => option.title}
+                        getOptionLabel={(option) => option.title || ""}
                         onChange={(event, newValue) => {
                             setValue(newValue);
                         }}
@@ -119,8 +117,14 @@ export default function Search() {
                                             border: 0,
                                             paddingLeft: 5
                                         }}
-                                        type="text"
+                                        type="search"
                                         placeholder="Search Movies.."
+                                        onKeyDown={e => {
+                                            if (e.key === 'Enter') {
+                                                console.log('Enter key pressed');
+                                                handleSubmit();
+                                            }
+                                        }}
                                         {...params.inputProps} />
 
                                     <button onClick={handleSubmit}>
