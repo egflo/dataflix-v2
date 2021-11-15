@@ -10,18 +10,17 @@ import { Button, Navbar} from 'react-bootstrap';
 import CartRow from'../components/CartRow'
 import { loadStripe } from "@stripe/stripe-js";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import {faFilm} from '@fortawesome/free-solid-svg-icons'
+import {faFilm, faPlus} from '@fortawesome/free-solid-svg-icons'
 import {getUserId, formatCurrency} from '../utils/helpers'
-import useSWR, { mutate } from 'swr'
 import { makeStyles } from '@material-ui/core/styles';
 import Select from 'react-select';
 import Backdrop from '@mui/material/Backdrop';
 import CircularProgress from '@mui/material/CircularProgress';
 import Alert from '@mui/material/Alert';
 import Snackbar from '@mui/material/Snackbar';
-import Confirmation from "./confirmation";
+import ShippingCard from "../components/ShippingCard";
 
-const stripe = loadStripe("");
+const stripe = loadStripe("pk_test_51J3qCqBVPvYzs7uWw0nbrKwdIZWg0hmaYHEABbUirTZqQR2TftCxjMBRJhBlVIQbvYLTWDrUXt2WZnzVbY2BNfye0055McVHXT");
 
 const useStyles = makeStyles((theme) => ({
     checkoutContainer: {
@@ -89,6 +88,23 @@ const useStyles = makeStyles((theme) => ({
         height: '2px',
         backgroundColor: 'lightgrey',
 
+    },
+
+    add: {
+        position: 'relative',
+        boxShadow: '0 4px 8px 0 rgba(0,0,0,0.2)',
+        width: '500px',
+        height: '100px',
+        '& > button': {
+            width: '100%',
+            height: '100%',
+            backgroundColor: 'transparent',
+            border: 'none',
+            fontWeight: 'bold',
+            fontSize: '25px',
+            color: 'gray',
+            marginTop: '5px',
+        },
     },
 
 }));
@@ -212,6 +228,7 @@ function CheckoutForm() {
 
     const [isLoading, setLoading] = useState(false);
     const [checkout, setCheckout] = useState( null);
+    const [enable, setEnable] = useState( false);
 
     const [state, setState] = useState({
         open: false,
@@ -368,6 +385,64 @@ function CheckoutForm() {
 
     };
 
+    function calcSubtotal(data) {
+        return data.map(li => li.quantity * li.movie.price).reduce((sum, val) => sum + val, 0)
+    };
+
+    function Totals() {
+        if(address == null) {
+
+            return (
+                <>
+                    <h6>Subtotal: {formatCurrency(calcSubtotal(cart))}</h6>
+                    <h6>Taxes: {formatCurrency(0.00)}</h6>
+                    <h6>Shipping: {formatCurrency(0.00)}</h6>
+
+                    <hr className={classes.checkoutTotalsDivider}></hr>
+
+                    <h5><b>Order Total: </b> {formatCurrency(calcSubtotal(cart))}</h5>
+                </>
+            );
+
+        }
+        else {
+
+            return (
+                <>
+                    <h6>Subtotal: {formatCurrency(subTotal)}</h6>
+                    <h6>Taxes: {formatCurrency(salesTax)}</h6>
+                    <h6>Shipping: {formatCurrency(0.00)}</h6>
+
+                    <hr className={classes.checkoutTotalsDivider}></hr>
+
+                    <h5><b>Order Total: </b> {formatCurrency(total)}</h5>
+                </>
+            );
+        }
+    }
+
+    function Address() {
+        if(address == null) {
+            return (
+                <div className={classes.shippingContainer}>
+                    <h4>1 Shipping Address</h4>
+                    <div className={classes.add}>
+                        <FontAwesomeIcon style={{color:'lightgray', position: 'absolute', marginLeft: '28%',marginTop:'8%'}} icon={faPlus} size="2x" />
+                        <ShippingCard insert={true}/>
+                    </div>
+                </div>
+            );
+        }
+        else {
+            return (
+                <div className={classes.shippingContainer}>
+                    <h4>1 Shipping Address</h4>
+                    <AddressSelect checkout={checkout} onChange={handleChange}></AddressSelect>
+                </div>
+            );
+        }
+    }
+
     const handleClose = () => {
         setState({ ...state, open: false });
     };
@@ -396,10 +471,8 @@ function CheckoutForm() {
 
             <div className={classes.checkoutContainer}>
                 <div className={classes.checkoutRow1}>
-                    <div className={classes.shippingContainer}>
-                        <h4>1 Shipping Address</h4>
-                        <AddressSelect checkout={checkout} onChange={handleChange}></AddressSelect>
-                    </div>
+
+                    <Address></Address>
 
                     <div className={classes.checkoutRow2}>
                         <h4>2 Payment Method</h4>
@@ -407,14 +480,7 @@ function CheckoutForm() {
                     </div>
 
                     <div className={classes.checkoutTotals}>
-                        <h6>Subtotal: {formatCurrency(subTotal)}</h6>
-                        <h6>Taxes: {formatCurrency(salesTax)}</h6>
-                        <h6>Shipping: {formatCurrency(0.00)}</h6>
-
-                        <hr className={classes.checkoutTotalsDivider}></hr>
-
-                        <h5><b>Order Total: </b> {formatCurrency(total)}</h5>
-
+                        <Totals></Totals>
                     </div>
                 </div>
 
@@ -430,7 +496,7 @@ function CheckoutForm() {
                     className="btn-block"
                     variant="primary"
                     size="lg"
-                    disabled={!stripe}>
+                    disabled={!stripe || !enable}>
                      Pay
                 </Button>
 
