@@ -2,8 +2,10 @@
 import React from 'react'
 import axios from "axios";
 import useSWR, { useSWRConfig } from 'swr'
+import { useSWRInfinite } from "swr";
 
-const baseUrl = "http://localhost:8080"
+//const baseUrl = "http://localhost:8080"
+const baseUrl = ""
 const fetcher = (url) =>
     axios
         .get(baseUrl + url, { headers: { Authorization: "Bearer " + localStorage.getItem("token") } })
@@ -127,8 +129,6 @@ export const useGetSales = (path) => {
             setTimeout(() => revalidate({ retryCount }), 5000)
         }})
 
-    console.log(url)
-    console.log(data)
     return {data, error}
 }
 
@@ -159,6 +159,7 @@ export const useGetMovies = path => {
         throw new Error("Path is required")
     }
     const url =  path
+
 
     const { data, error } = useSWR(url, fetcher, {
         onErrorRetry: (error, key, config, revalidate, { retryCount }) => {

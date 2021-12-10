@@ -4,8 +4,6 @@ import '@fontsource/roboto';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useRouter } from 'next/router'
 import {useGetCast} from '../api/Service'
-import ResultRow from '../../components/ResultRow'
-import {useGetFilmography} from '../api/Service'
 import Filmography from '../../components/Filmography'
 import Image from 'next/image'
 import CircularProgress from '@material-ui/core/CircularProgress';
@@ -13,45 +11,86 @@ import NoImage from '../../public/no_image.jpg'
 import validator from 'validator'
 import Navigation from '../../components/Navbar'
 import { makeStyles } from '@material-ui/core/styles';
+import {faExclamationTriangle} from "@fortawesome/free-solid-svg-icons";
+import React from "react";
+import NoBackground from "../../public/movie_background.png";
 
 
 const useStyles = makeStyles((theme) => ({
 
     castContainer: {
-        minWidth: '850px',
-        maxWidth: '850px',
-        display: 'grid',
-        gridTemplateRows: '380px auto',
-        margin: '20px auto',
-        boxShadow: '0 4px 8px 0 rgba(0,0,0,0.2)',
-        transition: '0.3s',
-        borderRadius: '5px',
+
+        [theme.breakpoints.down('sm')]: {
+            display: 'grid',
+            gridTemplateColumns: '1fr',
+            transition: '0.3s',
+            paddingTop: '10px',
+            width: '100%',
+        },
+
+        [theme.breakpoints.up('md')]: {
+            minWidth: '850px',
+            maxWidth: '850px',
+            display: 'grid',
+            gridTemplateRows: '440px auto',
+            margin: '20px auto',
+            boxShadow: '0 4px 8px 0 rgba(0,0,0,0.2)',
+            transition: '0.3s',
+            borderRadius: '5px',
+        },
     },
 
-    castRow1: {
-        display: 'grid',
-        gridTemplateColumns: '300px auto',
-        padding: '25px',
+    cast: {
+        [theme.breakpoints.down('sm')]: {
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+        },
+
+        [theme.breakpoints.up('md')]: {
+            display: 'grid',
+            gridTemplateColumns: '300px auto',
+            padding: '25px',
+        },
     },
 
-    castRow2: {
-        paddingTop: '20px',
+    films: {
+        display: 'grid',
+        gridTemplateRows: '50px auto',
     },
 
     castInformation: {
         display: 'grid',
-        gridTemplateRows: '50px 30px 300px',
-        paddingLeft: '10px',
+        gridTemplateRows: '50px 30px auto',
+        padding: '15px',
+
+        [theme.breakpoints.up('md')]: {
+            gridTemplateRows: '50px 30px 300px',
+            paddingLeft: '10px',
+        }
     },
 
     castImage: {
-        width: '100%',
-        height: '100%',
-        position: 'relative',
-        '& > * > img': {
-            borderRadius: '5px',
 
-        }
+        [theme.breakpoints.down('sm')]: {
+            width: '250px',
+            height: '300px',
+            position: 'relative',
+            '& > * > img': {
+                borderRadius: '5px',
+
+            },
+        },
+
+        [theme.breakpoints.up('md')]: {
+            width: '100%',
+            height: '100%',
+            position: 'relative',
+            '& > * > img': {
+                borderRadius: '5px',
+
+            },
+        },
     },
 
     castTitle: {
@@ -60,6 +99,10 @@ const useStyles = makeStyles((theme) => ({
         whiteSpace: 'nowrap',
         width: '95%',
         margin: '0',
+
+        [theme.breakpoints.down('sm')]: {
+            textAlign: 'center',
+        },
     },
 
     castSubheadline: {
@@ -68,12 +111,20 @@ const useStyles = makeStyles((theme) => ({
         whiteSpace: 'nowrap',
         width: '95%',
         margin: '0',
+
+        [theme.breakpoints.down('sm')]: {
+            textAlign: 'center',
+        },
     },
 
     castBody: {
         textOverflow: 'ellipsis',
         overflow: 'auto',
         margin: '0',
+
+        [theme.breakpoints.down('sm')]: {
+            height: '200px',
+        },
     },
 
 }));
@@ -86,13 +137,23 @@ export default function Cast() {
 
     const { data, error } = useGetCast(castId);
 
-    if (error) return <h1>Something went wrong!</h1>
+    if (error) return(
+        <>
+            <Navigation/>
+            <div className={classes.castContainer}>
+                <FontAwesomeIcon icon={faExclamationTriangle} size="2x" />
+                <h2>Unable to load cast information.</h2>
+            </div>
+        </>
+    );
+
     if (!data) return(
-        <div>
+        <>
+            <Navigation/>
             <div className={classes.castContainer}>
                 <div className="loading-container"><CircularProgress/></div>
             </div>
-        </div>
+        </>
     );
 
     const { starId, name, birthYear, photo, bio, birthName, birthDetails, dob, place_of_birth, dod, movies} = data
@@ -102,7 +163,7 @@ export default function Cast() {
             <Navigation/>
             
             <div className={classes.castContainer}>
-                <div className={classes.castRow1}>
+                <div className={classes.cast}>
                     <div className={classes.castImage}>
                         <Image
                             src={photo == null || !validator.isURL(photo) ? NoImage:photo}
@@ -129,7 +190,11 @@ export default function Cast() {
                     </div>
                 </div>
 
-                <div className={classes.castRow2}>
+                <div className={classes.films}>
+                    <div className="bar">
+                        <h4 style={{padding:10}}>Filmography</h4>
+                    </div>
+
                     <Filmography id={starId}> </Filmography>
                 </div>
             </div>

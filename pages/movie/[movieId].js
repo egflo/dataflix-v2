@@ -10,12 +10,11 @@ import { useRouter } from 'next/router'
 import  React, {useRef, useState} from 'react'
 import { makeStyles } from '@material-ui/core/styles';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faChevronUp,  faChevronDown} from '@fortawesome/free-solid-svg-icons'
+import {faChevronUp, faChevronDown, faExclamationTriangle} from '@fortawesome/free-solid-svg-icons'
 import CircularProgress from '@material-ui/core/CircularProgress'
 import Rating from '@material-ui/lab/Rating'
 import Button from 'react-bootstrap/Button'
 import NoImage from '../../public/no_image.jpg'
-import NoBackground from '../../public/movie_background.png'
 import {useGetMovieId, getBaseURL} from '../api/Service'
 import CastRow from '../../components/CastRow'
 import ReviewRow from '../../components/ReviewRow'
@@ -24,10 +23,121 @@ import validator from 'validator'
 import Navigation from '../../components/Navbar'
 import Bookmark from '../../components/Bookmark'
 import ReviewCard from '../../components/ReviewCard'
+import NoBackground from '/public/movie_background.png'
 import useSWR, { mutate } from 'swr'
 
-
 const useStyles = makeStyles((theme) => ({
+    container: {
+        [theme.breakpoints.down('sm')]: {
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: '100%',
+            height: '100%',
+            backgroundColor: '#fafafa',
+            backgroundImage: `url(${NoBackground})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
+            padding: '0',
+            margin: '0px',
+            overflow: 'hidden',
+            position: 'relative',
+
+        },
+
+        [theme.breakpoints.up('md')]: {
+            display: 'grid',
+            gridTemplateRows: '380px 50px 280px 320px auto',
+            margin: '15px auto',
+            zIndex: 50,
+            position: 'relative',
+            backgroundColor: 'white',
+            boxShadow: '0 4px 8px 0 rgba(0,0,0,0.2)',
+            transition: '0.3s',
+            borderRadius: '5px', /* 5px rounded corners */
+            minWidth: '805px',
+            maxWidth: '805px',
+        },
+    },
+
+    background: {
+        position: 'relative',
+        height: '100%',
+        width: '100%',
+
+        [theme.breakpoints.down('sm')]: {
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            //filter: 'blur(5px)',
+            //webkitFilter: 'blur(5px)',
+            backdropFilter: 'blur(5px)',
+            padding: '15px',
+
+        },
+
+        [theme.breakpoints.up('md')]: {
+            '& > * > img': {
+                borderTopLeftRadius: '5px',
+                borderTopRightRadius: '5px',
+            },
+        },
+    },
+
+    poster: {
+        zIndex: 99,
+
+        [theme.breakpoints.down('sm')]: {
+            position: 'relative',
+            height: '300px',
+            width: '170px',
+            '& > *': {
+                borderRadius:'5px',
+            },
+        },
+
+        [theme.breakpoints.up('md')]: {
+            position: 'relative',
+            height: '300px',
+            width: '170px',
+            top: '65px',
+            left: '50px',
+            '& > *': {
+                borderRadius:'5px',
+            },
+        },
+    },
+
+    backgroundContent: {
+        zIndex: 99,
+        [theme.breakpoints.down('sm')]: {
+            width: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            '& > *': {
+                margin: 0,
+                color: 'white',
+                textShadow: ' 1px 2px black',
+            }
+        },
+
+        [theme.breakpoints.up('md')]: {
+            position: 'absolute',
+            width: '525px',
+            top: '58px',
+            left: '225px',
+            paddingLeft: '5px',
+            '& > *': {
+                margin: 0,
+                color: 'white',
+                textShadow: ' 1px 2px black',
+            }
+        },
+    },
+
     starRating: {
         display: 'flex',
         alignItems: 'center',
@@ -37,56 +147,74 @@ const useStyles = makeStyles((theme) => ({
     },
 
     rottenTomatoes: {
-        display: 'grid',
-        gridTemplateColumns: '25% 20% 25% 20%',
-        height: '40px',
-        width: '195px',
+        //display: 'grid',
+        //gridTemplateColumns: '25% 20% 25% 20%',
+        //gridTemplateColumns: '50% 50%',
+        alignItems:'center',
+        justifyContent:'center',
+        height: '100%',
     },
 
     rottenImages: {
         position: 'relative',
-        height: '80%',
-        width: '70%',
-        top: '50%',
-        left: '50%',
-        transform: 'translate(-50%, -50%)',
+        width: '30px',
+        height: '30px',
+        //height: '80%',
+        //width: '70%',
+        //top: '50%',
+        //left: '50%',
+        //transform: 'translate(-50%, -50%)',
     },
 
     rottenText: {
-        fontSize: '20px',
-        margin: '0 auto',
-        marginTop: '5px',
+        fontSize: '22px',
+        //margin: '0 auto',
+        //marginTop: '5px',
+        padding:'0',
+        paddingLeft: '5px',
+        margin:'0',
     },
 
     metacritic: {
-        display: 'grid',
-        gridTemplateColumns: '60% 40%',
-        height: '40px',
-        width: '80px',
+        //display: 'grid',
+        //gridTemplateColumns: '60% 40%',
+        //height: '40px',
+        //width: '80px',
+        alignItems:'center',
+        justifyContent:'center',
+        height: '100%',
     },
 
     metacriticImage: {
         position: 'relative',
-        height: '75%',
-        width: '80%',
-        top: '50%',
-        left: '50%',
-        transform: 'translate(-50%, -50%)',
+        width: '30px',
+        height: '30px',
+        flex: '1',
+        //height: '75%',
+        //width: '80%',
+        //top: '50%',
+        //left: '50%',
+        //transform: 'translate(-50%, -50%)',
     },
 
     metacriticText: {
         fontSize: '22px',
-        margin: '0 auto',
-        marginTop: '2px',
+        padding:'0',
+        paddingLeft: '5px',
+        margin:'0',
+        flex: '1',
+        //margin: '0 auto',
+        //marginTop: '2px',
     },
 
     imdb: {
         display: 'grid',
         gridTemplateColumns: '60% 40%',
         height: '100%',
-        width: '120px',
+        width: '115px',
         border: '2px solid #F0C514',
         borderRadius: '5px',
+        //backgroundColor: 'white',
     },
 
     imdbImage: {
@@ -105,45 +233,31 @@ const useStyles = makeStyles((theme) => ({
     },
 
     title: {
-        overflow: 'hidden',
-        whiteSpace: 'nowrap',
-        textOverflow: 'ellipsis',
+
+        [theme.breakpoints.down('sm')]: {
+            //fontSize: '25px',
+            fontWeight: 'bold',
+            textAlign: 'center',
+            //margin: '0',
+            //            margin: '10px',
+            //textShadow: ' 1px 2px black',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+        },
+
+        [theme.breakpoints.up('md')]: {
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+        },
     },
 
-    background: {
-        position: 'relative',
-        height: '100%',
-        width: '100%',
-        '& > * > img': {
-            borderTopLeftRadius: '5px',
-            borderTopRightRadius: '5px',
-            //filter: 'blur(5px)',
-            //webkitFilter: 'blur(5px)',
-        }
-    },
-
-    backgroundPoster: {
-        position: 'relative',
-        height: '300px',
-        width: '170px',
-        top: '65px',
-        left: '50px',
-        '& > *': {
-            borderRadius:'5px',
-        }
-    },
-
-    backgroundContent: {
-        position: 'absolute',
-        width: '525px',
-        top: '58px',
-        left: '225px',
-        paddingLeft: '5px',
-        '& > *': {
-            margin: 0,
-            color: 'white',
-            textShadow: ' 1px 2px black',
-        }
+    plot: {
+        [theme.breakpoints.down('sm')]: {
+            padding: '5px 0px 5px 0px;',
+            width: '100%',
+        },
     },
 
     backdrop: {
@@ -155,6 +269,46 @@ const useStyles = makeStyles((theme) => ({
         '& > * > img': {
             filter: 'blur(5px)',
             webkitFilter: 'blur(5px)',
+        }
+    },
+
+    dropdown: {
+        position: 'relative',
+        display: 'inline-block',
+        width: '100%',
+        webkitTransition: 'all 150ms ease',
+        transition: 'all 150ms ease',
+        backgroundColor: '#0d6efd',
+        color: 'white',
+        fontSize: '20px',
+        border: 'none',
+
+        [theme.breakpoints.down('sm')]: {
+            height: '50px',
+        },
+        [theme.breakpoints.up('md')]: {
+            height: '100%',
+        },
+    },
+
+    dropdownContent: {
+        [theme.breakpoints.down('sm')]: {
+            backgroundColor: '#f9f9f9',
+            width: '100%',
+            boxShadow: '0 4px 8px 0 rgba(0,0,0,0.2)',
+            padding: '10px',
+            webkitTransition: 'all 150ms ease',
+            transition: 'all 150ms ease',
+        },
+        [theme.breakpoints.up('md')]: {
+            position: 'absolute',
+            backgroundColor: '#f9f9f9',
+            width: '100%',
+            boxShadow: '0 4px 8px 0 rgba(0,0,0,0.2)',
+            zIndex: '99',
+            padding: '10px',
+            webkitTransition: 'all 150ms ease',
+            transition: 'all 150ms ease',
         }
     },
 }));
@@ -180,20 +334,30 @@ export default function Movie() {
     const [dropdown, setDropdown] = useState(false);
     const { data, error } = useGetMovieId(movieId)
 
-    if (error) return <h1>Something went wrong!</h1>
+    if (error) return (
+        <>
+            <Navigation />
+            <div className="movie-container">
+                <FontAwesomeIcon icon={faExclamationTriangle} size="2x" />
+                <h2>Unable to load movie.</h2>
+            </div>
+        </>
+    );
+
     if (!data) return (
-        <div>
+        <>
+            <Navigation />
             <div className="movie-container">
                     <div className="loading-container"><CircularProgress/></div>
             </div>
-        </div>
+        </>
     );
 
     const { id, title, year, director, poster, plot, runtime, background, rated, cast, ratings, genres, language, writer, awards, boxOffice, production, country, price } = data
 
     function RatingRow() {
-        var numVotes = 0;
-        var rating = 0;
+        let numVotes = 0;
+        let rating = 0;
 
         try {
             numVotes = ratings['numVotes'];
@@ -218,8 +382,8 @@ export default function Movie() {
     }
 
     function IMDB () {
-        var rating = ratings['imdb'];
-        var style = {display: 'block'}
+        let rating = ratings['imdb'];
+        let style = {display: 'flex', alignItems: 'center', justifyContent: 'center'};
         if(rating != null) {
             const split = rating.split("/")
             rating = split[0]
@@ -230,7 +394,7 @@ export default function Movie() {
         }
 
         return (
-            <div style={style} className="imdb-container">
+            <div style={style}>
                 <div className={classes.imdb}>
                     <div className={classes.imdbImage}>
                         <Image
@@ -251,13 +415,13 @@ export default function Movie() {
     }
 
     function RottenTomatoes () {
-        var rottenTomatoes = ratings['rottenTomatoes'];
-        var rottenTomatoesAudience = ratings['rottenTomatoesAudience'];
-        var rottenTomatoesStatus = ratings['rottenTomatoesStatus'];
-        var rottenTomatoesAudienceStatus = ratings['rottenTomatoesAudienceStatus'];
+        let rottenTomatoes = ratings['rottenTomatoes'];
+        const rottenTomatoesAudience = ratings['rottenTomatoesAudience'];
+        const rottenTomatoesStatus = ratings['rottenTomatoesStatus'];
+        const rottenTomatoesAudienceStatus = ratings['rottenTomatoesAudienceStatus'];
 
-        var rottenImage = "/rotten_none.png";
-        var style = {display: 'grid'};
+        let rottenImage = "/rotten_none.png";
+        let style = {display: 'flex'};
 
         if (rottenTomatoes != null){
 
@@ -320,7 +484,7 @@ export default function Movie() {
             }
 
             rottenAudienceRow =
-                <>
+                <div className="audienceScore" style={{display:'flex', alignItems:'center', justifyContent:'center'}}>
                     <div className={classes.rottenImages}>
                         <Image
                             src={rottenAudienceImage}
@@ -334,32 +498,34 @@ export default function Movie() {
                         <b>{rottenTomatoesAudience}%</b>
                     </p>
 
-                </>
+                </div>
 
         }
 
         return (
             <div style={style} className={classes.rottenTomatoes}>
-                <div className={classes.rottenImages}>
-                    <Image
-                        src={rottenImage}
-                        layout='fill'
-                        objectFit="fit"
-                        alt="Not Found"
-                    ></Image>
+                <div className="rottenScore" style={{display:'flex', alignItems:'center', justifyContent:'center'}}>
+                    <div className={classes.rottenImages}>
+                        <Image
+                            src={rottenImage}
+                            layout='fill'
+                            objectFit="fit"
+                            alt="Not Found"
+                        ></Image>
+                    </div>
+                    <p className={classes.rottenText}>
+                        <b>{rottenTomatoes}</b>
+                    </p>
                 </div>
-                <p className={classes.rottenText}>
-                    <b>{rottenTomatoes}</b>
-                </p>
-                {rottenAudienceRow.length == 0? <div></div> : rottenAudienceRow}
 
+                {rottenAudienceRow.length == 0? <div></div> : rottenAudienceRow}
             </div>
         );
     }
 
     function Metacritic() {
-        var rating = ratings['metacritic'];
-        var style = {display: 'grid'};
+        let rating = ratings['metacritic'];
+        let style = {display: 'flex'};
 
         if(rating == null || rating.length == 0) {
             style = {display: 'none'};
@@ -380,7 +546,9 @@ export default function Movie() {
                     ></Image>
                 </div>
 
-                <p className={classes.metacriticText}><b>{rating}</b></p>
+                <p className={classes.metacriticText}>
+                    <b>{rating}</b>
+                </p>
             </div>
         );
     }
@@ -492,146 +660,71 @@ export default function Movie() {
     };
 
     function Background() {
-        if(true) {
-            return (
-                    <>
-                        <div className={classes.background}>
-                            <Image
-                                src={background == null || !validator.isURL(background) ? NoBackground : background}
-                                layout='fill'
-                                objectFit="cover"
-                                alt="Not Found"
 
-                            >
-                            </Image>
+        return (
+            <>
+                <div className={classes.background}>
+                    <Image
+                        src={background == null || !validator.isURL(background) ? NoBackground : background}
+                        layout='fill'
+                        objectFit="cover"
+                        alt="Not Found"
+                        placeholder="blur"
+                        blurDataURL= '/public/movie_background.png'
+                    >
+                    </Image>
 
-                            <div className={classes.backgroundPoster}>
-                                    <Image
-                                        src={poster == null || !validator.isURL(poster) ? NoImage : poster}
-                                        alt="Not Found"
-                                        width={170}
-                                        height={260}
-                                    >
-                                    </Image>
+                    <div className={classes.poster}>
+                        <Image
+                            src={poster == null || !validator.isURL(poster) ? NoImage : poster}
+                            alt="Not Found"
+                            width={170}
+                            height={260}
+                        >
+                        </Image>
 
-                                <div style={{display:'flex',alignItems:'center',justifyContent:'center', height:'35px', backgroundColor:'rgba(60, 60, 60, 0.8)', paddingLeft: '20px'}}>
-                                    <Bookmark id={movieId} button={false}></Bookmark>
-                                    <ReviewCard id={movieId}></ReviewCard>
-                                </div>
-                            </div>
-
-
-                            <div className={classes.backgroundContent}>
-                                <h1 className={classes.title}>
-                                        {title}
-                                </h1>
-
-
-                                <p style={{fontWeight:'bold'}}> {year} - {rated} - {formatRuntime(runtime)}</p>
-
-                                <RatingRow></RatingRow>
-
-                                <p style={{fontWeight:'bold'}}>
-                                    {plot}
-                                </p>
-
-                                <div className="ratings-row">
-
-                                    <IMDB></IMDB>
-                                    <Metacritic></Metacritic>
-                                    <RottenTomatoes></RottenTomatoes>
-
-                                </div>
-
-                                <div className="genre-container">
-                                    {genres.map(genre => (
-                                        <Button key={genre.id} onClick={handleButtonClick} id={genre.name} className="btn btn-default ">
-                                            <h5>{genre.name}</h5>
-                                        </Button>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-
-                    </>
-
-            );
-        }
-
-        else {
-            return (
-                <>
-                    <div className="movie-row-1">
-                        <div className="movie-image">
-                            <Image
-                                src={poster == null || !validator.isURL(poster) ? NoImage:poster}
-                                layout='fill'
-                                objectFit="cover"
-                                alt="Not Found"
-                            >
-                            </Image>
-
-                            <Bookmark id={movieId}></Bookmark>
-                        </div>
-
-                        <div className="movie-information">
-                            <h1 className="movie-title">
-                                {title}
-                            </h1>
-
-                            <div className="movie-headline-row1">
-                                {year} - {movie_rated()} - {formatRuntime(runtime)}
-                            </div>
-
-                            <div className="movie-content-text">
-
-                                <RatingRow></RatingRow>
-
-                                <div className="ratings-row">
-
-                                    <IMDB></IMDB>
-                                    <Metacritic></Metacritic>
-                                    <RottenTomatoes></RottenTomatoes>
-
-                                </div>
-
-                                <p className="movie-headline-row2">
-                                    <b>Synopsis</b> <br/>{plot}
-                                </p>
-
-
-                                <p className="movie-headline-row3">
-                                    <b>Director</b> {director}
-                                </p>
-
-                                <p className="movie-headline-row4">
-                                    <b>Writers</b> {writer}
-                                </p>
-
-                                <p className="movie-headline-row5">
-                                    <b>Production</b> {production}
-                                </p>
-
-                                <p className="movie-headline-row6">
-                                    <b>Language(s)</b> {language}
-                                </p>
-
-                            </div>
-
-                            <div className="genre-container">
-                                {genres.map(genre => (
-                                    <Button key={genre.id} onClick={handleButtonClick} id={genre.name} className="btn btn-default ">
-                                        <h5>{genre.name}</h5>
-                                    </Button>
-                                ))}
-                            </div>
+                        <div style={{display:'flex',alignItems:'center',justifyContent:'center', height:'35px', backgroundColor:'rgba(60, 60, 60, 0.8)', paddingLeft: '20px'}}>
+                            <Bookmark id={movieId} button={false}></Bookmark>
+                            <ReviewCard id={movieId}></ReviewCard>
                         </div>
                     </div>
 
-                </>
+                    <div className={classes.backgroundContent}>
+                        <div className="parent" style={{ width: "100%", height: "50px" }}>
+                            <h1 className={classes.title}>
+                                {title}
+                            </h1>
+                        </div>
 
-            );
-        }
+                        <p style={{fontWeight:'bold'}}> {year} - {rated} - {formatRuntime(runtime)}</p>
+
+                        <RatingRow></RatingRow>
+
+                        <p className={classes.plot} style={{fontWeight:'bold'}}>
+                            {plot}
+                        </p>
+
+                        <div className="ratings-row">
+
+                            <IMDB></IMDB>
+                            <Metacritic></Metacritic>
+                            <RottenTomatoes></RottenTomatoes>
+
+                        </div>
+
+                        <div className="genre-container">
+                            {genres.map(genre => (
+                                <Button key={genre.id} onClick={handleButtonClick} id={genre.name} className="btn btn-default ">
+                                    <h5>{genre.name}</h5>
+                                </Button>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+
+            </>
+        );
+
     }
 
     return (
@@ -639,16 +732,16 @@ export default function Movie() {
 
                 <Navigation />
 
-                <div className="movie-container">
+                <div className={classes.container}>
 
                     <Background></Background>
 
                     <div className="dropdown">
-                        <button onClick={dropdownClick} className="dropbtn">
+                        <button onClick={dropdownClick} className={classes.dropdown}>
                             More Details
                             <FontAwesomeIcon icon={dropdown ? faChevronUp: faChevronDown} size="1x" style={{color: "white", marginLeft: "10px"}} />
                         </button>
-                        <div style={{display: dropdown ? 'block':'none'}} className="dropdown-content">
+                        <div style={{display: dropdown ? 'block':'none'}} className={classes.dropdownContent}>
                             <p className="">
                                 <b>Director: </b> {formatInformation(director)}
                             </p>
@@ -684,7 +777,7 @@ export default function Movie() {
                         <ReviewRow id={id}></ReviewRow>
                     </div>
 
-                    <div className="button-row">
+                    <div className="button-row" style={{width:'100%'}}>
                         <div className="buy-button">
                             <Button onClick={handleAddCart} className="btn-block" >
                                 <h3>Add to Bag for {formatCurrency(price)}</h3>

@@ -17,17 +17,47 @@ import PasswordCard from '../../components/PasswordCard';
 import Navigation from '../../components/Navbar'
 import { makeStyles } from '@material-ui/core/styles';
 import React from "react";
+import {faExclamationTriangle} from "@fortawesome/free-solid-svg-icons";
 
 const useStyles = makeStyles((theme) => ({
+    container: {
+       // display: 'flex',
+       // flexWrap: 'wrap',
+       // alignItems: 'center',
+       // justifyContent: 'center',
+        width: '100%',
+        height: '100%',
+        marginTop: '20px',
+    },
+
+    text: {
+        margin: 0,
+        color: 'gray',
+        paddingLeft: '10px',
+    },
 
     settingsContainer: {
-        minWidth: '500px',
-        maxWidth: '500px',
-        margin: '25px auto 0',
-        padding: '15px',
-        boxShadow: '0 4px 8px 0 rgba(0,0,0,0.2)',
-        '& > h4': {
-            marginBottom: '20px',
+
+        [theme.breakpoints.down('sm')]: {
+            width: '100vw',
+            height: '100%',
+            overflow: 'auto',
+            marginTop: '10px',
+            '& > *': {
+                paddingLeft: '10px',
+            },
+        },
+
+        [theme.breakpoints.up('md')]: {
+            minWidth: '500px',
+            maxWidth: '500px',
+            margin: '25px auto 0',
+            padding: '15px',
+            boxShadow: '0 4px 8px 0 rgba(0,0,0,0.2)',
+            '& > h4': {
+                marginBottom: '20px',
+            },
+
         },
     },
 
@@ -44,9 +74,18 @@ export default function User() {
     const classes = useStyles();
     const { data, error } = useGetUser();
 
-    if (error) return <h1>Something went wrong!</h1>
+    if (error) return(
+        <div>
+            <Navigation></Navigation>
+            <div className={classes.container}>
+                <FontAwesomeIcon icon={faExclamationTriangle} size="3x" style={{color:'gray'}}/>
+                <h3 className={classes.text}>Unable to load user information.</h3>
+            </div>
+        </div>
+    );
     if (!data) return(
         <div>
+            <Navigation></Navigation>
             <div className="user-container">
                 <div className="loading-container"><CircularProgress/></div>
             </div>
@@ -55,9 +94,31 @@ export default function User() {
 
     const {id, firstName, lastName, email, primaryAddressId, addresses} = data;
 
-    var primary_address  = "No addresses found"
-    if(primaryAddressId != null) {
-        primary_address = addresses.find(element => element.id == primaryAddressId);
+    function Address() {
+        if (addresses.length === 0) {
+            return(
+                <div className={classes.settingsSection}>
+                    <h5>Primary Address</h5>
+                    <p>No shipping addresses found.</p>
+
+                    <button onClick={handleToggle} className="edit-address">Change</button>
+                </div>
+            );
+        }
+
+        else {
+            const primary_address = addresses.find(element => element.id == primaryAddressId);
+
+            return (
+                <div className={classes.settingsSection}>
+                    <h5>Primary Address</h5>
+                    <p>{primary_address.address + ", " + primary_address.city + ", " + primary_address.state + " " + primary_address.postcode}</p>
+
+                    <button onClick={handleToggle} className="edit-address">Change</button>
+                </div>
+            );
+        }
+
     }
 
     function handleToggle() {
@@ -71,12 +132,7 @@ export default function User() {
             <div className={classes.settingsContainer}>
                     <h4>Account Settings</h4>
 
-                    <div className={classes.settingsSection}>
-                        <h5>Primary Address</h5>
-                        <p>{primary_address.address + ", " + primary_address.city + ", " + primary_address.state + " " + primary_address.postcode}</p>
-
-                        <button onClick={handleToggle} className="edit-address">Change</button>
-                    </div>
+                    <Address></Address>
 
                     <hr></hr>
 

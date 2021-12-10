@@ -2,7 +2,7 @@ import 'bootstrap/dist/css/bootstrap.min.css'
 import '@fontsource/roboto';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import {useGetUser} from '../api/Service'
+import {getBaseURL, useGetUser} from '../api/Service'
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Navigation from '../../components/Navbar'
 import { makeStyles } from '@material-ui/core/styles';
@@ -16,19 +16,36 @@ import Snackbar from '@mui/material/Snackbar';
 const useStyles = makeStyles((theme) => ({
 
     settingsContainer: {
-        minWidth: '950px',
-        maxWidth: '950px',
-        margin: '25px auto 0',
-        padding: '15px',
-        boxShadow: '0 4px 8px 0 rgba(0,0,0,0.2)',
+
+        //boxShadow: '0 4px 8px 0 rgba(0,0,0,0.2)',
         '& > h4': {
             marginBottom: '20px',
         },
+
+        [theme.breakpoints.down('sm')]: {
+            width: '100vw',
+            marginTop: '15px',
+        },
+
+        [theme.breakpoints.up('md')]: {
+            minWidth: '950px',
+            maxWidth: '950px',
+            margin: '25px auto 0',
+            padding: '15px',
+
+        },
+
     },
 
     cardContainer: {
-        display: 'grid',
-        gridTemplateColumns: '33.33% 33.33% 33.33%',
+        display: 'inline-flex',
+        flexWrap: 'wrap',
+        [theme.breakpoints.up('md')]: {
+            gap: '5px',
+
+        },
+        //display: 'grid',
+        //gridTemplateColumns: '33.33% 33.33% 33.33%',
     },
 
     divider: {
@@ -40,10 +57,23 @@ const useStyles = makeStyles((theme) => ({
     },
 
     add: {
+
+        [theme.breakpoints.down('sm')]: {
+            borderTop: '1px solid #ccc',
+            width: '100vw',
+            height: '200px',
+        },
+
+        [theme.breakpoints.up('md')]: {
+
+            boxShadow: '0 4px 8px 0 rgba(0,0,0,0.2)',
+            width: '300px',
+            height: '200px',
+
+        },
+
         position: 'relative',
-        boxShadow: '0 4px 8px 0 rgba(0,0,0,0.2)',
-        width: '300px',
-        height: '200px',
+
         '& > button': {
             width: '100%',
             height: '100%',
@@ -63,14 +93,25 @@ const useStyles = makeStyles((theme) => ({
 
     default: {
         display: 'grid',
-        margin: '0 auto',
         gridTemplateRows: '5px 20px 20px 20px 20px 70px 20px',
-        boxShadow: '0 4px 8px 0 rgba(0,0,0,0.2)',
-        width: '300px',
-        height: '200px',
-        padding: '12px',
         '& > *': {
             margin: '0px',
+        },
+
+        [theme.breakpoints.down('sm')]: {
+            width: '100vw',
+            marginTop: '15px',
+            borderTop: '1px solid #ccc',
+            padding: '10px',
+        },
+
+        [theme.breakpoints.up('md')]: {
+
+            boxShadow: '0 4px 8px 0 rgba(0,0,0,0.2)',
+            width: '300px',
+            height: '200px',
+            padding: '12px',
+
         },
     },
 }));
@@ -108,7 +149,7 @@ function AddressCard({data, primary}) {
             },
             body: form_object
         };
-        const res = await fetch('http://localhost:8080/address/', requestOptions)
+        const res = await fetch(getBaseURL() + '/address/', requestOptions)
         const data = await  res.json()
 
         if(res.status < 300) {
@@ -143,7 +184,7 @@ function AddressCard({data, primary}) {
             },
             body: form_object
         };
-        const res = await fetch('http://localhost:8080/customer/update/primary', requestOptions)
+        const res = await fetch(getBaseURL() + '/customer/update/primary', requestOptions)
         const data = await  res.json()
 
         if(res.status < 300) {
@@ -211,7 +252,6 @@ export default function Addresses() {
 
                 <div className={classes.cardContainer}>
                     <div className={classes.add}>
-                        <FontAwesomeIcon style={{color:'lightgray', position: 'absolute', marginLeft: '45%',marginTop:'20%'}} icon={faPlus} size="2x" />
                         <ShippingCard insert={true}/>
                     </div>
 

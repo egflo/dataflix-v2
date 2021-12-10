@@ -31,6 +31,10 @@ const useStyles = makeStyles((theme) => ({
         position: 'relative',
         margin: '20px auto 0',
         marginBottom: '20px',
+
+        [theme.breakpoints.down('sm')]: {
+            display: 'none',
+        }
     },
 
     slideshowSlider: {
@@ -45,7 +49,7 @@ const useStyles = makeStyles((theme) => ({
 
 }));
 
-const movies = ["tt0468569", "tt0435761", "tt1375666","tt2488496"];
+const movies = ["tt0468569", "tt4154756", "tt1375666","tt2488496"];
 const delay = 2500;
 
 export default function Home() {

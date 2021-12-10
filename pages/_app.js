@@ -8,8 +8,7 @@ import { useRouter } from 'next/router';
 import jwt_decode from "jwt-decode";
 import useSWR, { SWRConfig } from 'swr';
 
-
-
+//https://nascentdigital.com/thoughts/how-to-deploy-next-js-without-vercel
 //https://jasonwatmore.com/post/2021/08/04/next-js-11-jwt-authentication-tutorial-with-example-app
 
 function MyApp({ Component, pageProps }) {
@@ -69,7 +68,7 @@ function MyApp({ Component, pageProps }) {
 
   function authCheck(url) {
     // redirect to login page if accessing a private page and not logged in
-    const publicPaths = ['/login'];
+    const publicPaths = ['/login', '/signup'];
     const path = url.split('?')[0];
     
     const token = localStorage.getItem("token")

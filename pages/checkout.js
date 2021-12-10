@@ -20,20 +20,35 @@ import Alert from '@mui/material/Alert';
 import Snackbar from '@mui/material/Snackbar';
 import ShippingCard from "../components/ShippingCard";
 
-const stripe = loadStripe("pk_test_51J3qCqBVPvYzs7uWw0nbrKwdIZWg0hmaYHEABbUirTZqQR2TftCxjMBRJhBlVIQbvYLTWDrUXt2WZnzVbY2BNfye0055McVHXT");
+const stripe = loadStripe("");
 
 const useStyles = makeStyles((theme) => ({
     checkoutContainer: {
-        minWidth: '800px',
-        maxWidth: '800px',
-        margin: '50px auto 0',
-        padding: '10px',
-        boxShadow: '0 4px 8px 0 rgba(0,0,0,0.2)',
+
+        [theme.breakpoints.up('md')]: {
+            minWidth: '800px',
+            maxWidth: '800px',
+            margin: '50px auto 0',
+            padding: '10px',
+            boxShadow: '0 4px 8px 0 rgba(0,0,0,0.2)',
+        },
+
+        [theme.breakpoints.down('sm')]: {
+            minWidth: '100vw',
+            maxWidth: '100vw',
+            padding: '10px',
+        },
     },
 
     checkoutRow1: {
-        display: 'grid',
-        gridTemplateColumns: '65% 35%',
+        [theme.breakpoints.up('md')]: {
+            display: 'grid',
+            gridTemplateColumns: '65% 35%',
+        },
+
+        [theme.breakpoints.down('sm')]: {
+            width: '100%',
+        },
     },
 
     checkoutRow2: {
@@ -41,9 +56,18 @@ const useStyles = makeStyles((theme) => ({
     },
 
     shippingContainer: {
-        gridColumn: 1,
-        marginBottom: '10px',
-        marginRight: '10px',
+        [theme.breakpoints.up('md')]: {
+            gridColumn: 1,
+            marginBottom: '10px',
+            marginRight: '10px',
+
+        },
+
+        [theme.breakpoints.down('sm')]: {
+            gridColumn: 1/2,
+            marginBottom: '10px',
+            marginRight: '10px',
+        },
     },
 
     shippingContent: {
@@ -70,16 +94,38 @@ const useStyles = makeStyles((theme) => ({
     },
 
     checkoutTotals: {
-        boxShadow: '0 4px 8px 0 rgba(0,0,0,0.2)',
-        gridColumn: 2,
-        gridRow: '1/ span 2',
-        marginTop: '36px',
-        paddingTop: '40px',
-        paddingLeft: '7px',
-        paddingRight: '7px',
-        height: '185px',
-        '& > *': {
-            textAlign: 'right',
+
+        [theme.breakpoints.up('md')]: {
+            boxShadow: '0 4px 8px 0 rgba(0,0,0,0.2)',
+            gridColumn: 2,
+            gridRow: '1/ span 2',
+            marginTop: '36px',
+            paddingTop: '40px',
+            paddingLeft: '7px',
+            paddingRight: '7px',
+            height: '185px',
+            '& > *': {
+                textAlign: 'right',
+            },
+
+        },
+
+        [theme.breakpoints.down('sm')]: {
+            display:'none',
+        },
+    },
+
+    totalMobile: {
+        [theme.breakpoints.up('md')]: {
+            display: 'none',
+        },
+
+
+        [theme.breakpoints.down('sm')]: {
+            border: '2px solid #ccc',
+            padding: '10px',
+            borderRadius: '5px',
+            marginBottom: '10px',
         },
     },
 
@@ -142,84 +188,6 @@ export default function Checkout() {
 
 //https://www.valentinog.com/blog/await-react/
 //https://react-select.com/styles
-function AddressSelect({checkout, onChange}) {
-    const classes = useStyles();
-    const { data, error } = useGetAddress();
-
-    if (error) return <h1>Something went wrong!</h1>
-    if (!data) return(
-        <div>
-            <div className="loading-container"><CircularProgress/></div>
-        </div>
-    );
-
-    function handleChange(selectedOptions) {
-        const selectedAddress = (element) => element.id == selectedOptions.value;
-        const selectedAddressIndex = data.findIndex(selectedAddress);
-        const address = data[selectedAddressIndex];
-        handleAddressChange(address).then(r => onChange(r) );
-    }
-
-    async function handleAddressChange(address) {
-        const token = localStorage.getItem("token")
-        // POST request using fetch with set headers
-        const requestOptions = {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + token,
-                'My-Custom-Header': 'dataflix'
-            },
-            body: JSON.stringify({
-                id: address.id,
-                firstName: address.firstName,
-                lastName: address.lastName,
-                address: address.address,
-                unit: address.unit,
-                city: address.city,
-                state: address.state,
-                postcode: address.postcode
-            })
-        };
-        const res = await fetch( getBaseURL() + '/checkout/', requestOptions)
-        const data = await  res.json()
-
-        if(res.status < 300) {
-            return data;
-        }
-        else {
-            console.log(res)
-        }
-    }
-
-    const options = [];
-    for (let i = 0; i < data.length; i++) {
-        let address = data[i];
-        let value = address.id;
-        let label =
-            <div className={classes.shippingRow}>
-                <p>{address.firstName + " " + address.lastName}</p>
-                <p>{address.address}</p>
-                <p>{address.city + ", " + address.state + " " + address.postcode}</p>
-            </div>;
-
-        options.push({value:value,label: label});
-    }
-
-    const defaultAddress = checkout['address']
-    const defaultIndex = (element) => element.value == defaultAddress.id;
-    const defaultAddressIndex = options.findIndex(defaultIndex)
-
-    return (
-        <Select
-            defaultValue={options[defaultAddressIndex]}
-            options={options}
-            isSearchable={false}
-            onChange={handleChange}
-        />
-    );
-}
-
 function CheckoutForm() {
     const router = useRouter();
     const stripe = useStripe();
@@ -228,7 +196,7 @@ function CheckoutForm() {
 
     const [isLoading, setLoading] = useState(false);
     const [checkout, setCheckout] = useState( null);
-    const [enable, setEnable] = useState( false);
+    const [enable, setEnable] = useState( true);
 
     const [state, setState] = useState({
         open: false,
@@ -261,7 +229,8 @@ function CheckoutForm() {
             <div className="loading-container"><CircularProgress/></div>
         </div>
     );
-    const { total, address, subTotal, salesTax, cart } = (checkout !=null) ? checkout:data;
+
+    const { total, addresses, defaultId, subTotal, salesTax, cart } = (checkout !=null) ? checkout:data;
 
     const processPayment = async (paymentIntent) => {
         //Get PaymentIntent Data
@@ -334,9 +303,44 @@ function CheckoutForm() {
 
     };
 
+    async function handleAddressChange(address) {
+        const token = localStorage.getItem("token")
+        // POST request using fetch with set headers
+        const requestOptions = {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token,
+                'My-Custom-Header': 'dataflix'
+            },
+            body: JSON.stringify({
+                id: address.id,
+                firstName: address.firstName,
+                lastName: address.lastName,
+                address: address.address,
+                unit: address.unit,
+                city: address.city,
+                state: address.state,
+                postcode: address.postcode
+            })
+        };
+        const res = await fetch( getBaseURL() + '/checkout/', requestOptions)
+        const data = await  res.json()
+
+        if(res.status < 300) {
+            setCheckout(data);
+        }
+        else {
+            console.log(res)
+        }
+    }
+
     async function processSale(payment) {
         const payment_intent = payment['paymentIntent'];
         const token = localStorage.getItem("token");
+
+        const defaultIndex = (element) => element.id == defaultId;
+        const defaultAddress = addresses.find(defaultIndex);
 
         // POST request using fetch with set headers
         const requestOptions = {
@@ -354,13 +358,13 @@ function CheckoutForm() {
                 stripeId: payment_intent['id'],
                 shipping: {
                     customerId: getUserId(),
-                    firstName: address.firstName,
-                    lastName: address.lastName,
-                    address: address.address,
-                    unit: address.unit,
-                    city: address.city,
-                    state: address.state,
-                    postcode: address.postcode
+                    firstName: defaultAddress.firstName,
+                    lastName: defaultAddress.lastName,
+                    defaultAddress: defaultAddress.address,
+                    unit: defaultAddress.unit,
+                    city: defaultAddress.city,
+                    state: defaultAddress.state,
+                    postcode: defaultAddress.postcode
                 }
             })
         };
@@ -390,7 +394,7 @@ function CheckoutForm() {
     };
 
     function Totals() {
-        if(address == null) {
+        if(addresses.length === 0) {
 
             return (
                 <>
@@ -403,7 +407,6 @@ function CheckoutForm() {
                     <h5><b>Order Total: </b> {formatCurrency(calcSubtotal(cart))}</h5>
                 </>
             );
-
         }
         else {
 
@@ -422,7 +425,9 @@ function CheckoutForm() {
     }
 
     function Address() {
-        if(address == null) {
+        if(addresses.length === 0) {
+            setEnable(false);
+
             return (
                 <div className={classes.shippingContainer}>
                     <h4>1 Shipping Address</h4>
@@ -434,10 +439,32 @@ function CheckoutForm() {
             );
         }
         else {
+            const options = [];
+            for (let i = 0; i < addresses.length; i++) {
+                let address = addresses[i];
+                let value = address.id;
+                let label =
+                    <div className={classes.shippingRow}>
+                        <p>{address.firstName + " " + address.lastName}</p>
+                        <p>{address.address}</p>
+                        <p>{address.city + ", " + address.state + " " + address.postcode}</p>
+                    </div>;
+
+                options.push({value:value,label: label});
+            }
+
+            const defaultIndex = (element) => element.value == defaultId;
+            const defaultAddressIndex = options.findIndex(defaultIndex)
+
             return (
                 <div className={classes.shippingContainer}>
                     <h4>1 Shipping Address</h4>
-                    <AddressSelect checkout={checkout} onChange={handleChange}></AddressSelect>
+                    <Select
+                        defaultValue={options[defaultAddressIndex]}
+                        options={options}
+                        isSearchable={false}
+                        onChange={handleChangeSelect}
+                    />
                 </div>
             );
         }
@@ -452,6 +479,15 @@ function CheckoutForm() {
             pathname: '/'
         })
     }
+
+    function handleChangeSelect(selectedOptions) {
+        const selectedAddress = (element) => element.id == selectedOptions.value;
+        const selectedAddressIndex = addresses.findIndex(selectedAddress);
+        const address = addresses[selectedAddressIndex];
+        //handleAddressChange(address).then(r => onChange(r) );
+        handleAddressChange(address).then(r => console.log(r));
+    }
+
 
     return (
         <>
@@ -470,6 +506,11 @@ function CheckoutForm() {
             </Navbar>
 
             <div className={classes.checkoutContainer}>
+
+                <div className={classes.totalMobile}>
+                    <Totals></Totals>
+                </div>
+
                 <div className={classes.checkoutRow1}>
 
                     <Address></Address>

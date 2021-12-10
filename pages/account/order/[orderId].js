@@ -24,20 +24,52 @@ import Navigation from '../../../components/Navbar'
 
 
 const useStyles = makeStyles((theme) => ({
-    orderContainter: {
-        width: '1000px',
-        margin: '50px auto 0',
+    orderContainer: {
 
+        [theme.breakpoints.down('sm')]: {
+            width: '100vw',
+            margin: '15px auto 0',
+        },
+
+        [theme.breakpoints.up('md')]: {
+            width: '1000px',
+            margin: '50px auto 0',
+        },
     },
+
+    orderTitle: {
+        [theme.breakpoints.down('sm')]: {
+            paddingLeft: '15px',
+        },
+    },
+
     orderContent: {
         borderRadius: '5px',
-        boxShadow: '0 4px 8px 0 rgba(0,0,0,0.2)',
-        padding: '15px',
+        padding: '0px 15px 15px 15px',
+
+        [theme.breakpoints.up('md')]: {
+            boxShadow: '0 4px 8px 0 rgba(0,0,0,0.2)',
+            padding: '15px',
+
+        },
+
     },
 
     orderHeader: {
         display: 'grid',
         gridTemplateColumns: '33% 33% 33%',
+
+        [theme.breakpoints.down('sm')]: {
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '15px',
+        },
+
+        [theme.breakpoints.up('md')]: {
+            display: 'grid',
+            gridTemplateColumns: '33% 33% 33%',
+
+        },
     },
 
     orderShipping: {
@@ -57,10 +89,22 @@ const useStyles = makeStyles((theme) => ({
     },
 
     orderSummary: {
-        '& > *': {
-            margin: 0,
-            textAlign: 'right',
+
+
+        [theme.breakpoints.down('sm')]: {
+            '& > *': {
+                margin: 0,
+                textAlign: 'left',
+            },
         },
+
+        [theme.breakpoints.up('md')]: {
+            '& > *': {
+                margin: 0,
+                textAlign: 'right',
+            },
+        },
+
     },
 
     cardImage: {
@@ -122,9 +166,12 @@ function OrderDetails({orderId}) {
     return (
         <>
             <Navigation />
-            <div className={classes.orderContainter}>
-                <h2>Order Details</h2>
-                <p>{formatDate()} | {"Order# " + orderId}</p>
+            <div className={classes.orderContainer}>
+                <div className={classes.orderTitle}>
+                    <h2>Order Details</h2>
+                    <p>{formatDate()} | {"Order# " + orderId}</p>
+                </div>
+
                 <div className={classes.orderContent}>
                     <div className={classes.orderHeader}>
                         <div className={classes.orderShipping}>
@@ -158,7 +205,7 @@ function OrderDetails({orderId}) {
 
                 <div className="order-content-view">
                     {orders.map(order => (
-                        <div style={{ marginTop:'20px', boxShadow:'0 4px 8px 0 rgba(0,0,0,0.2)'}}>
+                        <div key={order.id} style={{ marginTop:'20px'}}>
                             <OrderRowDetailed key={order.id} content={order}/>
                         </div>
                     ))}
