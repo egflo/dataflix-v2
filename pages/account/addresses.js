@@ -1,17 +1,14 @@
 import 'bootstrap/dist/css/bootstrap.min.css'
 import '@fontsource/roboto';
 
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import {getBaseURL, useGetUser} from '../api/Service'
+import { useGetUser} from '../../service/Service'
 import CircularProgress from '@material-ui/core/CircularProgress';
-import Navigation from '../../components/Navbar'
 import { makeStyles } from '@material-ui/core/styles';
 import React, {useState} from "react";
 import {faPlus} from "@fortawesome/free-solid-svg-icons";
-import ShippingCard from "../../components/ShippingCard";
+import ShippingCard from "../../components/account/ShippingCard";
 import {mutate} from "swr";
-import Alert from '@mui/material/Alert';
-import Snackbar from '@mui/material/Snackbar';
+import {DashboardLayout} from "../../components/nav/DashboardLayout";
 
 const useStyles = makeStyles((theme) => ({
 
@@ -118,27 +115,13 @@ const useStyles = makeStyles((theme) => ({
 
 //https://react-bootstrap.github.io/components/forms/
 
-function AddressCard({data, primary}) {
+function AddressCard(props) {
+    const {address, primary, alert, setalert} = props;
     const classes = useStyles();
-    const {id, firstName, lastName, address, city, state, postcode} = data
-    const addressData = data
 
-    const [snack, setSnack] = useState({
-        openSnack: false,
-        vertical: 'top',
-        horizontal: 'center',
-    });
-
-    const { vertical, horizontal, openSnack } = state;
-    const [alert, setAlert] = useState({
-        type: 'success',
-        message: 'Updated'
-    });
-
-    async function handleDelete() {
+    async function handleDelete(address) {
         const token = localStorage.getItem("token")
-        const values = {'id': id}
-        const form_object = JSON.stringify(values, null, 2);
+        const form_object = JSON.stringify(address, null, 2);
         // POST request using fetch with set headers
         const requestOptions = {
             method: 'DELETE',
@@ -149,31 +132,30 @@ function AddressCard({data, primary}) {
             },
             body: form_object
         };
-        const res = await fetch(getBaseURL() + '/address/', requestOptions)
+        const res = await fetch(process.env.NEXT_PUBLIC_API_URL + '/address/', requestOptions)
         const data = await  res.json()
 
         if(res.status < 300) {
             mutate("/customer/");
-            setAlert({
-                type: 'success',
-                message: 'Address Deleted.'
+            setalert({
+                open: true,
+                message: 'Address deleted successfully',
+                type: 'success'
             })
-            setSnack({ openSnack: true, vertical: 'top', horizontal: 'center'});
 
         }
         else {
-            setAlert({
-                type: 'error',
-                message: 'Unable to delete Address Information. Try Again Later.'
+            setalert({
+                open: true,
+                message: 'Address could not be deleted',
+                type: 'error'
             })
-            setSnack({ openSnack: true, vertical: 'top', horizontal: 'center'});
         }
     }
 
-    async function handleDefault() {
+    async function handleDefault(id) {
         const token = localStorage.getItem("token")
-        const values = {'primaryAddress': id}
-        const form_object = JSON.stringify(values, null, 2);
+        //const form_object = JSON.stringify(values, null, 2);
         // POST request using fetch with set headers
         const requestOptions = {
             method: 'POST',
@@ -182,26 +164,26 @@ function AddressCard({data, primary}) {
                 'Authorization': 'Bearer ' + token,
                 'My-Custom-Header': 'dataflix'
             },
-            body: form_object
+            //body: form_object
         };
-        const res = await fetch(getBaseURL() + '/customer/update/primary', requestOptions)
+        const res = await fetch(process.env.NEXT_PUBLIC_API_URL + '/address/primary/' + id, requestOptions)
         const data = await  res.json()
 
         if(res.status < 300) {
             mutate("/customer/");
-            setAlert({
+            setalert({
+                open: true,
                 type: 'success',
-                message: 'Address default updated.'
+                message: 'Address set as default'
             })
-            setSnack({ openSnack: true, vertical: 'top', horizontal: 'center'});
 
         }
         else {
-            setAlert({
+            setalert({
+                open: true,
                 type: 'error',
-                message: 'Unable to change default address. Try Again Later.'
+                message: 'Unable to set Default Address. Try Again Later.'
             })
-            setSnack({ openSnack: true, vertical: 'top', horizontal: 'center'});
         }
     }
 
@@ -210,25 +192,25 @@ function AddressCard({data, primary}) {
             <div style={{backgroundColor:(primary)? 'dodgerblue': 'white'}} className={classes.header}>
             </div>
 
-            <p><b>{firstName + " " + lastName}</b></p>
-            <p>{address}</p>
-            <p>{city + ", " + state + " " + postcode}</p>
+            <p><b>{address.firstname + " " + address.lastname}</b></p>
+            <p>{address.street}</p>
+            <p>{address.city + ", " + address.state + " " + address.postcode}</p>
             <p>United States</p>
 
             <div></div>
 
             <div>
-                <ShippingCard address={addressData} insert={false}/>
+                <ShippingCard address={address} insert={false} setalert={setalert}/>
                 <span className={classes.divider}></span>
-                <button onClick={handleDelete} className="edit-address">Remove</button>
+                <button onClick={() => {handleDelete(address)}} className="edit-address">Remove</button>
                 <span className={classes.divider}></span>
-                {(primary)? "": <button onClick={handleDefault} className="edit-address">Set as Default</button> }
+                {(primary)? "": <button onClick={() => {handleDefault(address.id)}} className="edit-address">Set as Default</button> }
             </div>
         </div>
     );
 }
 
-export default function Addresses() {
+function Addresses(props) {
     const classes = useStyles();
     const { data, error } = useGetUser();
 
@@ -241,22 +223,20 @@ export default function Addresses() {
         </div>
     );
 
-    const {id, firstName, lastName, email, primaryAddressId, addresses} = data;
+    const {id, firstName, lastName, email, primaryAddress, addresses} = data;
 
     return (
         <>
-            <Navigation />
-
             <div className={classes.settingsContainer}>
                 <h4>Your Addresses</h4>
 
                 <div className={classes.cardContainer}>
                     <div className={classes.add}>
-                        <ShippingCard insert={true}/>
+                        <ShippingCard insert={true} setalert={props.setalert}/>
                     </div>
 
                     {addresses.map(address => (
-                        <AddressCard key={address.id} data={address} primary={(primaryAddressId == address.id)? true: false}></AddressCard>
+                        <AddressCard key={address.id} address={address} primary={(primaryAddress == address.id)? true: false} alert={props.alert} setalert={props.setalert}></AddressCard>
                     ))}
                 </div>
 
@@ -264,3 +244,12 @@ export default function Addresses() {
         </>
     );
 }
+
+
+Addresses.getLayout = (page) => (
+    <DashboardLayout>
+        {page}
+    </DashboardLayout>
+);
+
+export default Addresses;

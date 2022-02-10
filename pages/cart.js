@@ -3,15 +3,17 @@ import '@fontsource/roboto';
 
 import { useRouter } from 'next/router'
 import CircularProgress from '@material-ui/core/CircularProgress';
-import CartRow from'../components/CartRow'
-import {useGetUserCart} from '../pages/api/Service'
+import CartRow from '../components/cart/CartRow'
+import {useGetUserCart} from '../service/Service'
 import { Button } from 'react-bootstrap';
 import  {formatCurrency} from '../utils/helpers'
-import Navigation from '../components/Navbar'
 import { makeStyles } from '@material-ui/core/styles';
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faExclamationTriangle, faShoppingCart} from "@fortawesome/free-solid-svg-icons";
 import React from "react";
+import {DashboardLayout} from "../components/nav/DashboardLayout";
+
+
 
 const useStyles = makeStyles((theme) => ({
     cartContainer: {
@@ -37,7 +39,8 @@ const useStyles = makeStyles((theme) => ({
         width: '620px',
         fontFamily: 'Roboto',
         fontWeight: 'bold',
-        marginTop: '10%'
+        marginTop: '10%',
+        //color: '#828282',
     },
 
     cart: {
@@ -55,15 +58,13 @@ const useStyles = makeStyles((theme) => ({
 
 }));
 
-export default function Cart() {
-
+function Cart(props) {
     const router = useRouter();
     const classes = useStyles();
     const { data, error } = useGetUserCart("");
 
     if (error) return(
         <>
-            <Navigation/>
             <div className={classes.cartContainer}>
                 <FontAwesomeIcon icon={faExclamationTriangle} size="2x" />
                 <h2>Unable to load cart data.</h2>
@@ -73,7 +74,6 @@ export default function Cart() {
 
     if (!data) return(
         <>
-            <Navigation/>
             <div className={classes.cartContainer}>
                 <div className="loading-container"><CircularProgress/></div>
             </div>
@@ -98,7 +98,7 @@ export default function Cart() {
             return (
                 <div className={classes.cartEmpty}>
                     <FontAwesomeIcon icon={faShoppingCart} size="7x" />
-                    <div style={{paddingLeft:'15px'}}>
+                    <div style={{padding:'7px'}}>
                         <h1>Your Cart is Empty</h1>
                         <p>You have no items in your cart. To add items to your cart, click on the &quot;Add to Cart&quot; button next to the movie you want to purchase.</p>
                     </div>
@@ -114,7 +114,7 @@ export default function Cart() {
                     </div>
                     <div className="cart-body">
                         {data.map(cartItem => (
-                            <CartRow key={cartItem.id} content={cartItem}></CartRow>
+                            <CartRow key={cartItem.id} content={cartItem} alert={props.alert} setalert={props.setalert}></CartRow>
                         ))}
                     </div>
                     <div className="cart-footer">
@@ -134,10 +134,17 @@ export default function Cart() {
 
     return (
         <>
-            <Navigation />
             <div className={classes.cartContainer}>
                 <CartData />
             </div>
         </>
     );
 }
+
+Cart.getLayout = (page) => (
+    <DashboardLayout>
+        {page}
+    </DashboardLayout>
+);
+
+export default Cart;

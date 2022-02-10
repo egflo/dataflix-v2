@@ -2,15 +2,9 @@
 import React from 'react';
 import { Form, Button } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { useEffect, useState } from "react";
 
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faExclamationTriangle } from '@fortawesome/free-solid-svg-icons'
+import { useEffect, useState } from "react";
 import { useRouter } from 'next/router'
-import Alert from '@mui/material/Alert';
-import Snackbar from '@mui/material/Snackbar';
-import {getBaseURL} from "./api/Service";
-import CircularProgress from '@mui/material/CircularProgress';
 import {makeStyles} from "@material-ui/core/styles";
 
 
@@ -46,7 +40,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 //https://stackoverflow.com/questions/54604505/redirecting-from-server-side-in-nextjs
-export default function Login() {
+export default function Login(props) {
     const router = useRouter()
     const classes = useStyles();
     const [loading, setLoading] = useState(false);
@@ -54,29 +48,11 @@ export default function Login() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
 
-    const [headline, setHeadline] = useState('');
-    const [message, setMessage] = useState('');
-    const [state, setState] = useState({
-        open: false,
-        vertical: 'top',
-        horizontal: 'center',
-    });
-    const { vertical, horizontal, open } = state;
-
-    const [alert, setAlert] = useState({
-        type: 'error',
-        message: 'Incorrect Email/Password!'
-    });
-
-    const handleClose = () => {
-        setState({ ...state, open: false });
-    };
-
     const loginUser = async event => {
         setLoading(true);
         event.preventDefault()
         const res = await fetch(
-            getBaseURL() +'/user/auth',
+            process.env.NEXT_PUBLIC_API_URL +'/user/auth',
             {
                 body: JSON.stringify({
                     username: email,
@@ -101,19 +77,19 @@ export default function Login() {
 
         }
         else if(res.status == 401) {
-            setAlert({
+            props.setalert({
+                open: true,
                 type: 'error',
-                message: 'Authorization Failed.'
+                message: 'Invalid username or password'
             })
-            setState({ open: true, vertical: 'top', horizontal: 'center'});
             setLoading(false);
         }
         else {
-            setAlert({
+            props.setalert({
+                open: true,
                 type: 'error',
-                message: 'Unable to connect to Database.Try Again Later.'
+                message: 'Something went wrong'
             })
-            setState({ open: true, vertical: 'top', horizontal: 'center'});
             setLoading(false);
         }
     }
@@ -159,20 +135,6 @@ export default function Login() {
                     </Button>
                 </div>
             </Form>
-
-            {loading ? <CircularProgress></CircularProgress> : null}
-
-            <Snackbar
-                open={open}
-                anchorOrigin={{ vertical, horizontal }}
-                autoHideDuration={6000}
-                key={vertical + horizontal}
-                onClose={handleClose}>
-
-                <Alert onClose={handleClose} severity={alert.type} sx={{ width: '100%' }}>
-                    {alert.message}
-                </Alert>
-            </Snackbar>
         </div>
     )
 }

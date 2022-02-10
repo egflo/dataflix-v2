@@ -4,10 +4,10 @@ import '@fontsource/roboto';
 import { useRouter} from 'next/router'
 import Link from 'next/link'
 import React, {useState, useEffect} from 'react'
-import {useGetCheckOut, useGetAddress, getBaseURL} from '../pages/api/Service'
+import {useGetCheckOut} from '../service/Service'
 import { useStripe, useElements, CardElement, Elements } from "@stripe/react-stripe-js";
 import { Button, Navbar} from 'react-bootstrap';
-import CartRow from'../components/CartRow'
+import CartRow from '../components/cart/CartRow'
 import { loadStripe } from "@stripe/stripe-js";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {faFilm, faPlus} from '@fortawesome/free-solid-svg-icons'
@@ -18,9 +18,9 @@ import Backdrop from '@mui/material/Backdrop';
 import CircularProgress from '@mui/material/CircularProgress';
 import Alert from '@mui/material/Alert';
 import Snackbar from '@mui/material/Snackbar';
-import ShippingCard from "../components/ShippingCard";
+import ShippingCard from "../components/account/ShippingCard";
 
-const stripe = loadStripe("");
+const stripe = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_API);
 
 const useStyles = makeStyles((theme) => ({
     checkoutContainer: {
@@ -178,17 +178,17 @@ const CARD_ELEMENT_OPTIONS = {
     }
 };
 
-export default function Checkout() {
+export default function Checkout(props) {
     return (
         <Elements stripe={stripe}>
-            <CheckoutForm></CheckoutForm>
+            <CheckoutForm {...props}></CheckoutForm>
         </Elements>
     );
 };
 
 //https://www.valentinog.com/blog/await-react/
 //https://react-select.com/styles
-function CheckoutForm() {
+function CheckoutForm(props) {
     const router = useRouter();
     const stripe = useStripe();
     const elements = useElements();
@@ -198,19 +198,6 @@ function CheckoutForm() {
     const [checkout, setCheckout] = useState( null);
     const [enable, setEnable] = useState( true);
 
-    const [state, setState] = useState({
-        open: false,
-        vertical: 'top',
-        horizontal: 'center',
-    });
-    const { vertical, horizontal, open } = state;
-
-    const [alert, setAlert] = useState({
-        type: 'success',
-        message: 'Payment Processed'
-    });
-
-
     const { data, error } = useGetCheckOut("/");
 
     useEffect(() => {
@@ -219,9 +206,6 @@ function CheckoutForm() {
         }
     }, [data]);
 
-    function handleChange(newValue) {
-        setCheckout(newValue);
-    }
 
     if (error) return <h1>Something went wrong!</h1>
     if (!data) return(
@@ -231,6 +215,10 @@ function CheckoutForm() {
     );
 
     const { total, addresses, defaultId, subTotal, salesTax, cart } = (checkout !=null) ? checkout:data;
+
+    if(addresses.length === 0){
+        router.push('/shipping');
+    }
 
     const processPayment = async (paymentIntent) => {
         //Get PaymentIntent Data
@@ -273,16 +261,22 @@ function CheckoutForm() {
                 'Authorization': 'Bearer ' + token,
                 'My-Custom-Header': 'dataflix'
             },
-            body: JSON.stringify({ amount: total, currency: "USD", description: "Test"})
+            body: JSON.stringify({ amount: total, currency: "USD", description: "Test Purchase Customer" + localStorage.getItem("userId") })
         };
-        const res = await fetch(getBaseURL() + '/checkout/charge', requestOptions)
+        const res = await fetch(process.env.NEXT_PUBLIC_API_URL + '/checkout/charge', requestOptions)
         const data = await res.json()
         
         if(res.status < 300) {
             const response = await processPayment(data);
             if (response.error) {
                 // Handle error here
-                console.log("Error Processing Payment")
+                props.setalert(
+                    {
+                        open: true,
+                        message: response.error.message,
+                        type: "error",
+                    }
+                );
 
             } else if (response.paymentIntent && response.paymentIntent.status === 'succeeded') {
                 // Handle successful payment here
@@ -294,11 +288,11 @@ function CheckoutForm() {
         }
         else {
             setLoading(false);
-            setAlert({
+            props.setalert({
+                open: true,
                 type: 'error',
                 message: 'Unable to process sale. Try again later.'
             })
-            setState({ open: true, vertical: 'top', horizontal: 'center'});
         }
 
     };
@@ -315,23 +309,27 @@ function CheckoutForm() {
             },
             body: JSON.stringify({
                 id: address.id,
-                firstName: address.firstName,
-                lastName: address.lastName,
-                address: address.address,
+                firstName: address.firstname,
+                lastName: address.lastname,
+                street: address.street,
                 unit: address.unit,
                 city: address.city,
                 state: address.state,
                 postcode: address.postcode
             })
         };
-        const res = await fetch( getBaseURL() + '/checkout/', requestOptions)
+        const res = await fetch( process.env.NEXT_PUBLIC_API_URL + '/checkout/', requestOptions)
         const data = await  res.json()
 
         if(res.status < 300) {
             setCheckout(data);
         }
         else {
-            console.log(res)
+            props.setalert({
+                open: true,
+                type: 'error',
+                message: 'Unable to process sale. Try again later.'
+            })
         }
     }
 
@@ -358,19 +356,24 @@ function CheckoutForm() {
                 stripeId: payment_intent['id'],
                 shipping: {
                     customerId: getUserId(),
-                    firstName: defaultAddress.firstName,
-                    lastName: defaultAddress.lastName,
-                    defaultAddress: defaultAddress.address,
+                    firstname: defaultAddress.firstname,
+                    lastname: defaultAddress.lastname,
+                    street: defaultAddress.street,
                     unit: defaultAddress.unit,
                     city: defaultAddress.city,
                     state: defaultAddress.state,
                     postcode: defaultAddress.postcode
-                }
+                },
+                device: 'browser'
             })
         };
-        const res = await fetch(getBaseURL() + '/sale/', requestOptions)
-        const data = await res.json()
 
+
+        alert(JSON.stringify(requestOptions, null, 2));
+        return
+
+        const res = await fetch(process.env.NEXT_PUBLIC_API_URL + '/sale/', requestOptions)
+        const data = await res.json()
         //.then(response => response.json())
         //.then(data => console.log(data));
         if(res.status < 300) {
@@ -380,11 +383,11 @@ function CheckoutForm() {
             }, '/success');
         }
         else {
-            setAlert({
+            props.setalert({
+                open: true,
                 type: 'error',
                 message: 'Unable to process sale. Try again later.'
             })
-            setState({ open: true, vertical: 'top', horizontal: 'center'});
         }
 
     };
@@ -427,7 +430,6 @@ function CheckoutForm() {
     function Address() {
         if(addresses.length === 0) {
             setEnable(false);
-
             return (
                 <div className={classes.shippingContainer}>
                     <h4>1 Shipping Address</h4>
@@ -445,8 +447,8 @@ function CheckoutForm() {
                 let value = address.id;
                 let label =
                     <div className={classes.shippingRow}>
-                        <p>{address.firstName + " " + address.lastName}</p>
-                        <p>{address.address}</p>
+                        <p>{address.firstname + " " + address.lastname}</p>
+                        <p>{address.street}</p>
                         <p>{address.city + ", " + address.state + " " + address.postcode}</p>
                     </div>;
 
@@ -470,10 +472,6 @@ function CheckoutForm() {
         }
     }
 
-    const handleClose = () => {
-        setState({ ...state, open: false });
-    };
-
     function handleClickHome() {
         router.push({
             pathname: '/'
@@ -487,7 +485,6 @@ function CheckoutForm() {
         //handleAddressChange(address).then(r => onChange(r) );
         handleAddressChange(address).then(r => console.log(r));
     }
-
 
     return (
         <>
@@ -528,7 +525,7 @@ function CheckoutForm() {
                 <div className="checkout-cart">
                     <h4>3 Review Items</h4>
                     {cart.map(cartItem => (
-                        <CartRow key={cartItem.id} content={cartItem}></CartRow>
+                        <CartRow {...props} key={cartItem.id} content={cartItem}></CartRow>
                     ))}
                 </div>
                 
@@ -548,18 +545,6 @@ function CheckoutForm() {
                     <CircularProgress color="inherit" />
                 </Backdrop>
             </div>
-
-            <Snackbar
-                open={open}
-                anchorOrigin={{ vertical, horizontal }}
-                autoHideDuration={6000}
-                key={vertical + horizontal}
-                onClose={handleClose}>
-
-                <Alert onClose={handleClose} severity={alert.type} sx={{ width: '100%' }}>
-                    {alert.message}
-                </Alert>
-            </Snackbar>
         </>
     );
 }

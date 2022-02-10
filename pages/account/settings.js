@@ -3,21 +3,15 @@ import '@fontsource/roboto';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useRouter } from 'next/router'
-import {useGetUser} from '../api/Service'
-import Image from 'next/image'
+import {useGetUser} from '../../service/Service'
 import CircularProgress from '@material-ui/core/CircularProgress';
-import { Button, Row, Col} from 'react-bootstrap';
-import Form from 'react-bootstrap/Form'
-import { Formik, Field, ErrorMessage } from "formik";
-import * as yup from 'yup';
-import  {formatCurrency, getUserId} from '../../utils/helpers';
-import ShippingCard from '../../components/ShippingCard';
-import EmailCard from '../../components/EmailCard';
-import PasswordCard from '../../components/PasswordCard';
-import Navigation from '../../components/Navbar'
+import EmailCard from '../../components/account/EmailCard';
+import PasswordCard from '../../components/account/PasswordCard';
 import { makeStyles } from '@material-ui/core/styles';
 import React from "react";
 import {faExclamationTriangle} from "@fortawesome/free-solid-svg-icons";
+import {DashboardLayout} from "../../components/nav/DashboardLayout";
+import {Box, CardContent, CardHeader, Divider} from "@mui/material";
 
 const useStyles = makeStyles((theme) => ({
     container: {
@@ -68,7 +62,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 //https://react-bootstrap.github.io/components/forms/
-export default function User() {
+function User(props) {
 
     const router = useRouter();
     const classes = useStyles();
@@ -76,7 +70,6 @@ export default function User() {
 
     if (error) return(
         <div>
-            <Navigation></Navigation>
             <div className={classes.container}>
                 <FontAwesomeIcon icon={faExclamationTriangle} size="3x" style={{color:'gray'}}/>
                 <h3 className={classes.text}>Unable to load user information.</h3>
@@ -85,17 +78,19 @@ export default function User() {
     );
     if (!data) return(
         <div>
-            <Navigation></Navigation>
             <div className="user-container">
                 <div className="loading-container"><CircularProgress/></div>
             </div>
         </div>
     );
 
-    const {id, firstName, lastName, email, primaryAddressId, addresses} = data;
+    const {id, firstName, lastName, email, primaryAddress, addresses} = data;
+
 
     function Address() {
-        if (addresses.length === 0) {
+        const primary = addresses.find(element => element.id == primaryAddress);
+
+        if (addresses.length === 0 || primary === undefined) {
             return(
                 <div className={classes.settingsSection}>
                     <h5>Primary Address</h5>
@@ -107,12 +102,11 @@ export default function User() {
         }
 
         else {
-            const primary_address = addresses.find(element => element.id == primaryAddressId);
 
             return (
                 <div className={classes.settingsSection}>
                     <h5>Primary Address</h5>
-                    <p>{primary_address.address + ", " + primary_address.city + ", " + primary_address.state + " " + primary_address.postcode}</p>
+                    <p>{primary.street + ", " + primary.city + ", " + primary.state + " " + primary.postcode}</p>
 
                     <button onClick={handleToggle} className="edit-address">Change</button>
                 </div>
@@ -127,32 +121,66 @@ export default function User() {
 
     return (
         <>
-            <Navigation />
-
             <div className={classes.settingsContainer}>
-                    <h4>Account Settings</h4>
+                <CardHeader
+                    title="User Settings"
+                    subheader="Manage your account settings"
+                />
+                <Divider/>
+                <CardContent>
 
-                    <Address></Address>
+                    <Box
+                        sx={{
+                            mt: 3,
+                        }}
+                    >
+                        <Address alert={props.alert} setalert={props.setalert}></Address>
 
-                    <hr></hr>
+                    </Box>
 
-                    <div className={classes.settingsSection}>
-                        <h5>Email Address</h5>
-                        <p>{email}</p>
+                    <Divider/>
 
-                        <EmailCard />
-                    </div>
+                    <Box
+                        sx={{
+                            mt: 3,
+                        }}
+                    >
+                        <div className={classes.settingsSection}>
+                            <h5>Email Address</h5>
+                            <p>{email}</p>
 
-                    <hr></hr>
+                            <EmailCard alert={props.alert} setalert={props.setalert}/>
+                        </div>
+                    </Box>
 
-                    <div className={classes.settingsSection}>
-                        <h5>Password</h5>
-                        <p>***************</p>
 
-                        <PasswordCard />
-                    </div>
+                    <Divider/>
+
+                    <Box
+                        sx={{
+                            mt: 3,
+                        }}
+                    >
+                        <div className={classes.settingsSection}>
+                            <h5>Password</h5>
+                            <p>***************</p>
+
+                            <PasswordCard alert={props.alert} setalert={props.setalert}/>
+                        </div>
+                    </Box>
+
+                </CardContent>
+
             </div>
 
         </>
     );
 }
+
+User.getLayout = (page) => (
+    <DashboardLayout>
+        {page}
+    </DashboardLayout>
+);
+
+export default User;

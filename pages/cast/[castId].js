@@ -3,17 +3,19 @@ import '@fontsource/roboto';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useRouter } from 'next/router'
-import {useGetCast} from '../api/Service'
-import Filmography from '../../components/Filmography'
+import {useGetCast} from '../../service/Service'
+import Filmography from '../../components/cast/Filmography'
 import Image from 'next/image'
 import CircularProgress from '@material-ui/core/CircularProgress';
-import NoImage from '../../public/no_image.jpg'
+import NoImage from '../../public/NOIMAGE.png'
 import validator from 'validator'
-import Navigation from '../../components/Navbar'
+import Navigation from '../../components/nav/Navbar'
 import { makeStyles } from '@material-ui/core/styles';
 import {faExclamationTriangle} from "@fortawesome/free-solid-svg-icons";
 import React from "react";
-import NoBackground from "../../public/movie_background.png";
+import NoBackground from "../../public/BACKGROUND.png";
+import Movie from "../movie/[movieId]";
+import {DashboardLayout} from "../../components/nav/DashboardLayout";
 
 
 const useStyles = makeStyles((theme) => ({
@@ -129,8 +131,7 @@ const useStyles = makeStyles((theme) => ({
 
 }));
 
-export default function Cast() {
-
+ function Cast(props) {
     const router = useRouter();
     const classes = useStyles();
     const { castId } = router.query;
@@ -139,7 +140,6 @@ export default function Cast() {
 
     if (error) return(
         <>
-            <Navigation/>
             <div className={classes.castContainer}>
                 <FontAwesomeIcon icon={faExclamationTriangle} size="2x" />
                 <h2>Unable to load cast information.</h2>
@@ -149,7 +149,6 @@ export default function Cast() {
 
     if (!data) return(
         <>
-            <Navigation/>
             <div className={classes.castContainer}>
                 <div className="loading-container"><CircularProgress/></div>
             </div>
@@ -160,8 +159,6 @@ export default function Cast() {
 
     return (
         <>
-            <Navigation/>
-            
             <div className={classes.castContainer}>
                 <div className={classes.cast}>
                     <div className={classes.castImage}>
@@ -195,12 +192,17 @@ export default function Cast() {
                         <h4 style={{padding:10}}>Filmography</h4>
                     </div>
 
-                    <Filmography id={starId}> </Filmography>
+                    <Filmography {...props} id={starId}> </Filmography>
                 </div>
             </div>
-
-
         </>
-
     );
 }
+
+Cast.getLayout = (page) => (
+    <DashboardLayout>
+        {page}
+    </DashboardLayout>
+);
+
+export default Cast;

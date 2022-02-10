@@ -5,11 +5,13 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import  React, {useRef, useState, useRouter, useEffect} from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import {getUserId} from '../../utils/helpers'
-import Navigation from '../../components/Navbar'
+import Navigation from '../../components/nav/Navbar'
 import {faBox, faExclamationTriangle} from "@fortawesome/free-solid-svg-icons";
 import {useWindowDimensions} from "../../utils/useWindowDimensions.ts";
-import OrderViewClassic from "../../components/OrderViewClassic";
-import OrderViewMobile from "../../components/OrderViewMobile";
+import OrderViewClassic from "../../components/order/OrderViewClassic";
+import OrderViewMobile from "../../components/order/OrderViewMobile";
+import OrderDetails from "./order/[orderId]";
+import {DashboardLayout} from "../../components/nav/DashboardLayout";
 
 
 
@@ -28,7 +30,6 @@ function Orders() {
     }
     return (
         <>
-            <Navigation />
             <OrderView />
         </>
     );
@@ -42,5 +43,11 @@ function Orders() {
 //        props: { userId }
 //    }
 //}
+
+Orders.getLayout = (page) => (
+    <DashboardLayout>
+        {page}
+    </DashboardLayout>
+);
 
 export default Orders;

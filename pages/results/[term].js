@@ -2,19 +2,14 @@ import 'bootstrap/dist/css/bootstrap.min.css'
 import '@fontsource/roboto';
 
 import {useRouter} from "next/router";
-import { makeStyles } from '@material-ui/core/styles';
 import  React, {useRef, useState,useEffect} from 'react';
 import CircularProgress from '@material-ui/core/CircularProgress';
-import Navigation from '../../components/Navbar'
-import ResultViewClassic from '../../components/ResultViewClassic';
+import ResultViewClassic from '../../components/results/ResultViewClassic';
 import {useWindowDimensions} from "../../utils/useWindowDimensions.ts";
-import OrderViewMobile from "../../components/OrderViewMobile";
-import OrderViewClassic from "../../components/OrderViewClassic";
-import ResultViewMobile from "../../components/ResultViewMobile";
+import ResultViewMobile from "../../components/results/ResultViewMobile";
+import {DashboardLayout} from "../../components/nav/DashboardLayout";
 
-
-
-export default function Results() {
+function Results(props) {
     const router = useRouter();
     const { width, height } = useWindowDimensions();
 
@@ -24,7 +19,6 @@ export default function Results() {
     const sort = router.query['sort'] || 0
     const query = {type, term, page, sort};
 
-    console.log(query)
     //const path = "/movie/" + type + "/" + term + "&page=" + page + "&sortBy=" + sort + "&orderBy=" + order
     //const { data, error } = useGetMovies(decoderPath())
 
@@ -38,18 +32,17 @@ export default function Results() {
 
     function ResultView() {
         if(width <= 900){
-            return <ResultViewMobile query={query}></ResultViewMobile>
+            return <ResultViewMobile {...props} query={query}></ResultViewMobile>
 
         }
         else{
-            return <ResultViewClassic query={query}></ResultViewClassic>
+            return <ResultViewClassic {...props} query={query}></ResultViewClassic>
 
         }
     }
 
     return (
         <>
-            <Navigation />
             <ResultView></ResultView>
         </>
 
@@ -63,3 +56,10 @@ export default function Results() {
 //        props: { userId }
 //    }
 //}
+Results.getLayout = (page) => (
+    <DashboardLayout>
+        {page}
+    </DashboardLayout>
+);
+
+export default Results;

@@ -3,7 +3,7 @@ import '@fontsource/roboto';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import  React, {useRef, useState, useRouter, useEffect} from 'react';
-import {useGetSales} from '../../api/Service'
+import {useGetSales} from '../../../service/Service'
 import Image from 'next/image'
 import CircularProgress from '@material-ui/core/CircularProgress'
 
@@ -19,8 +19,12 @@ import { makeStyles } from '@material-ui/core/styles';
 import { Button } from 'react-bootstrap';
 import {getUserId,formatCurrency} from '../../../utils/helpers'
 import moment from 'moment';
-import OrderRowDetailed from '../../../components/OrderRowDetailed'
-import Navigation from '../../../components/Navbar'
+import OrderRowDetailed from '../../../components/order/OrderRowDetailed'
+import Navigation from '../../../components/nav/Navbar'
+import {DashboardLayout} from "../../../components/nav/DashboardLayout";
+import Cast from "../../cast/[castId]";
+import {Box, Grid} from "@mui/material";
+import {SeverityPill} from "../../../components/severity-pill";
 
 
 const useStyles = makeStyles((theme) => ({
@@ -115,10 +119,11 @@ const useStyles = makeStyles((theme) => ({
 
 }));
 
-function OrderDetails({orderId}) {
+function OrderDetails(props) {
+
 
     const classes = useStyles();
-    const { data, error } = useGetSales(orderId);
+    const { data, error } = useGetSales(props.orderId);
 
     if (error) return <h1>Something went wrong!</h1>
     if (!data) return(
@@ -129,12 +134,13 @@ function OrderDetails({orderId}) {
         </div>
     );
 
+    console.log(data)
     const{card, sale} = data;
-    const {id, customerId, saleDate, salesTax, subTotal, total, shipping, orders} = sale;
+    const {id, customerId, saleDate, salesTax, subTotal, total, shipping, orders, status} = sale;
     const {brand,exp_month,exp_year, last4} = card;
 
     function CardImage() {
-        var card = visa;
+        let card = visa;
         if(brand == "mastercard") {
             card = mastercard;
         }
@@ -165,19 +171,56 @@ function OrderDetails({orderId}) {
 
     return (
         <>
-            <Navigation />
             <div className={classes.orderContainer}>
                 <div className={classes.orderTitle}>
-                    <h2>Order Details</h2>
-                    <p>{formatDate()} | {"Order# " + orderId}</p>
+                    <Grid
+                        container
+                        direction="row"
+                        justify="flex-start"
+                        alignItems="flex-start"
+                    >
+                        <Grid
+                            item
+
+                        >
+                            <Typography variant="h4" component="h4">
+                                Order #{id}
+                            </Typography>
+                        </Grid>
+
+                        <Grid
+                            item
+                        >
+                            <Box
+                                display="flex"
+                                justifyContent="center"
+                                alignItems="center"
+                                sx={{
+                                    height: '35px',
+                                    width: '90px',
+                                }}
+                            >
+                                <SeverityPill
+                                    color={(status === 'shipped' && 'success')
+                                        || (status === 'refunded' && 'error')
+                                        || 'warning'}
+                                >
+                                    {status}
+                                </SeverityPill>
+                            </Box>
+
+                        </Grid>
+                    </Grid>
+
+                    <p>{formatDate()} | {"Order# " + id}</p>
                 </div>
 
                 <div className={classes.orderContent}>
                     <div className={classes.orderHeader}>
                         <div className={classes.orderShipping}>
                             <h5>Shipping</h5>
-                            <p>{shipping.firstName + " " + shipping.lastName}</p>
-                            <p>{shipping.address}</p>
+                            <p>{shipping.firstname + " " + shipping.lastname}</p>
+                            <p>{shipping.street}</p>
                             <p>{shipping.city + ", " + shipping.state + " " + shipping.postcode}</p>
                             United States
                         </div>
@@ -206,7 +249,7 @@ function OrderDetails({orderId}) {
                 <div className="order-content-view">
                     {orders.map(order => (
                         <div key={order.id} style={{ marginTop:'20px'}}>
-                            <OrderRowDetailed key={order.id} content={order}/>
+                            <OrderRowDetailed {...props} key={order.id} content={order}/>
                         </div>
                     ))}
                 </div>
@@ -225,5 +268,11 @@ export const getServerSideProps = async ({params}) => {
         props: { orderId }
     }
 }
+
+OrderDetails.getLayout = (page) => (
+    <DashboardLayout>
+        {page}
+    </DashboardLayout>
+);
 
 export default OrderDetails;

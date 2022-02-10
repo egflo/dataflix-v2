@@ -2,10 +2,6 @@
 import 'bootstrap/dist/css/bootstrap.min.css'
 import '@fontsource/roboto';
 
-import Alert from '@mui/material/Alert';
-import Snackbar from '@mui/material/Snackbar';
-
-import Image from 'next/image'
 import { useRouter } from 'next/router'
 import  React, {useRef, useState} from 'react'
 import { makeStyles } from '@material-ui/core/styles';
@@ -14,17 +10,16 @@ import {faChevronUp, faChevronDown, faExclamationTriangle} from '@fortawesome/fr
 import CircularProgress from '@material-ui/core/CircularProgress'
 import Rating from '@material-ui/lab/Rating'
 import Button from 'react-bootstrap/Button'
-import NoImage from '../../public/no_image.jpg'
-import {useGetMovieId, getBaseURL} from '../api/Service'
-import CastRow from '../../components/CastRow'
-import ReviewRow from '../../components/ReviewRow'
+import NoImage from '../../public/NOIMAGE.png'
+import {useGetMovieId} from '../../service/Service'
+import CastRow from '../../components/cast/CastRow'
+import ReviewRow from '../../components/review/ReviewRow'
 import {formatRuntime, numFormatter, getUserId, formatCurrency} from '../../utils/helpers'
-import validator from 'validator'
-import Navigation from '../../components/Navbar'
-import Bookmark from '../../components/Bookmark'
-import ReviewCard from '../../components/ReviewCard'
-import NoBackground from '/public/movie_background.png'
+import NoBackground from '/public/BACKGROUND.png'
 import useSWR, { mutate } from 'swr'
+import {DashboardLayout} from "../../components/nav/DashboardLayout";
+import MovieCardDetailed from "../../components/movie/MovieCardDetailed";
+
 
 const useStyles = makeStyles((theme) => ({
     container: {
@@ -49,7 +44,7 @@ const useStyles = makeStyles((theme) => ({
 
         [theme.breakpoints.up('md')]: {
             display: 'grid',
-            gridTemplateRows: '380px 50px 280px 320px auto',
+            gridTemplateRows: '380px 50px auto',
             margin: '15px auto',
             zIndex: 50,
             position: 'relative',
@@ -59,204 +54,6 @@ const useStyles = makeStyles((theme) => ({
             borderRadius: '5px', /* 5px rounded corners */
             minWidth: '805px',
             maxWidth: '805px',
-        },
-    },
-
-    background: {
-        position: 'relative',
-        height: '100%',
-        width: '100%',
-
-        [theme.breakpoints.down('sm')]: {
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            //filter: 'blur(5px)',
-            //webkitFilter: 'blur(5px)',
-            backdropFilter: 'blur(5px)',
-            padding: '15px',
-
-        },
-
-        [theme.breakpoints.up('md')]: {
-            '& > * > img': {
-                borderTopLeftRadius: '5px',
-                borderTopRightRadius: '5px',
-            },
-        },
-    },
-
-    poster: {
-        zIndex: 99,
-
-        [theme.breakpoints.down('sm')]: {
-            position: 'relative',
-            height: '300px',
-            width: '170px',
-            '& > *': {
-                borderRadius:'5px',
-            },
-        },
-
-        [theme.breakpoints.up('md')]: {
-            position: 'relative',
-            height: '300px',
-            width: '170px',
-            top: '65px',
-            left: '50px',
-            '& > *': {
-                borderRadius:'5px',
-            },
-        },
-    },
-
-    backgroundContent: {
-        zIndex: 99,
-        [theme.breakpoints.down('sm')]: {
-            width: '100%',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            '& > *': {
-                margin: 0,
-                color: 'white',
-                textShadow: ' 1px 2px black',
-            }
-        },
-
-        [theme.breakpoints.up('md')]: {
-            position: 'absolute',
-            width: '525px',
-            top: '58px',
-            left: '225px',
-            paddingLeft: '5px',
-            '& > *': {
-                margin: 0,
-                color: 'white',
-                textShadow: ' 1px 2px black',
-            }
-        },
-    },
-
-    starRating: {
-        display: 'flex',
-        alignItems: 'center',
-        "& p": {
-            margin: '0',
-        },
-    },
-
-    rottenTomatoes: {
-        //display: 'grid',
-        //gridTemplateColumns: '25% 20% 25% 20%',
-        //gridTemplateColumns: '50% 50%',
-        alignItems:'center',
-        justifyContent:'center',
-        height: '100%',
-    },
-
-    rottenImages: {
-        position: 'relative',
-        width: '30px',
-        height: '30px',
-        //height: '80%',
-        //width: '70%',
-        //top: '50%',
-        //left: '50%',
-        //transform: 'translate(-50%, -50%)',
-    },
-
-    rottenText: {
-        fontSize: '22px',
-        //margin: '0 auto',
-        //marginTop: '5px',
-        padding:'0',
-        paddingLeft: '5px',
-        margin:'0',
-    },
-
-    metacritic: {
-        //display: 'grid',
-        //gridTemplateColumns: '60% 40%',
-        //height: '40px',
-        //width: '80px',
-        alignItems:'center',
-        justifyContent:'center',
-        height: '100%',
-    },
-
-    metacriticImage: {
-        position: 'relative',
-        width: '30px',
-        height: '30px',
-        flex: '1',
-        //height: '75%',
-        //width: '80%',
-        //top: '50%',
-        //left: '50%',
-        //transform: 'translate(-50%, -50%)',
-    },
-
-    metacriticText: {
-        fontSize: '22px',
-        padding:'0',
-        paddingLeft: '5px',
-        margin:'0',
-        flex: '1',
-        //margin: '0 auto',
-        //marginTop: '2px',
-    },
-
-    imdb: {
-        display: 'grid',
-        gridTemplateColumns: '60% 40%',
-        height: '100%',
-        width: '115px',
-        border: '2px solid #F0C514',
-        borderRadius: '5px',
-        //backgroundColor: 'white',
-    },
-
-    imdbImage: {
-        position: 'relative',
-        height: '100%'
-
-    },
-
-    imdbText: {
-        "& span": {
-            color: 'grey',
-            fontSize: '10px',
-        },
-        fontSize: '15px',
-        margin: '0 auto',
-    },
-
-    title: {
-
-        [theme.breakpoints.down('sm')]: {
-            //fontSize: '25px',
-            fontWeight: 'bold',
-            textAlign: 'center',
-            //margin: '0',
-            //            margin: '10px',
-            //textShadow: ' 1px 2px black',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap',
-        },
-
-        [theme.breakpoints.up('md')]: {
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap',
-        },
-    },
-
-    plot: {
-        [theme.breakpoints.down('sm')]: {
-            padding: '5px 0px 5px 0px;',
-            width: '100%',
         },
     },
 
@@ -315,28 +112,16 @@ const useStyles = makeStyles((theme) => ({
 
 
 //https://medium.com/geekculture/how-to-use-react-router-useparams-436851fd5ef6
-export default function Movie() {
+ function Movie(props) {
     const router = useRouter();
     const classes = useStyles();
     const { movieId } = router.query;
-    const [state, setState] = useState({
-        open: false,
-        vertical: 'top',
-        horizontal: 'center',
-    });
-    const { vertical, horizontal, open } = state;
-
-    const [alert, setAlert] = useState({
-        type: 'success',
-        message: 'Added to Cart!'
-    });
 
     const [dropdown, setDropdown] = useState(false);
     const { data, error } = useGetMovieId(movieId)
 
     if (error) return (
         <>
-            <Navigation />
             <div className="movie-container">
                 <FontAwesomeIcon icon={faExclamationTriangle} size="2x" />
                 <h2>Unable to load movie.</h2>
@@ -346,257 +131,14 @@ export default function Movie() {
 
     if (!data) return (
         <>
-            <Navigation />
             <div className="movie-container">
                     <div className="loading-container"><CircularProgress/></div>
             </div>
         </>
     );
 
-    const { id, title, year, director, poster, plot, runtime, background, rated, cast, ratings, genres, language, writer, awards, boxOffice, production, country, price } = data
+    const { id, title, year, director, poster, plot, runtime, background, rated, cast, ratings, genres, language, writer, awards, boxOffice, production, country, price, inventory} = data
 
-    function RatingRow() {
-        let numVotes = 0;
-        let rating = 0;
-
-        try {
-            numVotes = ratings['numVotes'];
-            rating = ratings['rating'];
-        }
-        catch(err) {
-            console.log(err)
-        }
-
-        return (
-            <div className={classes.starRating}>
-                <Rating
-                    name="read-only"
-                    value={rating * .5}
-                    precision={0.5}
-                    size="large"
-                    readOnly />
-                <p><b> ({numFormatter(numVotes)})</b></p>
-
-            </div>
-        );
-    }
-
-    function IMDB () {
-        let rating = ratings['imdb'];
-        let style = {display: 'flex', alignItems: 'center', justifyContent: 'center'};
-        if(rating != null) {
-            const split = rating.split("/")
-            rating = split[0]
-        }
-
-        else {
-            style = {display: 'none'}
-        }
-
-        return (
-            <div style={style}>
-                <div className={classes.imdb}>
-                    <div className={classes.imdbImage}>
-                        <Image
-                            src="/imdb.png"
-                            layout='fill'
-                            objectFit="fit"
-                            alt="Not Found"
-                        ></Image>
-                    </div>
-
-                    <p className={classes.imdbText}>
-                        <b>{rating}</b>
-                        <span>/10</span>
-                    </p>
-                </div>
-            </div>
-        );
-    }
-
-    function RottenTomatoes () {
-        let rottenTomatoes = ratings['rottenTomatoes'];
-        const rottenTomatoesAudience = ratings['rottenTomatoesAudience'];
-        const rottenTomatoesStatus = ratings['rottenTomatoesStatus'];
-        const rottenTomatoesAudienceStatus = ratings['rottenTomatoesAudienceStatus'];
-
-        let rottenImage = "/rotten_none.png";
-        let style = {display: 'flex'};
-
-        if (rottenTomatoes != null){
-
-            if(rottenTomatoes >= 90) {
-                rottenImage = "/rotten_fresh.png";
-            }
-            else if (rottenTomatoes >= 60) {
-                rottenImage = "/rotten_fresh.png";
-            }
-            else if (rottenTomatoes >= 1) {
-                rottenImage = "/rotten_rotten.png";
-            }
-
-            else {
-                style = {display: 'none'}
-            }
-            //rottenImage = "/rotten_none.png";
-        }
-
-        if (rottenTomatoesStatus != null){
-            if(rottenTomatoesStatus == "Certified-Fresh") {
-
-                rottenImage = "/rotten_cert.png";
-            }
-
-            if(rottenTomatoesStatus == "Fresh") {
-                rottenImage = "/rotten_fresh.png";
-
-            }
-
-            if(rottenTomatoesStatus == "Rotten") {
-                rottenImage = "/rotten_rotten.png";
-            }
-
-        }
-
-        if(rottenTomatoes == null) {
-            style = {display: 'none'}
-        }
-
-        else {
-            rottenTomatoes = rottenTomatoes + "%"
-        }
-
-
-        var rottenAudienceRow = ""
-        if ((rottenTomatoesAudienceStatus != null && rottenTomatoesAudience != null) && (rottenTomatoesAudience.length > 0 && rottenTomatoesAudience.length > 0)){
-
-            var rottenAudienceImage = "/rotten_upright.png"
-
-            if(rottenTomatoesAudienceStatus == "Upright") {
-
-                rottenAudienceImage = "/rotten_upright.png"
-            }
-
-            if(rottenTomatoesAudienceStatus == "Spilled") {
-
-                rottenAudienceImage = "/rotten_spilled.png"
-
-            }
-
-            rottenAudienceRow =
-                <div className="audienceScore" style={{display:'flex', alignItems:'center', justifyContent:'center'}}>
-                    <div className={classes.rottenImages}>
-                        <Image
-                            src={rottenAudienceImage}
-                            layout='fill'
-                            objectFit="fit"
-                            alt="Not Found"
-                        ></Image>
-                    </div>
-
-                    <p className={classes.rottenText}>
-                        <b>{rottenTomatoesAudience}%</b>
-                    </p>
-
-                </div>
-
-        }
-
-        return (
-            <div style={style} className={classes.rottenTomatoes}>
-                <div className="rottenScore" style={{display:'flex', alignItems:'center', justifyContent:'center'}}>
-                    <div className={classes.rottenImages}>
-                        <Image
-                            src={rottenImage}
-                            layout='fill'
-                            objectFit="fit"
-                            alt="Not Found"
-                        ></Image>
-                    </div>
-                    <p className={classes.rottenText}>
-                        <b>{rottenTomatoes}</b>
-                    </p>
-                </div>
-
-                {rottenAudienceRow.length == 0? <div></div> : rottenAudienceRow}
-            </div>
-        );
-    }
-
-    function Metacritic() {
-        let rating = ratings['metacritic'];
-        let style = {display: 'flex'};
-
-        if(rating == null || rating.length == 0) {
-            style = {display: 'none'};
-        }
-
-        else {
-            rating = parseInt(rating);
-        }
-
-        return (
-            <div style={style} className={classes.metacritic}>
-                <div className={classes.metacriticImage}>
-                    <Image
-                        src="/metacritic.png"
-                        layout='fill'
-                        objectFit="fit"
-                        alt="Not Found"
-                    ></Image>
-                </div>
-
-                <p className={classes.metacriticText}>
-                    <b>{rating}</b>
-                </p>
-            </div>
-        );
-    }
-
-    function movie_rated() {
-        console.log(rated)
-        var image = '/NOTRATED.svg'
-        var width = 80
-        var height = 40
-
-        if(rated == 'R') {
-            image = '/RATED_R.svg'
-            width = 22
-            height = 22
-        }
-
-        if(rated == 'G') {
-            image = '/RATED_G.svg'
-            width = 22
-            height = 22
-        }
-
-        if(rated == 'PG') {
-            image = '/RATED_PG.svg'
-            width = 22
-            height = 22
-        }
-
-        if(rated == 'PG-13') {
-            image = '/RATED_PG-13.svg'
-            width = 45
-            height = 22
-        }
-
-        return (
-
-            <span>
-              <Image
-                  src={image}
-                  width={width}
-                  height={height}
-                  alt={rated}
-              >
-                </Image>
-            </span>
-
-        );
-    }
 
     function handleButtonClick(event) {
         const genre_name = event.target.innerText
@@ -611,7 +153,7 @@ export default function Movie() {
         const token = localStorage.getItem("token")
         // POST request using fetch with set headers
         const requestOptions = {
-            method: 'POST',
+            method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': 'Bearer ' + token,
@@ -622,23 +164,30 @@ export default function Movie() {
                 movieId:id,
                 qty: 1 })
         };
-        const res = await fetch(getBaseURL() + '/cart/', requestOptions)
+        const res = await fetch(process.env.NEXT_PUBLIC_API_URL + '/cart/', requestOptions)
         if(res.status < 300) {
             await mutate('/cart/')
 
-            setAlert({
+            props.setalert({
+                open: true,
                 type: 'success',
-                message: 'Added to Cart'
+                message: 'Movie added to cart.'
             })
-            setState({ open: true, vertical: 'top', horizontal: 'center'});
 
         }
-        else {
-            setAlert({
+        else if(res.status == 400) {
+            props.setalert({
+                open: true,
                 type: 'error',
-                message: 'Unable to Add to Cart'
+                message: 'Unable to add to cart. Product is out of stock'
             })
-            setState({ open: true, vertical: 'top', horizontal: 'center'});
+        }
+        else {
+            props.setalert({
+                open: true,
+                type: 'error',
+                message: 'Error adding to cart'
+            })
         }
     }
 
@@ -651,90 +200,17 @@ export default function Movie() {
         }
     }
 
-    const handleClose = () => {
-        setState({ ...state, open: false });
-    };
 
     const dropdownClick = () => {
         setDropdown(!dropdown);
     };
 
-    function Background() {
-
-        return (
-            <>
-                <div className={classes.background}>
-                    <Image
-                        src={background == null || !validator.isURL(background) ? NoBackground : background}
-                        layout='fill'
-                        objectFit="cover"
-                        alt="Not Found"
-                        placeholder="blur"
-                        blurDataURL= '/public/movie_background.png'
-                    >
-                    </Image>
-
-                    <div className={classes.poster}>
-                        <Image
-                            src={poster == null || !validator.isURL(poster) ? NoImage : poster}
-                            alt="Not Found"
-                            width={170}
-                            height={260}
-                        >
-                        </Image>
-
-                        <div style={{display:'flex',alignItems:'center',justifyContent:'center', height:'35px', backgroundColor:'rgba(60, 60, 60, 0.8)', paddingLeft: '20px'}}>
-                            <Bookmark id={movieId} button={false}></Bookmark>
-                            <ReviewCard id={movieId}></ReviewCard>
-                        </div>
-                    </div>
-
-                    <div className={classes.backgroundContent}>
-                        <div className="parent" style={{ width: "100%", height: "50px" }}>
-                            <h1 className={classes.title}>
-                                {title}
-                            </h1>
-                        </div>
-
-                        <p style={{fontWeight:'bold'}}> {year} - {rated} - {formatRuntime(runtime)}</p>
-
-                        <RatingRow></RatingRow>
-
-                        <p className={classes.plot} style={{fontWeight:'bold'}}>
-                            {plot}
-                        </p>
-
-                        <div className="ratings-row">
-
-                            <IMDB></IMDB>
-                            <Metacritic></Metacritic>
-                            <RottenTomatoes></RottenTomatoes>
-
-                        </div>
-
-                        <div className="genre-container">
-                            {genres.map(genre => (
-                                <Button key={genre.id} onClick={handleButtonClick} id={genre.name} className="btn btn-default ">
-                                    <h5>{genre.name}</h5>
-                                </Button>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-
-            </>
-        );
-
-    }
-
     return (
         <>
 
-                <Navigation />
-
                 <div className={classes.container}>
 
-                    <Background></Background>
+                    <MovieCardDetailed {...props} content={data}></MovieCardDetailed>
 
                     <div className="dropdown">
                         <button onClick={dropdownClick} className={classes.dropdown}>
@@ -751,7 +227,7 @@ export default function Movie() {
                             </p>
 
                             <p className="">
-                                <b>Boxoffice: </b> {formatInformation(boxOffice)}
+                                <b>Box Office: </b> {formatInformation(boxOffice)}
                             </p>
 
                             <p className="">
@@ -780,25 +256,21 @@ export default function Movie() {
                     <div className="button-row" style={{width:'100%'}}>
                         <div className="buy-button">
                             <Button onClick={handleAddCart} className="btn-block" >
-                                <h3>Add to Bag for {formatCurrency(price)}</h3>
+                                <h3>Buy Now For {formatCurrency(price)}</h3>
                             </Button>
                         </div>
                     </div>
 
                 </div>
 
-
-            <Snackbar
-                open={open}
-                anchorOrigin={{ vertical, horizontal }}
-                autoHideDuration={6000}
-                key={vertical + horizontal}
-                onClose={handleClose}>
-
-                <Alert onClose={handleClose} severity={alert.type} sx={{ width: '100%' }}>
-                    {alert.message}
-                </Alert>
-            </Snackbar>
         </>
     );
 }
+
+Movie.getLayout = (page) => (
+    <DashboardLayout>
+        {page}
+    </DashboardLayout>
+);
+
+export default Movie;

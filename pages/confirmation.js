@@ -6,10 +6,10 @@ import React, {useState} from 'react'
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { Button, Navbar, Nav, NavDropdown, Form, FormControl, Container} from 'react-bootstrap';
 import {formatCurrency} from '../utils/helpers'
-import {useGetSales} from '../pages/api/Service'
+import {useGetSales} from '../service/Service'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCheckCircle, faFilm} from '@fortawesome/free-solid-svg-icons'
-import Fireworks from '../components/Fireworks'
+import Fireworks from '../components/order/Fireworks'
 import {makeStyles} from "@material-ui/core/styles";
 
 
