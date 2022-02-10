@@ -1,26 +1,32 @@
 import '../styles/globals.css'
-import PropTypes from 'prop-types';
-import { ThemeProvider } from '@material-ui/core/styles';
-import CssBaseline from '@material-ui/core/CssBaseline';
 import Head from 'next/head';
 import { useState, useEffect, React } from 'react';
 import { useRouter } from 'next/router';
 import jwt_decode from "jwt-decode";
 import useSWR, { SWRConfig } from 'swr';
-
-
-
+import { CacheProvider } from '@emotion/react';
+import LocalizationProvider from '@mui/lab/LocalizationProvider';
+import {CssBaseline, Snackbar, Alert} from '@mui/material';
+import { ThemeProvider } from '@mui/material/styles';
+import { createEmotionCache } from '../utils/create-emotion-cache';
+//import 'bootstrap/dist/css/bootstrap.min.css'
+//import '@fontsource/roboto';
+//https://nascentdigital.com/thoughts/how-to-deploy-next-js-without-vercel
 //https://jasonwatmore.com/post/2021/08/04/next-js-11-jwt-authentication-tutorial-with-example-app
 
-function MyApp({ Component, pageProps }) {
+function MyApp(props) {
+  const { Component, pageProps } = props;
+  const { vertical, horizontal } = { vertical: 'top', horizontal: 'center' };
 
-
+  const [alert, setAlert] = useState({
+    open: false,
+    message: '',
+    severity: 'info'
+  });
+  const getLayout = Component.getLayout ?? ((page) => page);
   const router = useRouter();
+
   const [authorized, setAuthorized] = useState(false);
-
-  const path = router.asPath
-  console.log(path)
-
   useEffect(() => {
     // Remove the server-side injected CSS.
     const jssStyles = document.querySelector('#jss-server-side');
@@ -48,11 +54,12 @@ function MyApp({ Component, pageProps }) {
 
    function validateToken(token) {
 
-     if(token == null) {
+     if (token == undefined || token == null || token == "null" )  {
+       console.log("token is undefined")
+
        return false;
      }
 
-     var decoded = jwt_decode(token);
      let decodedToken = jwt_decode(token);
      console.log("Decoded Token", decodedToken);
      let currentDate = new Date();
@@ -69,12 +76,11 @@ function MyApp({ Component, pageProps }) {
 
   function authCheck(url) {
     // redirect to login page if accessing a private page and not logged in
-    const publicPaths = ['/login'];
+    const publicPaths = ['/login', '/signup'];
     const path = url.split('?')[0];
-    
     const token = localStorage.getItem("token")
     const invalidToken = !validateToken(token)
-
+    console.log("Token", invalidToken)
     if ( invalidToken && !publicPaths.includes(path)) {
       setAuthorized(false);
       router.push({
@@ -86,29 +92,52 @@ function MyApp({ Component, pageProps }) {
     }
   }
 
-
-  function hideNavbar() {
-    const path_login = path.split('?')[0] == "/login"
-    const path_checkout = path.split('?')[0] == "/checkout"
-    const path_confirm = path.split('?')[0] == "/confirmation"
-
-    return path_login || path_checkout || path_confirm
-  }
+  const handleClose = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setAlert({
+      open: false,
+      message: '',
+      severity: 'info'
+    });
+  };
 
   return (
       <>
         <SWRConfig
             value={{
               refreshInterval: 90000,
-              fetcher: (resource, init) => fetch(resource, init).then(res => res.json())
+              fetcher: (resource, init) => fetch(resource, init).then(res => res.json()),
+              onError: (error, key) => {
+                if (error.status !== 403 && error.status !== 404) {
+                  // We can send the error to Sentry,
+                  // or show a notification UI.
+                  if(error.status == 401) {
+                    router.push("/login")
+                  }
+                }
+              }
             }}
         >
           <Head>
             <title>DataFlix</title>
           </Head>
 
-          {authorized && <Component {...pageProps} />}
-
+            <CacheProvider value={createEmotionCache()}>
+              {getLayout(<Component {...pageProps} alert={alert} setalert={setAlert}/>)}
+              <Snackbar
+                  open={alert.open}
+                  autoHideDuration={6000}
+                  onClose={handleClose}
+                  key={vertical + horizontal}
+                  anchorOrigin={{ vertical, horizontal }}
+              >
+                <Alert onClose={handleClose} severity={alert.type}>
+                  {alert.message}
+                </Alert>
+              </Snackbar>
+            </CacheProvider>
         </SWRConfig>
       </>
     );

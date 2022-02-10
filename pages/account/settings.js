@@ -3,30 +3,55 @@ import '@fontsource/roboto';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useRouter } from 'next/router'
-import {useGetUser} from '../api/Service'
-import Image from 'next/image'
+import {useGetUser} from '../../service/Service'
 import CircularProgress from '@material-ui/core/CircularProgress';
-import { Button, Row, Col} from 'react-bootstrap';
-import Form from 'react-bootstrap/Form'
-import { Formik, Field, ErrorMessage } from "formik";
-import * as yup from 'yup';
-import  {formatCurrency, getUserId} from '../../utils/helpers';
-import ShippingCard from '../../components/ShippingCard';
-import EmailCard from '../../components/EmailCard';
-import PasswordCard from '../../components/PasswordCard';
-import Navigation from '../../components/Navbar'
+import EmailCard from '../../components/account/EmailCard';
+import PasswordCard from '../../components/account/PasswordCard';
 import { makeStyles } from '@material-ui/core/styles';
+import React from "react";
+import {faExclamationTriangle} from "@fortawesome/free-solid-svg-icons";
+import {DashboardLayout} from "../../components/nav/DashboardLayout";
+import {Box, CardContent, CardHeader, Divider} from "@mui/material";
 
 const useStyles = makeStyles((theme) => ({
+    container: {
+       // display: 'flex',
+       // flexWrap: 'wrap',
+       // alignItems: 'center',
+       // justifyContent: 'center',
+        width: '100%',
+        height: '100%',
+        marginTop: '20px',
+    },
+
+    text: {
+        margin: 0,
+        color: 'gray',
+        paddingLeft: '10px',
+    },
 
     settingsContainer: {
-        minWidth: '500px',
-        maxWidth: '500px',
-        margin: '25px auto 0',
-        padding: '15px',
-        boxShadow: '0 4px 8px 0 rgba(0,0,0,0.2)',
-        '& > h4': {
-            marginBottom: '20px',
+
+        [theme.breakpoints.down('sm')]: {
+            width: '100vw',
+            height: '100%',
+            overflow: 'auto',
+            marginTop: '10px',
+            '& > *': {
+                paddingLeft: '10px',
+            },
+        },
+
+        [theme.breakpoints.up('md')]: {
+            minWidth: '500px',
+            maxWidth: '500px',
+            margin: '25px auto 0',
+            padding: '15px',
+            boxShadow: '0 4px 8px 0 rgba(0,0,0,0.2)',
+            '& > h4': {
+                marginBottom: '20px',
+            },
+
         },
     },
 
@@ -37,13 +62,20 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 //https://react-bootstrap.github.io/components/forms/
-export default function User() {
+function User(props) {
 
     const router = useRouter();
     const classes = useStyles();
     const { data, error } = useGetUser();
 
-    if (error) return <h1>Something went wrong!</h1>
+    if (error) return(
+        <div>
+            <div className={classes.container}>
+                <FontAwesomeIcon icon={faExclamationTriangle} size="3x" style={{color:'gray'}}/>
+                <h3 className={classes.text}>Unable to load user information.</h3>
+            </div>
+        </div>
+    );
     if (!data) return(
         <div>
             <div className="user-container">
@@ -52,41 +84,103 @@ export default function User() {
         </div>
     );
 
-    const {id, firstName, lastName, address, unit, email, city, state, postcode} = data;
+    const {id, firstName, lastName, email, primaryAddress, addresses} = data;
+
+
+    function Address() {
+        const primary = addresses.find(element => element.id == primaryAddress);
+
+        if (addresses.length === 0 || primary === undefined) {
+            return(
+                <div className={classes.settingsSection}>
+                    <h5>Primary Address</h5>
+                    <p>No shipping addresses found.</p>
+
+                    <button onClick={handleToggle} className="edit-address">Change</button>
+                </div>
+            );
+        }
+
+        else {
+
+            return (
+                <div className={classes.settingsSection}>
+                    <h5>Primary Address</h5>
+                    <p>{primary.street + ", " + primary.city + ", " + primary.state + " " + primary.postcode}</p>
+
+                    <button onClick={handleToggle} className="edit-address">Change</button>
+                </div>
+            );
+        }
+
+    }
+
+    function handleToggle() {
+        router.push("/account/addresses");
+    }
 
     return (
         <>
-            <Navigation />
-
             <div className={classes.settingsContainer}>
-                    <h4>Account Settings</h4>
+                <CardHeader
+                    title="User Settings"
+                    subheader="Manage your account settings"
+                />
+                <Divider/>
+                <CardContent>
 
-                    <div className={classes.settingsSection}>
-                        <h5>Primary Address</h5>
-                        <p>{address + ", " + city + ", " + state + " " + postcode}</p>
+                    <Box
+                        sx={{
+                            mt: 3,
+                        }}
+                    >
+                        <Address alert={props.alert} setalert={props.setalert}></Address>
 
-                        <ShippingCard address={data}/>
-                    </div>
+                    </Box>
 
-                    <hr></hr>
+                    <Divider/>
 
-                    <div className={classes.settingsSection}>
-                        <h5>Email Address</h5>
-                        <p>{email}</p>
+                    <Box
+                        sx={{
+                            mt: 3,
+                        }}
+                    >
+                        <div className={classes.settingsSection}>
+                            <h5>Email Address</h5>
+                            <p>{email}</p>
 
-                        <EmailCard />
-                    </div>
+                            <EmailCard alert={props.alert} setalert={props.setalert}/>
+                        </div>
+                    </Box>
 
-                    <hr></hr>
 
-                    <div className={classes.settingsSection}>
-                        <h5>Password</h5>
-                        <p>***************</p>
+                    <Divider/>
 
-                        <PasswordCard />
-                    </div>
+                    <Box
+                        sx={{
+                            mt: 3,
+                        }}
+                    >
+                        <div className={classes.settingsSection}>
+                            <h5>Password</h5>
+                            <p>***************</p>
+
+                            <PasswordCard alert={props.alert} setalert={props.setalert}/>
+                        </div>
+                    </Box>
+
+                </CardContent>
+
             </div>
 
         </>
     );
 }
+
+User.getLayout = (page) => (
+    <DashboardLayout>
+        {page}
+    </DashboardLayout>
+);
+
+export default User;

@@ -3,7 +3,7 @@ import '@fontsource/roboto';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import  React, {useRef, useState, useRouter, useEffect} from 'react';
-import {useGetSales} from '../../api/Service'
+import {useGetSales} from '../../../service/Service'
 import Image from 'next/image'
 import CircularProgress from '@material-ui/core/CircularProgress'
 
@@ -19,25 +19,61 @@ import { makeStyles } from '@material-ui/core/styles';
 import { Button } from 'react-bootstrap';
 import {getUserId,formatCurrency} from '../../../utils/helpers'
 import moment from 'moment';
-import OrderRowDetailed from '../../../components/OrderRowDetailed'
-import Navigation from '../../../components/Navbar'
+import OrderRowDetailed from '../../../components/order/OrderRowDetailed'
+import Navigation from '../../../components/nav/Navbar'
+import {DashboardLayout} from "../../../components/nav/DashboardLayout";
+import Cast from "../../cast/[castId]";
+import {Box, Grid} from "@mui/material";
+import {SeverityPill} from "../../../components/severity-pill";
 
 
 const useStyles = makeStyles((theme) => ({
-    orderContainter: {
-        width: '1000px',
-        margin: '50px auto 0',
+    orderContainer: {
 
+        [theme.breakpoints.down('sm')]: {
+            width: '100vw',
+            margin: '15px auto 0',
+        },
+
+        [theme.breakpoints.up('md')]: {
+            width: '1000px',
+            margin: '50px auto 0',
+        },
     },
+
+    orderTitle: {
+        [theme.breakpoints.down('sm')]: {
+            paddingLeft: '15px',
+        },
+    },
+
     orderContent: {
         borderRadius: '5px',
-        boxShadow: '0 4px 8px 0 rgba(0,0,0,0.2)',
-        padding: '15px',
+        padding: '0px 15px 15px 15px',
+
+        [theme.breakpoints.up('md')]: {
+            boxShadow: '0 4px 8px 0 rgba(0,0,0,0.2)',
+            padding: '15px',
+
+        },
+
     },
 
     orderHeader: {
         display: 'grid',
         gridTemplateColumns: '33% 33% 33%',
+
+        [theme.breakpoints.down('sm')]: {
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '15px',
+        },
+
+        [theme.breakpoints.up('md')]: {
+            display: 'grid',
+            gridTemplateColumns: '33% 33% 33%',
+
+        },
     },
 
     orderShipping: {
@@ -57,10 +93,22 @@ const useStyles = makeStyles((theme) => ({
     },
 
     orderSummary: {
-        '& > *': {
-            margin: 0,
-            textAlign: 'right',
+
+
+        [theme.breakpoints.down('sm')]: {
+            '& > *': {
+                margin: 0,
+                textAlign: 'left',
+            },
         },
+
+        [theme.breakpoints.up('md')]: {
+            '& > *': {
+                margin: 0,
+                textAlign: 'right',
+            },
+        },
+
     },
 
     cardImage: {
@@ -71,10 +119,11 @@ const useStyles = makeStyles((theme) => ({
 
 }));
 
-function OrderDetails({orderId}) {
+function OrderDetails(props) {
+
 
     const classes = useStyles();
-    const { data, error } = useGetSales(orderId);
+    const { data, error } = useGetSales(props.orderId);
 
     if (error) return <h1>Something went wrong!</h1>
     if (!data) return(
@@ -85,12 +134,13 @@ function OrderDetails({orderId}) {
         </div>
     );
 
+    console.log(data)
     const{card, sale} = data;
-    const {id, customerId, saleDate, salesTax, subTotal, total, shipping, orders} = sale;
+    const {id, customerId, saleDate, salesTax, subTotal, total, shipping, orders, status} = sale;
     const {brand,exp_month,exp_year, last4} = card;
 
     function CardImage() {
-        var card = visa;
+        let card = visa;
         if(brand == "mastercard") {
             card = mastercard;
         }
@@ -121,16 +171,56 @@ function OrderDetails({orderId}) {
 
     return (
         <>
-            <Navigation />
-            <div className={classes.orderContainter}>
-                <h2>Order Details</h2>
-                <p>{formatDate()} | {"Order# " + orderId}</p>
+            <div className={classes.orderContainer}>
+                <div className={classes.orderTitle}>
+                    <Grid
+                        container
+                        direction="row"
+                        justify="flex-start"
+                        alignItems="flex-start"
+                    >
+                        <Grid
+                            item
+
+                        >
+                            <Typography variant="h4" component="h4">
+                                Order #{id}
+                            </Typography>
+                        </Grid>
+
+                        <Grid
+                            item
+                        >
+                            <Box
+                                display="flex"
+                                justifyContent="center"
+                                alignItems="center"
+                                sx={{
+                                    height: '35px',
+                                    width: '90px',
+                                }}
+                            >
+                                <SeverityPill
+                                    color={(status === 'shipped' && 'success')
+                                        || (status === 'refunded' && 'error')
+                                        || 'warning'}
+                                >
+                                    {status}
+                                </SeverityPill>
+                            </Box>
+
+                        </Grid>
+                    </Grid>
+
+                    <p>{formatDate()} | {"Order# " + id}</p>
+                </div>
+
                 <div className={classes.orderContent}>
                     <div className={classes.orderHeader}>
                         <div className={classes.orderShipping}>
                             <h5>Shipping</h5>
-                            <p>{shipping.firstName + " " + shipping.lastName}</p>
-                            <p>{shipping.address}</p>
+                            <p>{shipping.firstname + " " + shipping.lastname}</p>
+                            <p>{shipping.street}</p>
                             <p>{shipping.city + ", " + shipping.state + " " + shipping.postcode}</p>
                             United States
                         </div>
@@ -158,7 +248,9 @@ function OrderDetails({orderId}) {
 
                 <div className="order-content-view">
                     {orders.map(order => (
-                        <OrderRowDetailed key={order.id} content={order}/>
+                        <div key={order.id} style={{ marginTop:'20px'}}>
+                            <OrderRowDetailed {...props} key={order.id} content={order}/>
+                        </div>
                     ))}
                 </div>
 
@@ -176,5 +268,11 @@ export const getServerSideProps = async ({params}) => {
         props: { orderId }
     }
 }
+
+OrderDetails.getLayout = (page) => (
+    <DashboardLayout>
+        {page}
+    </DashboardLayout>
+);
 
 export default OrderDetails;
