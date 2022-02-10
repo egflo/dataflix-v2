@@ -1,12 +1,52 @@
 import {React, useEffect, useState} from 'react';
 import jwt_decode from "jwt-decode";
 
+
+export const decodeSort = (sort) => {
+    let newSort, newOrder;
+
+    if (sort == 0) {
+        newSort = "price.price";
+        newOrder = 0;
+    }
+    else if (sort == 1) {
+        newSort = "price.price";
+        newOrder = 1;
+    }
+    else if (sort == 2) {
+        newSort = "year";
+        newOrder = 1;
+    }
+    else if (sort == 3) {
+        newSort = "year";
+        newOrder = 0;
+    }
+
+    else if (sort == 4) {
+        newSort = "title";
+        newOrder = 1;
+    }
+    else  {
+        newSort = "title";
+        newOrder = 0;
+    }
+
+    //const path = "/movie/" + type + "/" + term + "?page=" + page + "&sortBy=" + newSort + "&orderBy=" + newOrder
+    const path = "&sortBy=" + newSort + "&orderBy=" + newOrder;
+    return path;
+};
+
 export const formatRuntime = runtime =>
 {
+    if(runtime == null || runtime == "N/A")
+    {
+        return "Runtime Unavailable";
+    }
+
     const num = runtime.split(" ")[0]
 
-    var hours = Math.floor(num / 60);
-    var minutes = num % 60;
+    const hours = Math.floor(num / 60);
+    const minutes = num % 60;
     return hours + "h " + minutes + " min";
 }
 
@@ -21,7 +61,6 @@ export const numFormatter = num =>
         return num; // if value < 1000, nothing to do
     }
 }
-
 
 export const formatCurrency = num =>
 {
