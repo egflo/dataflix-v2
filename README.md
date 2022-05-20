@@ -32,3 +32,13 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+## Screenshots
+![Screen Shot 2022-05-19 at 10 54 21 PM](https://user-images.githubusercontent.com/51683281/169460339-4a3f735f-96ea-444b-8dc7-726c37c81345.png)
+![Screen Shot 2022-05-19 at 10 53 13 PM](https://user-images.githubusercontent.com/51683281/169460329-8ea2a7f0-47c0-4a2d-9660-b6f3875b2fa9.png)
+![Screen Shot 2022-05-19 at 10 53 57 PM](https://user-images.githubusercontent.com/51683281/169460282-dedb0feb-01f6-4e75-92f4-daa58aa58a25.png)
+![Screen Shot 2022-05-19 at 10 53 37 PM](https://user-images.githubusercontent.com/51683281/169460285-1dc8c2aa-d519-435b-87b9-57321d1353ab.png)
+![Screen Shot 2022-05-19 at 10 54 52 PM](https://user-images.githubusercontent.com/51683281/169460286-62a0e3c9-16ad-4b09-99db-b3fc267af729.png)
+![Screen Shot 2022-05-19 at 10 53 24 PM](https://user-images.githubusercontent.com/51683281/169460288-95cb9646-b78c-4b72-a149-76731aa89548.png)
+![Screen Shot 2022-05-19 at 10 54 31 PM](https://user-images.githubusercontent.com/51683281/169460290-c909b3c8-751e-4a94-86a0-c22557ae2e45.png)
+
+
