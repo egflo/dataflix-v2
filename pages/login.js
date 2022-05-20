@@ -6,6 +6,8 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import { useEffect, useState } from "react";
 import { useRouter } from 'next/router'
 import {makeStyles} from "@material-ui/core/styles";
+import {axiosInstance} from "../service/Service.js";
+import { setCookies } from 'cookies-next';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -51,47 +53,46 @@ export default function Login(props) {
     const loginUser = async event => {
         setLoading(true);
         event.preventDefault()
-        const res = await fetch(
-            process.env.NEXT_PUBLIC_API_URL +'/user/auth',
-            {
-                body: JSON.stringify({
-                    username: email,
-                    password: password
-                }),
-                mode: 'cors',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                method: 'POST'
-            }
-        )
-        const result = await res.json()
-        if(res.ok) {
-            const {id,username,token, roles} = result;
-            localStorage.setItem("userId", id);
-            localStorage.setItem("token", token);
-            setLoading(
-                false,
-                router.push('/')
-            );
 
-        }
-        else if(res.status == 401) {
+        axiosInstance.post('/user/auth', {
+            username: email,
+            password: password
+        }).then(response => {
+            if (response.status === 200) {
+                const {id, username, accessToken, refreshToken} = response.data;
+
+                const options = {
+                    path: '/',
+                    maxAge: 60 * 60 * 24 * 7,
+                    secure: true,
+                    sameSite: 'lax',
+                };
+
+                setCookies('accessToken', accessToken, options);
+                setCookies('refreshToken', refreshToken, options);
+                setCookies('username', username, options);
+                setCookies('id', id, options);
+                setCookies('isLoggedIn', true, options);
+
+                router.push('/');
+            }
+
+            else {
+                props.setalert({
+                    open: true,
+                    type: 'error',
+                    message: response.data.message
+                })
+            }
+            setLoading(false);
+        }).catch(error => {
             props.setalert({
                 open: true,
                 type: 'error',
-                message: 'Invalid username or password'
+                message: error.response.data.message
             })
             setLoading(false);
-        }
-        else {
-            props.setalert({
-                open: true,
-                type: 'error',
-                message: 'Something went wrong'
-            })
-            setLoading(false);
-        }
+        });
     }
 
     useEffect(() => {

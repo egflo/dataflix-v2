@@ -31,6 +31,8 @@ import {
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faFilm} from "@fortawesome/free-solid-svg-icons";
 import Link from "next/link";
+import {checkCookies, getCookies} from "cookies-next";
+import Home from "./index";
 
 const useStyles = makeStyles((theme) => ({
     backdrop: {
@@ -83,7 +85,7 @@ const schema = yup.object().shape({
 });
 
 
-export default function Shipping(props) {
+function Shipping(props) {
     const {address, insert, alert, setalert} = props;
 
     const classes = useStyles();
@@ -333,3 +335,24 @@ export default function Shipping(props) {
         </>
     );
 }
+
+// This gets called on every request
+export const getServerSideProps = ({ req, res }) => {
+    // Fetch data from external API
+    // Pass data to the page via props
+    const cookies = getCookies({ res, req });
+    const isLoggedInExists = checkCookies('isLoggedIn', {res, req});
+    const isLoggedIn = isLoggedInExists ? cookies.isLoggedIn : false;
+
+    if (!isLoggedIn) {
+        return {
+            redirect: {
+                destination: '/login',
+                permanent: false,
+            },
+        }
+    }
+    return { props: { } }
+}
+
+export default Shipping;

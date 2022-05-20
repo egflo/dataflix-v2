@@ -9,13 +9,16 @@ import Image from 'next/image'
 import CircularProgress from '@material-ui/core/CircularProgress';
 import NoImage from '../../public/NOIMAGE.png'
 import validator from 'validator'
-import Navigation from '../../components/nav/Navbar'
+import Navigation from '../../components/navigation/Navbar'
 import { makeStyles } from '@material-ui/core/styles';
 import {faExclamationTriangle} from "@fortawesome/free-solid-svg-icons";
 import React from "react";
 import NoBackground from "../../public/BACKGROUND.png";
 import Movie from "../movie/[movieId]";
-import {DashboardLayout} from "../../components/nav/DashboardLayout";
+import {DashboardLayout} from "../../components/navigation/DashboardLayout";
+import {Card, CardContent, CardHeader, Divider} from "@mui/material";
+import {checkCookies, getCookies} from "cookies-next";
+import Shipping from "../shipping";
 
 
 const useStyles = makeStyles((theme) => ({
@@ -138,14 +141,18 @@ const useStyles = makeStyles((theme) => ({
 
     const { data, error } = useGetCast(castId);
 
-    if (error) return(
-        <>
-            <div className={classes.castContainer}>
-                <FontAwesomeIcon icon={faExclamationTriangle} size="2x" />
-                <h2>Unable to load cast information.</h2>
-            </div>
-        </>
-    );
+     if (error) return(
+         <Card>
+             <CardHeader
+                 title= "Error"
+                 subheader={"Status Code: " + error.status}
+             />
+             <Divider />
+             <CardContent>
+                 <p>{error.message}</p>
+             </CardContent>
+         </Card>
+     );
 
     if (!data) return(
         <>
@@ -192,7 +199,7 @@ const useStyles = makeStyles((theme) => ({
                         <h4 style={{padding:10}}>Filmography</h4>
                     </div>
 
-                    <Filmography {...props} id={starId}> </Filmography>
+                    <Filmography {...props} cast={data.movies}> </Filmography>
                 </div>
             </div>
         </>
@@ -204,5 +211,24 @@ Cast.getLayout = (page) => (
         {page}
     </DashboardLayout>
 );
+
+// This gets called on every request
+export const getServerSideProps = ({ req, res }) => {
+    // Fetch data from external API
+    // Pass data to the page via props
+    const cookies = getCookies({ res, req });
+    const isLoggedInExists = checkCookies('isLoggedIn', {res, req});
+    const isLoggedIn = isLoggedInExists ? cookies.isLoggedIn : false;
+
+    if (!isLoggedIn) {
+        return {
+            redirect: {
+                destination: '/login',
+                permanent: false,
+            },
+        }
+    }
+    return { props: { } }
+}
 
 export default Cast;

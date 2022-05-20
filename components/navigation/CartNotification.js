@@ -3,10 +3,10 @@ import { Button} from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faFilm, faShoppingCart, faUserCircle} from '@fortawesome/free-solid-svg-icons'
 import { useRouter } from 'next/router'
-import Badge from '@material-ui/core/Badge';
-import { withStyles } from '@material-ui/core/styles';
 import {useGetUserCart} from '../../service/Service'
 import  React, {useRef, useState, useEffect} from 'react';
+import {Badge} from "@mui/material";
+import { withStyles} from '@mui/styles'
 
 const StyledBadge = withStyles((theme) => ({
     badge: {

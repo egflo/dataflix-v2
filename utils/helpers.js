@@ -1,5 +1,6 @@
 import {React, useEffect, useState} from 'react';
 import jwt_decode from "jwt-decode";
+import {getCookie} from "cookies-next";
 
 
 export const decodeSort = (sort) => {
@@ -80,13 +81,12 @@ export const getUserId = () => {
 
     // Update the document title using the browser API
     if (typeof window !== 'undefined') {
-        const token = localStorage.getItem("token");
+        const token = getCookie('accessToken');
         let decodedToken = jwt_decode(token);
 
         const {sub, iss, iat} = decodedToken;
         const id = sub.split(',')[0];
         
-        console.log(id)
         return id;
     }
 }

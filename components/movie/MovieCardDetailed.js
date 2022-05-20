@@ -1,6 +1,6 @@
 
-import 'bootstrap/dist/css/bootstrap.min.css'
 import '@fontsource/roboto';
+import 'bootstrap/dist/css/bootstrap.min.css'
 
 import Image from 'next/image'
 import { useRouter } from 'next/router'
@@ -16,15 +16,14 @@ import ReviewCard from '../../components/review/ReviewCard'
 import NoBackground from '/public/BACKGROUND.png'
 import { SeverityPill } from '/components/severity-pill'
 import CriticsRow from "../../components/movie/CrticsRow";
-import {Box} from "@mui/material";
 
 const useStyles = makeStyles((theme) => ({
     background: {
+        zIndex: 1,
+
         position: 'relative',
         height: '100%',
         width: '100%',
-
-        //filter: 'blur(5px)',
         webkitFilter: 'blur(5px)',
         backdropFilter: 'blur(5px)',
 
@@ -34,11 +33,8 @@ const useStyles = makeStyles((theme) => ({
         alignItems: 'center',
 
         [theme.breakpoints.down('sm')]: {
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            padding: '15px',
-
+            padding: '1rem',
+            //filter: 'blur(5px)',
         },
 
         [theme.breakpoints.up('md')]: {
@@ -50,61 +46,80 @@ const useStyles = makeStyles((theme) => ({
     },
 
     box: {
+        zIndex: 2,
         display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
+
+        [theme.breakpoints.down('sm')]: {
+            flexDirection: 'column',
+            alignItems: 'center',
+            padding: '1rem',
+
+        },
+        [theme.breakpoints.up('md')]: {
+            justifyContent: 'center',
+            alignItems: 'center',
+        }
     },
 
     poster: {
+
         [theme.breakpoints.down('sm')]: {
-            position: 'relative',
-            height: '300px',
-            width: '170px',
-            '& > *': {
-                borderRadius:'5px',
-            },
+            display: 'grid',
+            gridTemplateRows: '220px 50px',
+            width: '150px',
         },
 
         [theme.breakpoints.up('md')]: {
-            position: 'relative',
-            height: '300px',
-            width: '170px',
-            //top: '30px',
-            //left: '50px',
-            '& > *': {
-                borderRadius:'5px',
-            },
+            display: 'grid',
+            gridTemplateRows: '16rem 3rem',
+            width: '11rem',
         },
     },
 
-    content: {
-
+    image: {
+        position: 'relative',
         height: '100%',
+        width: '100%',
+        '& > *': {
+            borderRadius:'5px',
+        },
+    },
+
+    toolbar: {
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor:'rgba(60, 60, 60, 0.8)',
+        borderRadius: '5px',
+        marginTop: '0.5rem',
+
+        [theme.breakpoints.down('sm')]: {
+        },
+
+        [theme.breakpoints.up('md')]: {
+            flexDirection: 'row',
+            alignItems: 'center',
+        }
+    },
+
+    content: {
+        '& > *': {
+            margin: 0,
+            color: 'white',
+            textShadow: ' 1px 2px black',
+        },
 
         [theme.breakpoints.down('sm')]: {
             width: '100%',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            '& > *': {
-                margin: 0,
-                color: 'white',
-                textShadow: ' 1px 2px black',
-            }
         },
 
         [theme.breakpoints.up('md')]: {
             zIndex: '1',
-            //position: 'absolute',
             width: '525px',
-            //top: '25px',
-            //left: '225px',
             paddingLeft: '10px',
-            '& > *': {
-                margin: 0,
-                color: 'white',
-                textShadow: ' 1px 2px black',
-            }
         },
     },
 
@@ -119,12 +134,8 @@ const useStyles = makeStyles((theme) => ({
     title: {
 
         [theme.breakpoints.down('sm')]: {
-            //fontSize: '25px',
             fontWeight: 'bold',
             textAlign: 'center',
-            //margin: '0',
-            //            margin: '10px',
-            //textShadow: ' 1px 2px black',
             overflow: 'hidden',
             textOverflow: 'ellipsis',
             whiteSpace: 'nowrap',
@@ -135,6 +146,18 @@ const useStyles = makeStyles((theme) => ({
             textOverflow: 'ellipsis',
             whiteSpace: 'nowrap',
         },
+    },
+
+    severity: {
+        marginTop: '0.5rem',
+        marginBottom: '0.5rem',
+
+        [theme.breakpoints.down('sm')]: {
+            fontSize: '0.7rem',
+        },
+        [theme.breakpoints.up('md')]: {
+            fontSize: '0.8rem',
+        }
     },
 
     plot: {
@@ -231,29 +254,30 @@ export default function MovieCardDetailed(props) {
 
             <div className={classes.box}>
                 <div className={classes.poster}>
-                    <Image
-                        onClick={handleClick}
-                        src={poster == null || !validator.isURL(poster) ? NoImage : poster}
-                        alt="Not Found"
-                        width={170}
-                        height={260}
-                    >
-                    </Image>
+                    <div className={classes.image}>
+                        <Image
+                            onClick={handleClick}
+                            src={poster == null || !validator.isURL(poster) ? NoImage : poster}
+                            alt="Not Found"
+                            layout='fill'
+                        >
+                        </Image>
+                    </div>
 
-                    <div style={{display:'flex',alignItems:'center',justifyContent:'center', height:'40px', backgroundColor:'rgba(60, 60, 60, 0.8)', paddingLeft: '20px'}}>
+                    <div className={classes.toolbar}>
                         <Bookmark {...props} id={id} button={false}></Bookmark>
                         <ReviewCard {...props} id={id} button={false}></ReviewCard>
                     </div>
                 </div>
 
                 <div className={classes.content}>
-                    <div className="parent" style={{ width: "100%", height: "50px" }}>
-                        <h1 className={classes.title}>
-                            {title}
-                        </h1>
-                    </div>
+
+                    <h1 className={classes.title}>
+                        {title}
+                    </h1>
 
                     <SeverityPill
+                        className={classes.severity}
                         color={(inventory.status === 'in stock' && 'success')
                             || (inventory.status === 'out of stock' && 'error')
                             || 'warning'}
@@ -265,7 +289,7 @@ export default function MovieCardDetailed(props) {
 
                     <RatingRow></RatingRow>
 
-                    <p className={classes.plot} style={{fontWeight:'bold'}}>
+                    <p className={classes.plot} style={{fontWeight:'bold', color:'white'}}>
                         {plot}
                     </p>
 

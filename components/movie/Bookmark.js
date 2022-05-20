@@ -6,9 +6,9 @@ import { useGetMovieMeta} from '../../service/Service'
 import IconButton from '@material-ui/core/IconButton';
 import {getUserId} from '../../utils/helpers'
 import { makeStyles } from '@material-ui/core/styles';
-import {useEffect, useState} from "react";
-import {Circle} from "@mui/icons-material";
 import {CircularProgress} from "@mui/material";
+import {axiosInstance} from "../../service/Service";
+
 
 const useStyles = makeStyles((theme) => ({
     bookmarkMovie: {
@@ -38,40 +38,38 @@ export default function Bookmark(props) {
     );
 
     async function handleBookmark() {
-        const token = localStorage.getItem("token")
         // POST request using fetch with set headers
-        const requestOptions = {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + token,
-                'My-Custom-Header': 'dataflix'
-            },
-            body: JSON.stringify({
-                customerId: getUserId(),
-                movieId:props.id,
-            })
-        };
-        const res = await fetch(process.env.NEXT_PUBLIC_API_URL + '/bookmark/', requestOptions)
-        if(res.status < 300) {
-            props.setalert({
-                open: true,
-                type: 'success',
-                message: 'Watchlist Updated'
-            })
-        }
-        else {
+
+        axiosInstance.post('/bookmark/', {
+            customerId: getUserId(),
+            movieId: props.id
+        }).then(res => {
+            console.log(res.data)
+            if(res.status === 200 || res.status === 201) {
+                props.setalert({
+                    open: true,
+                    type: 'success',
+                    message: res.data.message
+                })
+            }
+            else {
+                props.setalert({
+                    open: true,
+                    type: 'error',
+                    message: res.data.message
+                })
+            }
+            mutate(data)
+        }).catch(err => {
+            console.log(err)
             props.setalert({
                 open: true,
                 type: 'error',
-                message: 'Unable to update watchlist'
+                message: err.message
             })
+        })
 
-        }
-
-        await mutate(data)
     }
-
     const {success, message, bookmark} = data
 
     function BookmarkStatus() {

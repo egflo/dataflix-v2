@@ -20,20 +20,17 @@ const useStyles = makeStyles((theme) => ({
     },
 
     orderContainer: {
-
         [theme.breakpoints.down('sm')]: {
-            width: '90vw',
+            width: '100vw',
         },
 
         [theme.breakpoints.up('md')]: {
             borderRadius: '5px',
             boxShadow: '0 4px 8px 0 rgba(0,0,0,0.2)',
-            minWidth: '1000px',
-            maxWidth: '1000px',
-            width: '1000px',
-            paddingBottom: '10px',
-            margin: '20px auto 0',
+            //width: '95%',
+            margin: '5px ',
         },
+
     },
 
     orderHeadline: {
@@ -44,11 +41,6 @@ const useStyles = makeStyles((theme) => ({
         paddingRight: '10px',
 
         [theme.breakpoints.down('sm')]: {
-            //display: 'flex',
-            //alignItems: 'center',
-            //gap: '50px',
-            //display: 'grid',
-            //gridTemplateColumns: '1fr 1fr 1fr',
             display: 'none',
         },
 
@@ -94,7 +86,6 @@ const useStyles = makeStyles((theme) => ({
 
         [theme.breakpoints.down('sm')]: {
             display: 'none',
-
         },
 
         [theme.breakpoints.up('md')]: {
@@ -106,7 +97,6 @@ const useStyles = makeStyles((theme) => ({
 
     orderNumber: {
         '& > div > *': {
-           // marginTop: '20px',
             margin: '4px 4px 4px 0px',
         }
     },

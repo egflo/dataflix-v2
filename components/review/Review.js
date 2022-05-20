@@ -1,8 +1,6 @@
 import { useRouter } from 'next/router'
 
 import Backdrop from '@mui/material/Backdrop'
-import CircularProgress from '@material-ui/core/CircularProgress';
-import Button from '@material-ui/core/Button';
 import { faStar, faThumbsUp, faThumbsDown} from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { makeStyles } from '@material-ui/core/styles';

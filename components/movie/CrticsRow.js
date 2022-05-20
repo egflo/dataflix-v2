@@ -23,7 +23,7 @@ import Bookmark from '../../components/movie/Bookmark'
 import ReviewCard from '../../components/review/ReviewCard'
 import NoBackground from '/public/BACKGROUND.png'
 import useSWR, { mutate } from 'swr'
-import {DashboardLayout} from "../../components/nav/DashboardLayout";
+import {DashboardLayout} from "../navigation/DashboardLayout";
 import { SeverityPill } from '/components/severity-pill'
 import {Box} from "@mui/material";
 

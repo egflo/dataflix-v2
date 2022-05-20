@@ -10,8 +10,10 @@ import PasswordCard from '../../components/account/PasswordCard';
 import { makeStyles } from '@material-ui/core/styles';
 import React from "react";
 import {faExclamationTriangle} from "@fortawesome/free-solid-svg-icons";
-import {DashboardLayout} from "../../components/nav/DashboardLayout";
-import {Box, CardContent, CardHeader, Divider} from "@mui/material";
+import {DashboardLayout} from "../../components/navigation/DashboardLayout";
+import {Box, Card, CardContent, CardHeader, Divider} from "@mui/material";
+import {checkCookies, getCookies} from "cookies-next";
+import Shipping from "../shipping";
 
 const useStyles = makeStyles((theme) => ({
     container: {
@@ -69,13 +71,18 @@ function User(props) {
     const { data, error } = useGetUser();
 
     if (error) return(
-        <div>
-            <div className={classes.container}>
-                <FontAwesomeIcon icon={faExclamationTriangle} size="3x" style={{color:'gray'}}/>
-                <h3 className={classes.text}>Unable to load user information.</h3>
-            </div>
-        </div>
+        <Card>
+            <CardHeader
+                title= "Error"
+                subheader={"Status Code: " + error.status}
+            />
+            <Divider />
+            <CardContent>
+                <p>{error.message}</p>
+            </CardContent>
+        </Card>
     );
+
     if (!data) return(
         <div>
             <div className="user-container">
@@ -182,5 +189,24 @@ User.getLayout = (page) => (
         {page}
     </DashboardLayout>
 );
+
+// This gets called on every request
+export const getServerSideProps = ({ req, res }) => {
+    // Fetch data from external API
+    // Pass data to the page via props
+    const cookies = getCookies({ res, req });
+    const isLoggedInExists = checkCookies('isLoggedIn', {res, req});
+    const isLoggedIn = isLoggedInExists ? cookies.isLoggedIn : false;
+
+    if (!isLoggedIn) {
+        return {
+            redirect: {
+                destination: '/login',
+                permanent: false,
+            },
+        }
+    }
+    return { props: { } }
+}
 
 export default User;

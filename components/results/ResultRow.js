@@ -41,11 +41,11 @@ const useStyles = makeStyles((theme) => ({
     content: {
         [theme.breakpoints.down('sm')]: {
             display: 'grid',
-            gridTemplateColumns : '120px auto',
-            //boxShadow: '0 4px 8px 0 rgba(0,0,0,0.2)',
-            borderBottom: '2px solid dodgerblue',
+            gridTemplateColumns : '8rem auto',
+            ///boxShadow: '0 4px 8px 0 rgba(0,0,0,0.2)',
             width: '100%',
             maxWidth: '100%',
+            borderTop: '1px solid #dee2e6',
         },
 
         [theme.breakpoints.up('md')]: {

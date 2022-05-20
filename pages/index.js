@@ -2,13 +2,13 @@ import Head from 'next/head'
 import Image from 'next/image'
 import styles from '../styles/Home.module.css'
 
-
 import React, { useState, useEffect } from 'react';
 //https://stackoverflow.com/questions/44897070/element-type-is-invalid-expected-a-string-for-built-in-components-or-a-class
 import CardRow from '../components/movie/CardRow'
 import Background from '../components/movie/Background'
 import { makeStyles } from '@material-ui/core/styles';
-import {DashboardLayout} from "../components/nav/DashboardLayout";
+import {DashboardLayout} from "../components/navigation/DashboardLayout";
+import {checkCookies, getCookie, getCookies, setCookies} from 'cookies-next';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -42,8 +42,7 @@ const useStyles = makeStyles((theme) => ({
 const movies = ["tt0468569", "tt4154756", "tt1375666","tt2488496"];
 const delay = 2500;
 
-function Home() {
-
+function Home({}) {
     const top_sellers = {title: 'Best Sellers', path: '/order/sellers'}
     const top_rated = {title: 'Top Rated', path: '/rating/rated'}
     const watchlist = {title: 'Your Watchlist', path: '/bookmark/all'}
@@ -115,5 +114,25 @@ Home.getLayout = (page) => (
         {page}
     </DashboardLayout>
 );
+
+
+// This gets called on every request
+export const getServerSideProps = ({ req, res }) => {
+    // Fetch data from external API
+    // Pass data to the page via props
+    const cookies = getCookies({ res, req });
+    const isLoggedInExists = checkCookies('isLoggedIn', {res, req});
+    const isLoggedIn = isLoggedInExists ? cookies.isLoggedIn : false;
+
+    if (!isLoggedIn) {
+        return {
+            redirect: {
+                destination: '/login',
+                permanent: false,
+            },
+        }
+    }
+    return { props: { } }
+}
 
 export default Home;

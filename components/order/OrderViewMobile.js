@@ -3,7 +3,7 @@ import '@fontsource/roboto';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import  React, {useRef, useState, useRouter, useEffect} from 'react';
-import {useGetSales} from '../../service/Service'
+import {axiosInstance, useGetSales} from '../../service/Service'
 import Image from 'next/image'
 import Order from './Order'
 import { makeStyles } from '@material-ui/core/styles';
@@ -37,19 +37,6 @@ const useStyles = makeStyles((theme) => ({
         fontWeight: 'bold',
     },
 
-    orderContainer: {
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginTop: '20px',
-        marginBottom: '20px',
-        width: '100%',
-        height: '100%',
-        //backgroundColor: '#f5f5f5',
-        //borderRadius: '10px',
-        //boxShadow: '0px 0px 10px #00000029'
-    },
 }));
 
 
@@ -67,8 +54,7 @@ function OrderViewMobile() {
     useEffect(() => {
         setLoading(true);
         let url = process.env.NEXT_PUBLIC_API_URL + "/sale/?page=" + page;
-        axios
-            .get( url, { headers: { Authorization: "Bearer " + localStorage.getItem("token") } })
+        axiosInstance.get(url)
             .then((res) => {
                 const data = res.data;
                 const {content, totalPages, totalElements, size, last} = data;
@@ -112,9 +98,7 @@ function OrderViewMobile() {
         }
         else {
             return(
-
                 <div className={classes.mobile}>
-                    <h1>My Orders</h1>
                     <InfiniteScroll
                         dataLength={list.length}
                         next={fetchMoreData}
@@ -122,7 +106,7 @@ function OrderViewMobile() {
                         loader={<h4>Loading...</h4>}
                         endMessage={
                             <p style={{textAlign: 'center'}}>
-                                <b>Yay! You have seen it all</b>
+                                <b>End of list</b>
                             </p>
                         }
                     >
@@ -138,9 +122,7 @@ function OrderViewMobile() {
 
     return (
         <>
-            <div className={classes.orderContainer}>
-                <OrderData />
-            </div>
+            <OrderData />
         </>
     );
 }

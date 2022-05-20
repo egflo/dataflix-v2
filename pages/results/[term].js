@@ -7,7 +7,9 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 import ResultViewClassic from '../../components/results/ResultViewClassic';
 import {useWindowDimensions} from "../../utils/useWindowDimensions.ts";
 import ResultViewMobile from "../../components/results/ResultViewMobile";
-import {DashboardLayout} from "../../components/nav/DashboardLayout";
+import {DashboardLayout} from "../../components/navigation/DashboardLayout";
+import {checkCookies, getCookies} from "cookies-next";
+import Shipping from "../shipping";
 
 function Results(props) {
     const router = useRouter();
@@ -61,5 +63,24 @@ Results.getLayout = (page) => (
         {page}
     </DashboardLayout>
 );
+
+// This gets called on every request
+export const getServerSideProps = ({ req, res }) => {
+    // Fetch data from external API
+    // Pass data to the page via props
+    const cookies = getCookies({ res, req });
+    const isLoggedInExists = checkCookies('isLoggedIn', {res, req});
+    const isLoggedIn = isLoggedInExists ? cookies.isLoggedIn : false;
+
+    if (!isLoggedIn) {
+        return {
+            redirect: {
+                destination: '/login',
+                permanent: false,
+            },
+        }
+    }
+    return { props: { } }
+}
 
 export default Results;

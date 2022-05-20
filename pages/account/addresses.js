@@ -8,13 +8,15 @@ import React, {useState} from "react";
 import {faPlus} from "@fortawesome/free-solid-svg-icons";
 import ShippingCard from "../../components/account/ShippingCard";
 import {mutate} from "swr";
-import {DashboardLayout} from "../../components/nav/DashboardLayout";
+import {DashboardLayout} from "../../components/navigation/DashboardLayout";
+import {axiosInstance} from "../../service/Service";
+import {Card, CardContent, CardHeader, Divider} from "@mui/material";
+import {checkCookies, getCookies} from "cookies-next";
+import Shipping from "../shipping";
 
 const useStyles = makeStyles((theme) => ({
 
     settingsContainer: {
-
-        //boxShadow: '0 4px 8px 0 rgba(0,0,0,0.2)',
         '& > h4': {
             marginBottom: '20px',
         },
@@ -41,8 +43,6 @@ const useStyles = makeStyles((theme) => ({
             gap: '5px',
 
         },
-        //display: 'grid',
-        //gridTemplateColumns: '33.33% 33.33% 33.33%',
     },
 
     divider: {
@@ -114,77 +114,62 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 //https://react-bootstrap.github.io/components/forms/
-
 function AddressCard(props) {
     const {address, primary, alert, setalert} = props;
     const classes = useStyles();
 
     async function handleDelete(address) {
-        const token = localStorage.getItem("token")
-        const form_object = JSON.stringify(address, null, 2);
-        // POST request using fetch with set headers
-        const requestOptions = {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + token,
-                'My-Custom-Header': 'dataflix'
-            },
-            body: form_object
-        };
-        const res = await fetch(process.env.NEXT_PUBLIC_API_URL + '/address/', requestOptions)
-        const data = await  res.json()
+        const userId = localStorage.getItem("id")
 
-        if(res.status < 300) {
-            mutate("/customer/");
-            setalert({
-                open: true,
-                message: 'Address deleted successfully',
-                type: 'success'
-            })
+        axiosInstance.delete(`/address/${address.id}`)
+            .then(res => {
+                mutate("/customer/");
+                let data = res.data;
+                props.setalert({
+                    open: true,
+                    type: data.success ? "success" : "error",
+                    message: data.message
+                });
 
-        }
-        else {
-            setalert({
-                open: true,
-                message: 'Address could not be deleted',
-                type: 'error'
-            })
-        }
+            }) .catch(err => {
+                props.setalert({
+                    open: true,
+                    type: "error",
+                    message: err.message
+                });
+            });
+
     }
-
     async function handleDefault(id) {
-        const token = localStorage.getItem("token")
-        //const form_object = JSON.stringify(values, null, 2);
-        // POST request using fetch with set headers
-        const requestOptions = {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + token,
-                'My-Custom-Header': 'dataflix'
-            },
-            //body: form_object
-        };
-        const res = await fetch(process.env.NEXT_PUBLIC_API_URL + '/address/primary/' + id, requestOptions)
-        const data = await  res.json()
+        const userId = localStorage.getItem("id")
+        const data = JSON.stringify({ id: userId, primaryAddress: id });
 
-        if(res.status < 300) {
-            mutate("/customer/");
-            setalert({
-                open: true,
-                type: 'success',
-                message: 'Address set as default'
-            })
+        axiosInstance.post('/customer/primary', data)
+            .then(res => {
+                let data = res.data;
+                if(res.status === 200) {
+                    mutate("/customer/");
+                    props.setalert({
+                        open: true,
+                        type: 'success',
+                        message: data.message
+                    })
+                }
+                else {
+                    props.setalert({
+                        open: true,
+                        type: 'error',
+                        message: data.message
+                    })
+                }
 
-        }
-        else {
-            setalert({
+            }).catch (error => {
+            props.setalert({
                 open: true,
                 type: 'error',
-                message: 'Unable to set Default Address. Try Again Later.'
-            })
-        }
+                message: error.message
+            } )
+        });
     }
 
     return (
@@ -214,7 +199,19 @@ function Addresses(props) {
     const classes = useStyles();
     const { data, error } = useGetUser();
 
-    if (error) return <h1>Something went wrong!</h1>
+    if (error) return(
+        <Card>
+            <CardHeader
+                title= "Error"
+                subheader={"Status Code: " + error.status}
+            />
+            <Divider />
+            <CardContent>
+                <p>{error.message}</p>
+            </CardContent>
+        </Card>
+    );
+
     if (!data) return(
         <div>
             <div className="user-container">
@@ -251,5 +248,25 @@ Addresses.getLayout = (page) => (
         {page}
     </DashboardLayout>
 );
+
+// This gets called on every request
+export const getServerSideProps = ({ req, res }) => {
+    // Fetch data from external API
+    // Pass data to the page via props
+    const cookies = getCookies({ res, req });
+    const isLoggedInExists = checkCookies('isLoggedIn', {res, req});
+    const isLoggedIn = isLoggedInExists ? cookies.isLoggedIn : false;
+
+    if (!isLoggedIn) {
+        return {
+            redirect: {
+                destination: '/login',
+                permanent: false,
+            },
+        }
+    }
+    return { props: { } }
+}
+
 
 export default Addresses;

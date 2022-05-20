@@ -17,14 +17,67 @@ const useStyles = makeStyles((theme) => ({
         boxShadow: ' 0 4px 8px 0 rgba(0,0,0,0.2)',
         transition: '0.3s',
         borderRadius: '5px',
+        marginRight: '1rem',
 
-        minWidth: '220px',
-        maxWidth: '220px',
-        //height: '450px',
-        margin: '10px',
-        '&:hover': {
-            backgroundColor: '#fafafa'
+        [theme.breakpoints.down('sm')]: {
+            display:'grid',
+            gridTemplateRows: '70% 10% auto',
+            height: '18rem',
+            minWidth: '10rem',
         },
+
+        [theme.breakpoints.up('md')]: {
+            display:'grid',
+            gridTemplateRows: '70% 10% auto',
+            height: '25rem',
+            minWidth: '12rem',
+            '&:hover': {
+                backgroundColor: '#fafafa'
+            },
+        },
+    },
+
+    content: {
+        padding: '0.4rem',
+    },
+
+    cardImage: {
+        overflow: 'hidden',
+        borderTopLeftRadius: '5px',
+        borderTopRightRadius: '5px',
+        position: 'relative',
+        width: '100%',
+        height: '100%',
+    },
+
+    cardRating: {
+        height: '20px',
+        color: 'gold',
+        display: 'inline-block',
+    },
+
+    cardTitle: {
+        display: '-webkit-box',
+        WebkitBoxOrient: 'vertical',
+        WebkitLineClamp: '2',
+        textOverflow: 'ellipsis',
+        overflow: 'hidden',
+
+        [theme.breakpoints.down('sm')]: {
+            fontSize: '1rem',
+            fontWeight: 'bold',
+        },
+
+        [theme.breakpoints.up('md')]: {
+            fontSize: '1.3rem',
+            fontWeight: 'bold',
+        }
+    },
+
+    cardButton: {
+        height: '50px',
+        width: '95%',
+        margin: '5px 5px 5px 5px',
     },
 
     cardStatus: {
@@ -40,60 +93,15 @@ const useStyles = makeStyles((theme) => ({
         height: '480px',
     },
 
-    cardImage: {
-        overflow: 'hidden',
-        borderTopLeftRadius: '5px',
-        borderTopRightRadius: '5px',
-
-    },
-
-    cardRating: {
-        width: '95%',
-        margin: '5px 5px 5px 5px',
-        height: '20px',
-        color: 'gold',
-        display: 'inline-block',
-    },
-
-    cardTitle: {
-        //height: '50px',
-        padding: '10px',
-        //width: '95%',
-        //margin: '5px 5px 5px 5px',
-        textAlign: 'left',
-        fontSize: '15px',
-        //display: 'flex',
-        //justifyContent: 'center',
-       // alignItems: 'center',
-    },
-
-    cardButton: {
-        height: '50px',
-        width: '95%',
-        margin: '5px 5px 5px 5px',
-    }
 }));
 
 
 export default function MovieCard({ meta }) {
     const router = useRouter();
     const classes = useStyles();
-    const {data, error} = useGetMovieId(meta['movieId']);
 
-    if (error) return (
-        <div className={classes.cardStatus}>
-            <FontAwesomeIcon icon={faExclamationTriangle} size="2x" />
-        </div>
-    );
+    const { title, plot, id, poster, rated, runtime, year, ratings } = meta.movie;
 
-    if (!data) return(
-        <div className={classes.cardStatus}>
-            <div className="loading-container"><CircularProgress/></div>
-        </div>
-    );
-
-    const { title, plot, id, poster, rated, runtime, year, ratings } = data;
-    
     function handleClick() {
         router.push({
             pathname: '/movie/[movieId]',
@@ -106,31 +114,23 @@ export default function MovieCard({ meta }) {
             <div className={classes.cardImage}>
                 <Image
                     src={poster == null || !validator.isURL(poster) ? NoImage : poster}
-                    width={220}
-                    height={330}
                     alt="Not Found"
+                    layout={'fill'}
                 >
                 </Image>
             </div>
 
-            <div className={classes.cardRating}>
-                <FontAwesomeIcon icon={faStar} size="1x"/>
-                <b style={{color: 'grey', paddingLeft:'5px'}}>{ratings.rating}</b>
+            <div className={classes.content}>
+                <div className={classes.cardRating}>
+                    <FontAwesomeIcon icon={faStar} size="1x"/>
+                    <b style={{color: 'grey', paddingLeft:'5px'}}>{ratings.imdb}</b>
+                </div>
+
+                <p className={classes.cardTitle}>
+                    {title}
+                </p>
             </div>
 
-            <p className={classes.cardTitle}
-               style={{
-                   display: '-webkit-box',
-                   WebkitBoxOrient: 'vertical',
-                   WebkitLineClamp: '2',
-                   textOverflow: 'ellipsis',
-                   overflow: 'hidden',
-                   fontSize: '17px',
-                   fontWeight: 'bold',
-               }}
-            >
-                {title}
-            </p>
 
             {/* A JSX comment
 

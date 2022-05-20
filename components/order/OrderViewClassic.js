@@ -65,15 +65,9 @@ function OrderViewClassic() {
             <FontAwesomeIcon icon={faExclamationTriangle} size="2x" />
             <h2>Unable to load Order Information.</h2>
         </div>
-
     )
-
     if (!data) return(
-
-        <div className={classes.orderContainer}>
-                <CircularProgress></CircularProgress>
-        </div>
-
+        <div className={classes.orderContainer}><CircularProgress /></div>
     );
 
 
@@ -101,26 +95,24 @@ function OrderViewClassic() {
         }
         else {
             return(
-                <>
-                    <div className={classes.classic}>
-                        <h1 className={classes.orderHeadline}>Your Orders</h1>
+                <div className={classes.classic}>
+                    <h1 className={classes.orderHeadline}>Your Orders</h1>
 
-                        {data.content.map(sale => (
-                            <Order key={sale.id} content={sale}></Order>
-                        ))}
+                    {data.content.map(sale => (
+                        <Order key={sale.id} content={sale}></Order>
+                    ))}
 
-                        <div className="order-pagination">
-                            <Pagination count={totalPages}
-                                        variant="outlined"
-                                        color="primary"
-                                        shape="rounded"
-                                        size='large'
-                                        page={page + 1}
-                                        onChange={handlePageClick}
-                            />
-                        </div>
+                    <div className="order-pagination">
+                        <Pagination count={totalPages}
+                                    variant="outlined"
+                                    color="primary"
+                                    shape="rounded"
+                                    size='large'
+                                    page={page + 1}
+                                    onChange={handlePageClick}
+                        />
                     </div>
-                </>
+                </div>
 
             )
         }

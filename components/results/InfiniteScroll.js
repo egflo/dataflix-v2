@@ -1,7 +1,7 @@
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { makeStyles } from '@material-ui/core/styles';
 import  React, {useRef, useState, useEffect, useCallback} from 'react'
-import axios from "axios";
+import {axiosInstance} from "../../service/Service";
 
 function GetMovies(path, page) {
     const [loading, setLoading] = useState(true);
@@ -16,7 +16,7 @@ function GetMovies(path, page) {
         try {
             await setLoading(true);
             await setError(false);
-            const res = await axios.get(url, { headers: { Authorization: "Bearer " + localStorage.getItem("token") } });
+            const res = await axiosInstance.get(url);
             //const data = {content, totalElements, empty, last}
             //await setList((prev) => [...prev, ...res.data.content]);
             await setList((prev) => {

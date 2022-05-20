@@ -17,12 +17,18 @@ const useStyles = makeStyles((theme) => ({
         height: '180px',
         display: 'grid',
         gridTemplateColumns: '120px auto',
-        marginBottom: '10px',
+        marginBottom: '0.5rem',
+        marginLeft: '0.5rem',
+        marginRight: '0.5rem',
+
     },
 
     orderImage: {
         position: 'relative',
-
+        overflow: 'hidden',
+        borderRadius: '5px',
+        width: '100%',
+        height: '100%',
     },
 
     orderContentRow: {
@@ -34,9 +40,15 @@ const useStyles = makeStyles((theme) => ({
     },
 
     orderContent: {
-        paddingLeft: '10px',
+        paddingLeft: '0.5rem',
         '& > *': {
-
+            margin: '0px',
+            marginBottom: '0.1rem',
+            textAlign: 'left',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+            width: '65vw',
         },
 
     },
@@ -45,20 +57,10 @@ const useStyles = makeStyles((theme) => ({
 
 export default function OrderRow({content}) {
 
-    const { id, orderId, movieId, quantity, listPrice} = content;
+    const { id, orderId, movieId, quantity, listPrice, movie} = content;
 
     const router = useRouter();
     const classes = useStyles();
-    const { data, error } = useGetMovieId(movieId);
-
-    if (error) return <h1>Something went wrong!</h1>
-    if (!data) return(
-        <div className="movie_card">
-            <div className="loading-container"><CircularProgress/></div>
-        </div>
-    );
-
-    const { title, poster, rated, runtime, year } = data
 
     
     function handleBuyAgain() {
@@ -71,7 +73,7 @@ export default function OrderRow({content}) {
         <div className={classes.orderRow}>
             <div className={classes.orderImage}>
                 <Image
-                    src={poster == null || !validator.isURL(poster) ? NoImage:poster}
+                    src={movie.poster == null || !validator.isURL(movie.poster) ? NoImage:movie.poster}
                     layout='fill'
                     objectFit="fill"
                     alt="Not Found"
@@ -80,11 +82,11 @@ export default function OrderRow({content}) {
 
             <div className={classes.orderContent}>
                 <h3>
-                    <a href={"/movie/"+movieId}>{title}</a>
+                    <a href={"/movie/"+movieId}>{movie.title}</a>
                 </h3>
 
                 <p className={classes.orderContentRow}>
-                    {year} - {rated} - {formatRuntime(runtime)}
+                    {movie.year} - {movie.rated} - {formatRuntime(movie.runtime)}
                 </p>
 
                 <p className={classes.orderContentRow}>

@@ -11,8 +11,10 @@ import { makeStyles } from '@material-ui/core/styles';
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faExclamationTriangle, faShoppingCart} from "@fortawesome/free-solid-svg-icons";
 import React from "react";
-import {DashboardLayout} from "../components/nav/DashboardLayout";
-
+import {DashboardLayout} from "../components/navigation/DashboardLayout";
+import {Card, CardContent, CardHeader, Divider} from "@mui/material";
+import {checkCookies, getCookies} from "cookies-next";
+import Shipping from "./shipping";
 
 
 const useStyles = makeStyles((theme) => ({
@@ -64,12 +66,16 @@ function Cart(props) {
     const { data, error } = useGetUserCart("");
 
     if (error) return(
-        <>
-            <div className={classes.cartContainer}>
-                <FontAwesomeIcon icon={faExclamationTriangle} size="2x" />
-                <h2>Unable to load cart data.</h2>
-            </div>
-        </>
+        <Card>
+            <CardHeader
+                title= "Error"
+                subheader={"Status Code: " + error.status}
+            />
+            <Divider />
+            <CardContent>
+                <p>{error.message}</p>
+            </CardContent>
+        </Card>
     );
 
     if (!data) return(
@@ -146,5 +152,24 @@ Cart.getLayout = (page) => (
         {page}
     </DashboardLayout>
 );
+
+// This gets called on every request
+export const getServerSideProps = ({ req, res }) => {
+    // Fetch data from external API
+    // Pass data to the page via props
+    const cookies = getCookies({ res, req });
+    const isLoggedInExists = checkCookies('isLoggedIn', {res, req});
+    const isLoggedIn = isLoggedInExists ? cookies.isLoggedIn : false;
+
+    if (!isLoggedIn) {
+        return {
+            redirect: {
+                destination: '/login',
+                permanent: false,
+            },
+        }
+    }
+    return { props: {} }
+}
 
 export default Cart;

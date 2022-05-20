@@ -10,6 +10,7 @@ import Link from 'next/link'
 import validator from 'validator'
 import {formatRuntime,getUserId} from '../../utils/helpers'
 import useSWR, { mutate } from 'swr'
+import {axiosInstance} from "../../service/Service.js";
 
 
 const useStyles = makeStyles((theme) => ({
@@ -186,90 +187,62 @@ export default function CartRow(props) {
 
         setQty(value);
 
-        const token = localStorage.getItem("token")
-        // POST request using fetch with set headers
-        const requestOptions = {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + token,
-                'My-Custom-Header': 'dataflix'
-            },
-            body: JSON.stringify({
-                id: id, 
-                userId:getUserId(),
-                movieId:movieId, 
-                qty: value })
-        };
-        const res = await fetch(process.env.NEXT_PUBLIC_API_URL + '/cart/', requestOptions)
-            //.then(response => response.json())
-            //.then(data => console.log(data));
+        axiosInstance.post('/cart/', {
+            id: id,
+            userId:userId,
+            movieId:movieId,
+            qty: value
+        }).then(response => {
+            if (response.status === 200) {
+                mutate('/cart/')
+                mutate('/checkout/')
+                props.setalert({
+                    open: true,
+                    type: 'success',
+                    message: 'Cart updated successfully'
+                })
+            }
 
-        if(res.status < 300) {
-            await mutate('/cart/')
-            await mutate('/checkout/')
-            props.setalert({
-                open: true,
-                type: 'success',
-                message: 'Cart updated successfully'
-            })
+        }).catch(error => {
 
-        }
-        else if (res.status === 401) {
-            props.setalert({
-                open: true,
-                type: 'error',
-                message: 'You are not authorized to update cart'
-            })
-        }
-        else if (res.status === 400) {
-            props.setalert({
-                open: true,
-                type: 'error',
-                message: 'Quantity exceeds the available stock'
-            })
-        }
+            if (error.response.data !== undefined) {
+                props.setalert({
+                    open: true,
+                    type: 'error',
+                    message: error.response.data.message
+                })
+            }
+            else {
+                props.setalert({
+                    open: true,
+                    type: 'error',
+                    message: error.message
+                })
+            }
+        });
 
-        else {
-            props.setalert({
-                open: true,
-                type: 'error',
-                message: 'Cart update failed'
-            })
-
-        }
     };
 
     async function handleRemove() {
-        const token = localStorage.getItem("token")
-        // POST request using fetch with set headers
-        const requestOptions = {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + token,
-                'My-Custom-Header': 'dataflix'
-            },
-        };
-        const res = await fetch(process.env.NEXT_PUBLIC_API_URL + '/cart/' + id, requestOptions)
 
-        if(res.status < 300) {
-            await mutate('/cart/')
-            await mutate('/checkout/')
-            props.setalert({
-                open: true,
-                type: 'success',
-                message: 'Removed from Cart'
-            })
+        axiosInstance.delete('/cart/' + id).then(response => {
+            if (response.status === 200) {
+                mutate('/cart/')
+                mutate('/checkout/')
+                props.setalert({
+                    open: true,
+                    type: 'success',
+                    message: 'Item removed from Cart'
+                })
+            }
 
-        }
-        else {
+        }).catch(error => {
             props.setalert({
                 open: true,
                 type: 'error',
-                message: 'Unable to remove from Cart. Try again later.'
+                message: error.message
             })
-        }
+        });
 
     }
 

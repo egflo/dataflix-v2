@@ -109,7 +109,6 @@ export default function PasswordCard() {
         //alert(form_object)
         //alert(object)
 
-        const token = localStorage.getItem("token")
         // POST request using fetch with set headers
         const requestOptions = {
             method: 'POST',

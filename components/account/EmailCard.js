@@ -1,5 +1,3 @@
-import { useRouter } from 'next/router'
-import CircularProgress from '@material-ui/core/CircularProgress';
 import { makeStyles } from '@material-ui/core/styles';
 import Form from 'react-bootstrap/Form'
 import { Formik, Field, ErrorMessage } from "formik";
@@ -17,6 +15,7 @@ import {
     CardHeader,
     Divider,
 } from '@mui/material';
+import {axiosInstance} from "../../service/Service";
 
 const useStyles = makeStyles((theme) => ({
     backdrop: {
@@ -106,43 +105,23 @@ export default function EmailCard(props) {
         values['id'] = getUserId();
         const form_object = JSON.stringify(values, null, 2);
 
-        const token = localStorage.getItem("token")
-        // POST request using fetch with set headers
-        const requestOptions = {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + token,
-                'My-Custom-Header': 'dataflix'
-            },
-            body: form_object
-        };
-        const res = await fetch( process.env.NEXT_PUBLIC_API_URL + '/customer/update/email', requestOptions)
-        const data = await  res.json()
+        axiosInstance.post('/customer/email', values)
+            .then(res => {
+                let response = res.data;
+                mutate("/customer/");
+                props.setalert({
+                    open: true,
+                    type: 'success',
+                    message: response.message
+                })
 
-        if(res.status < 300) {
-            await mutate("/customer/");
-            props.setalert({
-                open: true,
-                type: 'success',
-                message: 'Updated'
-            })
-        }
-
-        if(res.status == 404) {
-            props.setalert({
-                open: true,
-                type: 'error',
-                message: 'Email not found.'
-            })
-        }
-        else {
-            props.setalert({
-                open: true,
-                type: 'error',
-                message: 'Error Updating Email.'
-            })
-        }
+            }).catch (error => {
+               props.setalert({
+                   open: true,
+                   type: 'error',
+                   message: error.message
+               } )
+        });
     }
 
     function handleSwitch(event) {

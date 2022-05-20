@@ -4,12 +4,11 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faFilm, faShoppingCart, faUserCircle} from '@fortawesome/free-solid-svg-icons'
 import Search from './Search'
 import { useRouter } from 'next/router'
-import Badge from '@material-ui/core/Badge';
-import { withStyles } from '@material-ui/core/styles';
 import  React, {useRef, useState, useEffect} from 'react';
 import {useWindowDimensions} from "../../utils/useWindowDimensions.ts";
 import OrderViewMobile from "../order/OrderViewMobile";
 import CartNotification from"./CartNotification";
+import {removeCookies, setCookies} from "cookies-next";
 
 
 //https://stackoverflow.com/questions/67540393/next-js-material-ui-warning-prop-classname-did-not-match
@@ -28,7 +27,18 @@ export default function Navigation() {
     }
 
     function handleLogout() {
-        localStorage.removeItem("token");
+        const options = {
+            path: '/',
+            maxAge: 60 * 60 * 24 * 7,
+            secure: true,
+            sameSite: 'lax',
+        };
+
+        removeCookies('accessToken', options);
+        removeCookies('refreshToken', options);
+        removeCookies('username', options);
+        removeCookies('id',options);
+        removeCookies('isLoggedIn', options);
 
         router.push({
             pathname: '/login'

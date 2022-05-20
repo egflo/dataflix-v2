@@ -1,7 +1,5 @@
 import { useRouter } from 'next/router'
-import {useGetMovieId} from '../../service/Service'
 import Image from 'next/image'
-import CircularProgress from '@material-ui/core/CircularProgress'
 import NoImage from '../../public/NOIMAGE.png'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faRedo } from '@fortawesome/free-solid-svg-icons'
@@ -12,26 +10,22 @@ import { makeStyles } from '@material-ui/core/styles';
 import ReviewCard from "../review/ReviewCard";
 
 const useStyles = makeStyles((theme) => ({
-
     orderRow: {
         display: 'grid',
         borderRadius: '5px',
-        //marginTop: '20px',
 
         [theme.breakpoints.down('sm')]: {
             //border: '1px solid #e0e0e0',
-            boxShadow: '0 4px 8px 0 rgba(0,0,0,0.2)',
-            gridTemplateColumns: '115px auto',
-            margin: '5px',
+            gridTemplateColumns: '25vw auto',
+            backgroundColor: '#fafafa',
+            marginBottom: '1rem',
         },
 
         [theme.breakpoints.up('md')]: {
             boxShadow: '0 4px 8px 0 rgba(0,0,0,0.2)',
-            gridTemplateColumns: '115px 600px auto',
-            marginBottom: '20px',
-
+            gridTemplateColumns: '10vw 50vw auto',
+            marginBottom: '2vh',
         },
-
     },
 
     orderImage: {
@@ -46,11 +40,11 @@ const useStyles = makeStyles((theme) => ({
     },
 
     orderInformation: {
-      paddingRight: '10px',
-      paddingLeft: '10px',
+      paddingRight: '1rem',
+      paddingLeft: '1rem',
       '& > *': {
           margin: '0px',
-          marginBottom: '4px',
+          marginBottom: '0.1rem',
           textAlign: 'left',
           overflow: 'hidden',
           textOverflow: 'ellipsis',
@@ -72,28 +66,17 @@ const useStyles = makeStyles((theme) => ({
 
     buttonContainer: {
         position: 'relative',
-        height: '40px',
-        margin: '10px',
+        height: '2.5rem',
+        margin: '0.8rem',
     },
 
 }));
 
 export default function OrderRowDetailed(props) {
-
-    const { id, orderId, movieId, quantity, listPrice} = props.content;
+    const { id, orderId, movieId, quantity, listPrice, movie} = props.content;
 
     const router = useRouter();
     const classes = useStyles();
-    var { data, error } = useGetMovieId(movieId);
-
-    if (error) return <h1>Something went wrong!</h1>
-    if (!data) return(
-        <div className="movie_card">
-            <div className="loading-container"><CircularProgress/></div>
-        </div>
-    );
-
-    const { title, poster, rated, runtime, year } = data
 
 
     function handleBuyAgain() {
@@ -106,7 +89,7 @@ export default function OrderRowDetailed(props) {
         <div className={classes.orderRow}>
             <div className={classes.orderImage}>
                 <Image
-                    src={poster == null || !validator.isURL(poster) ? NoImage:poster}
+                    src={movie.poster == null || !validator.isURL(movie.poster) ? NoImage:movie.poster}
                     layout='fill'
                     objectFit="fill"
                     alt="Not Found"
@@ -114,12 +97,12 @@ export default function OrderRowDetailed(props) {
             </div>
 
             <div className={classes.orderInformation}>
-                <h3 className="order-row-title">
-                    <a href={"/movie/"+ movieId}>{title}</a>
-                </h3>
+                <h4 className="order-row-title">
+                    <a href={"/movie/"+ movieId}>{movie.title}</a>
+                </h4>
 
                 <p className="order-row-subheadline">
-                    {year} - {rated} - {formatRuntime(runtime)}
+                    {movie.year} - {movie.rated} - {formatRuntime(movie.runtime)}
                 </p>
 
                 <p className="order-row-sku">

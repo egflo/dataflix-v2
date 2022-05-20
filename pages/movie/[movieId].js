@@ -17,9 +17,12 @@ import ReviewRow from '../../components/review/ReviewRow'
 import {formatRuntime, numFormatter, getUserId, formatCurrency} from '../../utils/helpers'
 import NoBackground from '/public/BACKGROUND.png'
 import useSWR, { mutate } from 'swr'
-import {DashboardLayout} from "../../components/nav/DashboardLayout";
+import {DashboardLayout} from "../../components/navigation/DashboardLayout";
 import MovieCardDetailed from "../../components/movie/MovieCardDetailed";
-
+import {axiosInstance} from "../../service/Service";
+import {Card, CardContent, CardHeader, Divider} from "@mui/material";
+import {checkCookies, getCookies} from "cookies-next";
+import Shipping from "../shipping";
 
 const useStyles = makeStyles((theme) => ({
     container: {
@@ -120,14 +123,18 @@ const useStyles = makeStyles((theme) => ({
     const [dropdown, setDropdown] = useState(false);
     const { data, error } = useGetMovieId(movieId)
 
-    if (error) return (
-        <>
-            <div className="movie-container">
-                <FontAwesomeIcon icon={faExclamationTriangle} size="2x" />
-                <h2>Unable to load movie.</h2>
-            </div>
-        </>
-    );
+     if (error) return(
+         <Card>
+             <CardHeader
+                 title= "Error"
+                 subheader={"Status Code: " + error.status}
+             />
+             <Divider />
+             <CardContent>
+                 <p>{error.message}</p>
+             </CardContent>
+         </Card>
+     );
 
     if (!data) return (
         <>
@@ -150,45 +157,29 @@ const useStyles = makeStyles((theme) => ({
     }
 
     async function handleAddCart() {
-        const token = localStorage.getItem("token")
-        // POST request using fetch with set headers
-        const requestOptions = {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + token,
-                'My-Custom-Header': 'dataflix'
-            },
-            body: JSON.stringify({
-                userId: getUserId(),
-                movieId:id,
-                qty: 1 })
-        };
-        const res = await fetch(process.env.NEXT_PUBLIC_API_URL + '/cart/', requestOptions)
-        if(res.status < 300) {
-            await mutate('/cart/')
+        axiosInstance.put('/cart/', {
+            //userId: getUserId(),
+            movieId:id,
+            qty: 1
+        }).then(res => {
+            mutate('/cart/')
+            let data = res.data
+            props.setalert({
+                open: true,
+                message: "Added to cart",
+                type: "success"
+            })
+
+        }).catch(error => {
+
+           let response = error.response
 
             props.setalert({
                 open: true,
-                type: 'success',
-                message: 'Movie added to cart.'
+                type: "error",
+                message: response ? response.data.message : error.message
             })
-
-        }
-        else if(res.status == 400) {
-            props.setalert({
-                open: true,
-                type: 'error',
-                message: 'Unable to add to cart. Product is out of stock'
-            })
-        }
-        else {
-            props.setalert({
-                open: true,
-                type: 'error',
-                message: 'Error adding to cart'
-            })
-        }
+        })
     }
 
     function formatInformation(data) {
@@ -208,60 +199,60 @@ const useStyles = makeStyles((theme) => ({
     return (
         <>
 
-                <div className={classes.container}>
+            <div className={classes.container}>
 
-                    <MovieCardDetailed {...props} content={data}></MovieCardDetailed>
+                <MovieCardDetailed {...props} content={data}></MovieCardDetailed>
 
-                    <div className="dropdown">
-                        <button onClick={dropdownClick} className={classes.dropdown}>
-                            More Details
-                            <FontAwesomeIcon icon={dropdown ? faChevronUp: faChevronDown} size="1x" style={{color: "white", marginLeft: "10px"}} />
-                        </button>
-                        <div style={{display: dropdown ? 'block':'none'}} className={classes.dropdownContent}>
-                            <p className="">
-                                <b>Director: </b> {formatInformation(director)}
-                            </p>
+                <div className="dropdown">
+                    <button onClick={dropdownClick} className={classes.dropdown}>
+                        More Details
+                        <FontAwesomeIcon icon={dropdown ? faChevronUp: faChevronDown} size="1x" style={{color: "white", marginLeft: "10px"}} />
+                    </button>
+                    <div style={{display: dropdown ? 'block':'none'}} className={classes.dropdownContent}>
+                        <p className="">
+                            <b>Director: </b> {formatInformation(director)}
+                        </p>
 
-                            <p className="">
-                                <b>Writers: </b> {formatInformation(writer)}
-                            </p>
+                        <p className="">
+                            <b>Writers: </b> {formatInformation(writer)}
+                        </p>
 
-                            <p className="">
-                                <b>Box Office: </b> {formatInformation(boxOffice)}
-                            </p>
+                        <p className="">
+                            <b>Box Office: </b> {formatInformation(boxOffice)}
+                        </p>
 
-                            <p className="">
-                                <b>Production: </b> {formatInformation(production)}
-                            </p>
+                        <p className="">
+                            <b>Production: </b> {formatInformation(production)}
+                        </p>
 
-                            <p className="">
-                                <b>Language(s): </b> {formatInformation(language)}
-                            </p>
+                        <p className="">
+                            <b>Language(s): </b> {formatInformation(language)}
+                        </p>
 
-                            <p className="">
-                                <b>Country(s): </b> {formatInformation(country)}
-                            </p>
+                        <p className="">
+                            <b>Country(s): </b> {formatInformation(country)}
+                        </p>
 
-                        </div>
                     </div>
-
-                    <div className="cast-row">
-                        <CastRow id={id}></CastRow>
-                    </div>
-
-                    <div className="review-row">
-                        <ReviewRow id={id}></ReviewRow>
-                    </div>
-
-                    <div className="button-row" style={{width:'100%'}}>
-                        <div className="buy-button">
-                            <Button onClick={handleAddCart} className="btn-block" >
-                                <h3>Buy Now For {formatCurrency(price)}</h3>
-                            </Button>
-                        </div>
-                    </div>
-
                 </div>
+
+                <div className="cast-row">
+                    <CastRow id={id}></CastRow>
+                </div>
+
+                <div className="review-row">
+                    <ReviewRow id={id}></ReviewRow>
+                </div>
+
+                <div className="button-row" style={{width:'100%'}}>
+                    <div className="buy-button">
+                        <Button onClick={handleAddCart} className="btn-block" >
+                            <h3>Buy Now For {formatCurrency(price)}</h3>
+                        </Button>
+                    </div>
+                </div>
+
+            </div>
 
         </>
     );
@@ -272,5 +263,24 @@ Movie.getLayout = (page) => (
         {page}
     </DashboardLayout>
 );
+// Thi
+// gets called on every request
+export const getServerSideProps = ({ req, res }) => {
+    // Fetch data from external API
+    // Pass data to the page via props
+    const cookies = getCookies({ res, req });
+    const isLoggedInExists = checkCookies('isLoggedIn', {res, req});
+    const isLoggedIn = isLoggedInExists ? cookies.isLoggedIn : false;
+
+    if (!isLoggedIn) {
+        return {
+            redirect: {
+                destination: '/login',
+                permanent: false,
+            },
+        }
+    }
+    return { props: { } }
+}
 
 export default Movie;

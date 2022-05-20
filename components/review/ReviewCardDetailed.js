@@ -12,10 +12,8 @@ import Alert from '@mui/material/Alert';
 import Snackbar from '@mui/material/Snackbar';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faThumbsUp, faStar } from '@fortawesome/free-regular-svg-icons'
-import IconButton from "@material-ui/core/IconButton";
 import Rating from '@material-ui/lab/Rating'
-import {getUserId} from "../../utils/helpers";
-import OrderRow from "../order/OrderRow";
+import {axiosInstance} from "../../service/Service";
 
 
 const useStyles = makeStyles((theme) => ({
@@ -32,7 +30,7 @@ const useStyles = makeStyles((theme) => ({
     },
 
     rateMovie: {
-        zIndex: 99,
+        zIndex: theme.zIndex.drawer + 1,
         '& > *': {
             padding: '0',
         },
@@ -89,7 +87,6 @@ export default function ReviewCardDetailed({items}) {
         setState({ ...state, openSnack: false });
     };
 
-    // useOutsideAlerter(ref, open)
     useEffect(() => {
         /**
          * Alert if clicked on outside of element
@@ -110,42 +107,36 @@ export default function ReviewCardDetailed({items}) {
     }, [ref, open]);
 
     async function handleSubmit(values) {
-        const token = localStorage.getItem("token")
+        const userId = localStorage.getItem("id");
         values['movieId'] = id;
-        values['customerId'] = getUserId();
+        values['customerId'] = userId;
+
         const form_object = JSON.stringify(values, null, 2);
         console.log(form_object);
 
-        // POST request using fetch with set headers
-        const requestOptions = {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + token,
-                'My-Custom-Header': 'dataflix'
-            },
-            body: form_object
-        };
-        const res = await fetch(process.env.NEXT_PUBLIC_API_URL + '/review/', requestOptions)
-        const data = await  res.json()
-
-        if(res.status < 300) {
-            await mutate("/movie/" + id);
-            setAlert({
-                type: 'success',
-                message: 'Review Added.'
-            })
-            setState({ openSnack: true, vertical: 'top', horizontal: 'center'});
-
+        axiosInstance.put('/review/', values)
+            .then(res => {
+                if (res.status === 200 || res.status === 201) {
+                    setState({ ...state, openSnack: true });
+                    mutate("/movie/" + id);
+                    setAlert({
+                        type: 'success',
+                        message: 'Review Added.'
+                    })
+                }
+                else {
+                    setAlert({
+                        type: 'error',
+                        message: 'Review not added.'
+                    })
+                }
+            }) .catch(err => {
+                setAlert({
+                    type: 'error',
+                    message: err.message
+                })
+            });
         }
-        else {
-            setAlert({
-                type: 'error',
-                message: 'Unable to add review. Try Again Later.'
-            })
-            setState({ openSnack: true, vertical: 'top', horizontal: 'center'});
-        }
-    }
 
     let initalValues = {
         text: "",
@@ -153,7 +144,6 @@ export default function ReviewCardDetailed({items}) {
         title: "",
         movie: "",
     }
-
 
     return (
         <>

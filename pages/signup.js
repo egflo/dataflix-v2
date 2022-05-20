@@ -13,6 +13,8 @@ import PasswordStrengthBar from "react-password-strength-bar";
 import {Link} from "@material-ui/core";
 import {useRouter} from "next/router";
 import {CardContent, CardHeader, Divider} from "@mui/material";
+import {axiosInstance} from "../service/Service";
+import {setCookies} from "cookies-next";
 
 
 function validateEmail(value) {
@@ -105,35 +107,45 @@ export default function RegistrationForm(props){
     async function handleSubmit(values) {
         const form_object = JSON.stringify(values, null, 2);
         alert(form_object);
+        return
         // POST request using fetch with set headers
-        const requestOptions = {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'My-Custom-Header': 'dataflix'
-            },
-            body: form_object
-        };
-        const res = await fetch(process.env.NEXT_PUBLIC_API_URL + '/user/reg', requestOptions)
-        const data = await  res.json()
 
-        console.log(data);
-        if(res.ok) {
-            const {id,username,token, roles} = data;
-            localStorage.setItem("userId", id);
-            localStorage.setItem("token", token);
-            await router.push({
-                pathname: '/',
+        axiosInstance.post('/user/reg', form_object)
+            .then(res => {
+                if (res.status === 200) {
+
+                    const {id, username, accessToken, refreshToken} = res.data;
+
+                    const options = {
+                        path: '/',
+                        maxAge: 60 * 60 * 24 * 7,
+                        secure: true,
+                        sameSite: 'lax',
+                    };
+
+                    setCookies('accessToken', accessToken, options);
+                    setCookies('refreshToken', refreshToken, options);
+                    setCookies('username', username, options);
+                    setCookies('id', id, options);
+                    setCookies('isLoggedIn', true, options);
+
+                    router.push('/');
+                } else {
+                    props.setalert({
+                        open: true,
+                        type: 'error',
+                        message: "Registration Failed"
+                    })
+                }
             })
-        }
-        else {
-            props.setalert({
-                open: true,
-                type: 'error',
-                message: `${data.message}`
+            .catch(err => {
+                props.setalert({
+                    open: true,
+                    type: 'error',
+                    message: res.data ? res.data.message : 'Registration failed'
+                })
             })
 
-        }
     }
 
     function handleReset() {

@@ -4,7 +4,7 @@ import '@fontsource/roboto';
 import { useRouter} from 'next/router'
 import Link from 'next/link'
 import React, {useState, useEffect} from 'react'
-import {useGetCheckOut} from '../service/Service'
+import {axiosInstance, useGetCheckOut} from '../service/Service'
 import { useStripe, useElements, CardElement, Elements } from "@stripe/react-stripe-js";
 import { Button, Navbar} from 'react-bootstrap';
 import CartRow from '../components/cart/CartRow'
@@ -16,11 +16,10 @@ import { makeStyles } from '@material-ui/core/styles';
 import Select from 'react-select';
 import Backdrop from '@mui/material/Backdrop';
 import CircularProgress from '@mui/material/CircularProgress';
-import Alert from '@mui/material/Alert';
-import Snackbar from '@mui/material/Snackbar';
 import ShippingCard from "../components/account/ShippingCard";
+import {Card, CardContent, CardHeader, Divider} from "@mui/material";
+import {checkCookies, getCookies} from "cookies-next";
 
-const stripe = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_API);
 
 const useStyles = makeStyles((theme) => ({
     checkoutContainer: {
@@ -156,6 +155,35 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 
+async function handleAddressChange(address) {
+    // POST request using fetch with set headers
+
+    const options = {
+        id: address.id,
+        firstName: address.firstname,
+        lastName: address.lastname,
+        street: address.street,
+        unit: address.unit,
+        city: address.city,
+        state: address.state,
+        postcode: address.postcode
+    }
+
+    axiosInstance.post('/checkout/', options)
+        .then(res => {
+            if (res.status === 200 || res.status === 201) {
+                setCheckout(res.data);
+            }
+        })
+        .catch(err => {
+            props.setalert({
+                open: true,
+                type: 'error',
+                message: err.data ? err.data.message : 'Unable to process sale. Try again later.'
+            })
+        })
+}
+
 const CARD_ELEMENT_OPTIONS = {
     iconStyle: "solid",
     hidePostalCode: false,
@@ -178,7 +206,9 @@ const CARD_ELEMENT_OPTIONS = {
     }
 };
 
-export default function Checkout(props) {
+function Checkout(props) {
+    const stripe = loadStripe(props.STRIPE_KEY);
+
     return (
         <Elements stripe={stripe}>
             <CheckoutForm {...props}></CheckoutForm>
@@ -195,202 +225,192 @@ function CheckoutForm(props) {
     const classes = useStyles();
 
     const [isLoading, setLoading] = useState(false);
-    const [checkout, setCheckout] = useState( null);
-    const [enable, setEnable] = useState( true);
+    const [checkout, setCheckout] = useState(null);
+    const [enable, setEnable] = useState(true);
+    const [intent, setIntent] = useState(null);
 
-    const { data, error } = useGetCheckOut("/");
+    const {data, error} = useGetCheckOut("/");
 
     useEffect(() => {
-        if(data){
+        if (data) {
+            //Once we have the data, we can set the checkout state
+            //Get a payment intent from the server and set the intent state
+            setLoading(true);
             setCheckout(data);
+            axiosInstance.post('/checkout/charge', {
+                amount: total,
+                currency: 'USD',
+                description: 'Test Charge for user id: ' + getUserId(),
+            })
+                .then(response => {
+                    if (response.error) {
+                        // Handle error here
+                        props.setalert(
+                            {
+                                open: true,
+                                message: response.error.message,
+                                type: "error",
+                            }
+                        );
+
+                    }
+                    setIntent(response.data);
+                })
+                .catch(function (error) {
+                    setLoading(false)
+                    props.setalert(
+                        {
+                            open: true,
+                            message: error.message,
+                            type: "error",
+                        }
+                    );
+                });
+
+            setLoading(false);
         }
     }, [data]);
 
 
-    if (error) return <h1>Something went wrong!</h1>
-    if (!data) return(
+    if (error) return (
+        <Card>
+            <CardHeader
+                title="Error"
+                subheader={"Status Code: " + error.status}
+            />
+            <Divider/>
+            <CardContent>
+                <p>{error.message}</p>
+            </CardContent>
+        </Card>
+    );
+
+    if (!data) return (
         <div>
             <div className="loading-container"><CircularProgress/></div>
         </div>
     );
 
-    const { total, addresses, defaultId, subTotal, salesTax, cart } = (checkout !=null) ? checkout:data;
+    const {total, addresses, defaultId, subTotal, salesTax, cart} = (checkout != null) ? checkout : data;
 
-    if(addresses.length === 0){
+    if (addresses.length === 0) {
         router.push('/shipping');
     }
 
-    const processPayment = async (paymentIntent) => {
+    function processPayment() {
         //Get PaymentIntent Data
-        const {id, amount, currency, secret, created} = paymentIntent
-
-        if (!stripe || !elements) {
+        if (!stripe || !elements || intent === null) {
             // Stripe.js has not loaded yet. Make sure to disable
             // form submission until Stripe.js has loaded.
             return;
         }
+
+        const {id, amount, currency, secret, created} = intent;
+
+        setEnable(false);
+        setLoading(true);
 
         // Get a reference to a mounted CardElement. Elements knows how
         // to find your CardElement because there can only ever be one of
         // each type of element.
         const cardElement = elements.getElement(CardElement);
 
-        const response = await stripe.confirmCardPayment(secret, {
-                payment_method: {
-                    card: cardElement,
-                    billing_details: {
-                        name: 'Test Test',
-                    },
+        stripe.confirmCardPayment(secret, {
+            payment_method: {
+                card: cardElement,
+                billing_details: {
+                    name: 'Test Test',
                 },
-            })
-
-        return response;
-    };
-
-    async function CreatePaymentIntent(event) {
-        // Block native form submission.
-        event.preventDefault();
-        setLoading(true)
-        
-        const token = localStorage.getItem("token")
-        // POST request using fetch with set headers
-        const requestOptions = {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + token,
-                'My-Custom-Header': 'dataflix'
             },
-            body: JSON.stringify({ amount: total, currency: "USD", description: "Test Purchase Customer" + localStorage.getItem("userId") })
-        };
-        const res = await fetch(process.env.NEXT_PUBLIC_API_URL + '/checkout/charge', requestOptions)
-        const data = await res.json()
-        
-        if(res.status < 300) {
-            const response = await processPayment(data);
-            if (response.error) {
-                // Handle error here
+        }).then(function (result) {
+
+            if(result.paymentIntent && result.paymentIntent.status === 'succeeded'){
+
+                processSale(result)
+
+            }
+            else if(result.error){
+                //Payment Failed
                 props.setalert(
                     {
                         open: true,
-                        message: response.error.message,
+                        message: result.error.message,
                         type: "error",
                     }
                 );
-
-            } else if (response.paymentIntent && response.paymentIntent.status === 'succeeded') {
-                // Handle successful payment here
-                const form_object = JSON.stringify(response.paymentIntent, null, 2);
-                await processSale(response);
-
             }
-            setLoading(false);
-        }
-        else {
-            setLoading(false);
-            props.setalert({
-                open: true,
-                type: 'error',
-                message: 'Unable to process sale. Try again later.'
-            })
-        }
+        }) .catch( function (error) {
+            props.setalert(
+                {
+                    open: true,
+                    message: error.message,
+                    type: "error",
+                }
+            );
+        });
+
+        setLoading(false);
+        setEnable(true);
 
     };
 
-    async function handleAddressChange(address) {
-        const token = localStorage.getItem("token")
-        // POST request using fetch with set headers
-        const requestOptions = {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + token,
-                'My-Custom-Header': 'dataflix'
-            },
-            body: JSON.stringify({
-                id: address.id,
-                firstName: address.firstname,
-                lastName: address.lastname,
-                street: address.street,
-                unit: address.unit,
-                city: address.city,
-                state: address.state,
-                postcode: address.postcode
-            })
-        };
-        const res = await fetch( process.env.NEXT_PUBLIC_API_URL + '/checkout/', requestOptions)
-        const data = await  res.json()
-
-        if(res.status < 300) {
-            setCheckout(data);
-        }
-        else {
-            props.setalert({
-                open: true,
-                type: 'error',
-                message: 'Unable to process sale. Try again later.'
-            })
-        }
-    }
-
-    async function processSale(payment) {
+    function processSale(payment) {
         const payment_intent = payment['paymentIntent'];
-        const token = localStorage.getItem("token");
 
         const defaultIndex = (element) => element.id == defaultId;
         const defaultAddress = addresses.find(defaultIndex);
 
-        // POST request using fetch with set headers
-        const requestOptions = {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + token,
-                'My-Custom-Header': 'dataflix'
-            },
-            body: JSON.stringify({
-                total: total,
-                subTotal: subTotal,
-                salesTax: salesTax,
+
+        let values = {
+            total: total,
+            subTotal: subTotal,
+            salesTax: salesTax,
+            customerId: getUserId(),
+            stripeId: payment_intent['id'],
+            shipping: {
                 customerId: getUserId(),
-                stripeId: payment_intent['id'],
-                shipping: {
-                    customerId: getUserId(),
-                    firstname: defaultAddress.firstname,
-                    lastname: defaultAddress.lastname,
-                    street: defaultAddress.street,
-                    unit: defaultAddress.unit,
-                    city: defaultAddress.city,
-                    state: defaultAddress.state,
-                    postcode: defaultAddress.postcode
-                },
-                device: 'browser'
-            })
-        };
-
-
-        alert(JSON.stringify(requestOptions, null, 2));
-        return
-
-        const res = await fetch(process.env.NEXT_PUBLIC_API_URL + '/sale/', requestOptions)
-        const data = await res.json()
-        //.then(response => response.json())
-        //.then(data => console.log(data));
-        if(res.status < 300) {
-            await router.push({
-                pathname: '/confirmation',
-                query: {sid: data.id},
-            }, '/success');
-        }
-        else {
-            props.setalert({
-                open: true,
-                type: 'error',
-                message: 'Unable to process sale. Try again later.'
-            })
+                firstname: defaultAddress.firstname,
+                lastname: defaultAddress.lastname,
+                street: defaultAddress.street,
+                unit: defaultAddress.unit,
+                city: defaultAddress.city,
+                state: defaultAddress.state,
+                postcode: defaultAddress.postcode
+            },
+            device: 'browser'
         }
 
-    };
+        //alert(JSON.stringify(values, null, 2));
+        //return
+
+        axiosInstance.post('/sale/', values)
+            .then(res => {
+                if (res.status === 200 || res.status === 201) {
+
+                    const data = res.data;
+                    router.push({
+                        pathname: '/confirmation',
+                        query: {sid: data.id },
+                    }, '/success');
+
+                }
+                else {
+                    props.setalert({
+                        open: true,
+                        type: 'error',
+                        message: 'Unable to process sale. Try again later.'
+                    })
+                }
+            })
+            .catch(error => {
+                props.setalert({
+                    open: true,
+                    type: 'error',
+                    message: error.message
+                })
+            });
+    }
+
 
     function calcSubtotal(data) {
         return data.map(li => li.quantity * li.movie.price).reduce((sum, val) => sum + val, 0)
@@ -530,7 +550,7 @@ function CheckoutForm(props) {
                 </div>
                 
                 <Button
-                    onClick={CreatePaymentIntent}
+                    onClick={processPayment}
                     className="btn-block"
                     variant="primary"
                     size="lg"
@@ -548,3 +568,28 @@ function CheckoutForm(props) {
         </>
     );
 }
+
+// This gets called on every request
+export const getServerSideProps = ({ req, res }) => {
+    // Fetch data from external API
+    // Pass data to the page via props
+    const cookies = getCookies({ res, req });
+    const isLoggedInExists = checkCookies('isLoggedIn', {res, req});
+    const isLoggedIn = isLoggedInExists ? cookies.isLoggedIn : false;
+
+    if (!isLoggedIn) {
+        return {
+            redirect: {
+                destination: '/login',
+                permanent: false,
+            },
+        }
+    }
+
+    return { props: {
+            STRIPE_KEY: process.env.STRIPE_KEY
+        },
+    }
+}
+
+export default Checkout;

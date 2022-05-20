@@ -12,6 +12,7 @@ import axios from "axios";
 import InfiniteScroll from "react-infinite-scroll-component";
 import {decodeSort} from "../../utils/helpers";
 import {makeStyles} from "@material-ui/core/styles";
+import {axiosInstance} from "../../service/Service";
 
 
 const useStyles = makeStyles((theme) => ({
@@ -53,8 +54,8 @@ export default function ResultViewMobile(...props) {
     useEffect(() => {
         setLoading(true);
         let url = process.env.NEXT_PUBLIC_API_URL + "/movie/" + type + "/" + term + "?page=" + page + decodeSort(sort);
-        axios
-            .get( url, { headers: { Authorization: "Bearer " + localStorage.getItem("token") } })
+        axiosInstance
+            .get(url)
             .then((res) => {
                 const data = res.data;
                 const {content, totalPages, totalElements, size, last} = data;

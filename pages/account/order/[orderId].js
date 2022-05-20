@@ -1,7 +1,5 @@
 import 'bootstrap/dist/css/bootstrap.min.css'
 import '@fontsource/roboto';
-
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import  React, {useRef, useState, useRouter, useEffect} from 'react';
 import {useGetSales} from '../../../service/Service'
 import Image from 'next/image'
@@ -16,15 +14,13 @@ import mastercard from '../../../public/payment/mastercard.svg'
 import Popover from '@material-ui/core/Popover';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
-import { Button } from 'react-bootstrap';
 import {getUserId,formatCurrency} from '../../../utils/helpers'
-import moment from 'moment';
 import OrderRowDetailed from '../../../components/order/OrderRowDetailed'
-import Navigation from '../../../components/nav/Navbar'
-import {DashboardLayout} from "../../../components/nav/DashboardLayout";
-import Cast from "../../cast/[castId]";
+import {DashboardLayout} from "../../../components/navigation/DashboardLayout";
 import {Box, Grid} from "@mui/material";
 import {SeverityPill} from "../../../components/severity-pill";
+import {checkCookies, getCookies} from "cookies-next";
+import Shipping from "../../shipping";
 
 
 const useStyles = makeStyles((theme) => ({
@@ -54,7 +50,7 @@ const useStyles = makeStyles((theme) => ({
         [theme.breakpoints.up('md')]: {
             boxShadow: '0 4px 8px 0 rgba(0,0,0,0.2)',
             padding: '15px',
-
+            marginBottom: '1rem',
         },
 
     },
@@ -72,7 +68,6 @@ const useStyles = makeStyles((theme) => ({
         [theme.breakpoints.up('md')]: {
             display: 'grid',
             gridTemplateColumns: '33% 33% 33%',
-
         },
     },
 
@@ -120,8 +115,6 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 function OrderDetails(props) {
-
-
     const classes = useStyles();
     const { data, error } = useGetSales(props.orderId);
 
@@ -134,7 +127,6 @@ function OrderDetails(props) {
         </div>
     );
 
-    console.log(data)
     const{card, sale} = data;
     const {id, customerId, saleDate, salesTax, subTotal, total, shipping, orders, status} = sale;
     const {brand,exp_month,exp_year, last4} = card;
@@ -248,7 +240,7 @@ function OrderDetails(props) {
 
                 <div className="order-content-view">
                     {orders.map(order => (
-                        <div key={order.id} style={{ marginTop:'20px'}}>
+                        <div key={order.id}>
                             <OrderRowDetailed {...props} key={order.id} content={order}/>
                         </div>
                     ))}
@@ -262,17 +254,38 @@ function OrderDetails(props) {
 
 
 // this function only runs on the server by Next.js
-export const getServerSideProps = async ({params}) => {
-   const orderId = params.orderId;
-    return {
-        props: { orderId }
-    }
-}
+//export const getServerSideProps = async ({params}) => {
+ //   const orderId = params.orderId;
+//    return {
+//        props: { orderId }
+//    }
+
 
 OrderDetails.getLayout = (page) => (
     <DashboardLayout>
         {page}
     </DashboardLayout>
 );
+
+// This gets called on every request
+export const getServerSideProps = ({ req, res, params }) => {
+    // Fetch data from external API
+    // Pass data to the page via props
+    const cookies = getCookies({ res, req });
+    const isLoggedInExists = checkCookies('isLoggedIn', {res, req});
+    const isLoggedIn = isLoggedInExists ? cookies.isLoggedIn : false;
+
+    if (!isLoggedIn) {
+        return {
+            redirect: {
+                destination: '/login',
+                permanent: false,
+            },
+        }
+    }
+    const orderId = params.orderId;
+
+    return { props: { orderId} }
+}
 
 export default OrderDetails;

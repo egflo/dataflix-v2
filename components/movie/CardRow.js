@@ -1,49 +1,42 @@
 
 import MovieCard from './MovieCard'
-import CircularProgress from '@material-ui/core/CircularProgress';
 import { makeStyles } from '@material-ui/core/styles';
-import IconButton from '@material-ui/core/IconButton';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faChevronRight, faChevronLeft } from '@fortawesome/free-solid-svg-icons'
 import  React, {useRef, useState, useEffect, useCallback} from 'react'
 import GetMovies from "../results/InfiniteScroll";
-import {useGetMovies} from "../../service/Service";
 import Typography from "@material-ui/core/Typography";
-import PerfectScrollbar  from "perfect-scrollbar";
 
 const useStyles = makeStyles((theme) => ({
     container: {
-        //border: '1px solid #e0e0e0',
-
         [theme.breakpoints.down('sm')]: {
-            width: '100%',
             height: '100%',
-            padding: '0px',
-            //backgroundColor: '#f5f5f5',
-            position: 'relative',
-            '&::-webkit-scrollbar': {
-                display: 'none'
-            },
+            paddingTop: '0.5rem',
+            paddingBottom: '0.5rem',
+            position: 'relative'
         },
 
         [theme.breakpoints.up('md')]: {
             margin: '0 auto',
-            //maxWidth: '1200px',
-           // minWidth: '1200px',
-            marginBottom: '10px',
+            maxWidth: '1200px',
+            minWidth: '1200px',
             display: 'grid',
-            gridTemplateRows: '50px 470px',
-
+            gridTemplateRows: '50px auto',
         },
-
     },
 
     cardRow: {
-        position: 'relative',
-        //border: '1px solid #e0e0e0',
-        height: '100%',
-        maxWidth: '1200px',
-        // minWidth: '1200px',
+
+        [theme.breakpoints.down('sm')]: {
+            padding: '0px',
+
+        },
+
+        [theme.breakpoints.up('md')]: {
+            position: 'relative',
+            height: '100%',
+            maxWidth: '1200px',
+        },
     },
 
     cardContainer: {
@@ -52,7 +45,7 @@ const useStyles = makeStyles((theme) => ({
         overflowX: 'hidden',
         overflowY: 'hidden',
         scrollBehavior: 'smooth',
-        height: '100%',
+        paddingBottom: '1rem',
 
         [theme.breakpoints.down('sm')]: {
             overflowX: 'auto',
@@ -126,7 +119,6 @@ export default function CardRow({meta}) {
     const [total, setTotal] = useState(5);
     const [movieList, setMovieList] = useState([]);
 
-    //const {data ,error} = useGetMovies(path + "?page=" + page + "&limit=10");
     const { loading, error, list, last} = GetMovies(path, page);
 
     function onScroll(event) {
@@ -187,7 +179,6 @@ export default function CardRow({meta}) {
                     <div className={classes.shape}></div>
                     <Typography variant="h4">{title}</Typography>
                 </div>
-
 
                 <div className={classes.cardRow}>
                     <div className={left ? classes.chevronHide : classes.chevronLeft}>
