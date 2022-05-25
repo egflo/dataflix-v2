@@ -17,7 +17,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import {getUserId,formatCurrency} from '../../../utils/helpers'
 import OrderRowDetailed from '../../../components/order/OrderRowDetailed'
 import {DashboardLayout} from "../../../components/navigation/DashboardLayout";
-import {Box, Grid} from "@mui/material";
+import {Box, Card, CardContent, CardHeader, Divider, Grid} from "@mui/material";
 import {SeverityPill} from "../../../components/severity-pill";
 import {checkCookies, getCookies} from "cookies-next";
 import Shipping from "../../shipping";
@@ -118,7 +118,19 @@ function OrderDetails(props) {
     const classes = useStyles();
     const { data, error } = useGetSales(props.orderId);
 
-    if (error) return <h1>Something went wrong!</h1>
+    if (error) return(
+        <Card>
+            <CardHeader
+                title= "Error"
+                subheader={"Status Code: "  + error.status}
+            />
+            <Divider />
+            <CardContent>
+                <p>{error.message}</p>
+            </CardContent>
+        </Card>
+    );
+
     if (!data) return(
         <div>
             <div className="order-container">

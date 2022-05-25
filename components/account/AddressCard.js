@@ -17,6 +17,8 @@ import {
     Grid,
     TextField,
 } from '@mui/material';
+import {getUserId} from "../../utils/helpers";
+import {axiosInstance} from "../../service/Service";
 
 const useStyles = makeStyles((theme) => ({
     backdrop: {
@@ -70,8 +72,8 @@ const schema = yup.object().shape({
 });
 
 
-export default function ShippingCard(props) {
-    const {address, insert, alert, setalert} = props;
+export default function AddressCard(props) {
+    const {address, insert} = props;
 
     const classes = useStyles();
     const router = useRouter()
@@ -122,40 +124,46 @@ export default function ShippingCard(props) {
     }, [ref, open]);
 
     async function handleSubmit(values) {
-        if(!insert) {
-            values['id'] = address['id'];
-        }
-        const form_object = JSON.stringify(values, null, 2);
-        const token = localStorage.getItem("token")
-        // POST request using fetch with set headers
-        const requestOptions = {
-            method: (insert == true)? 'PUT':'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + token,
-                'My-Custom-Header': 'dataflix'
-            },
-            body: form_object
-        };
-        const res = await fetch(process.env.NEXT_PUBLIC_API_URL + '/address/', requestOptions)
-        const data = await  res.json()
+        if(insert) {
+            axiosInstance.post('/address/', values)
+                .then(res => {
+                    let response = res.data;
+                    mutate("/customer/");
+                    props.setalert({
+                        open: true,
+                        type: 'success',
+                        message: response.message
+                    })
 
-        if(res.status < 300) {
-            await mutate("/customer/");
-            await mutate("/checkout/");
-            setalert({
-                open: true,
-                message: "Address updated successfully",
-                type: "success"
+                }).catch (error => {
+                props.setalert({
+                    open: true,
+                    type: 'error',
+                    message: error.message
+                } )
+            });
+
+        } else {
+            values['id'] = address['id'];
+            axiosInstance.put('/address/', values)
+                .then(res => {
+                    let response = res.data;
+                    mutate("/customer/");
+                    props.setalert({
+                        open: true,
+                        type: 'success',
+                        message: response.message
+                    })
+
+                }).catch (error => {
+                props.setalert({
+                    open: true,
+                    type: 'error',
+                    message: error.message
+                } )
             });
         }
-        else {
-           setalert({
-                open: true,
-                message: "Address update failed",
-                type: "error"
-            });
-        }
+
     }
 
     const formik = useFormik({
@@ -166,7 +174,7 @@ export default function ShippingCard(props) {
         onSubmit: (values) => {
             const json = JSON.stringify(values);
             setValues(values);
-            handleSubmit(values);
+            handleSubmit(values).then(r => handleToggle() );
             setLoading(true)
         },
     });

@@ -6,7 +6,7 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 import { makeStyles } from '@material-ui/core/styles';
 import React, {useState} from "react";
 import {faPlus} from "@fortawesome/free-solid-svg-icons";
-import ShippingCard from "../../components/account/ShippingCard";
+import AddressCard from "../../components/account/AddressCard";
 import {mutate} from "swr";
 import {DashboardLayout} from "../../components/navigation/DashboardLayout";
 import {axiosInstance} from "../../service/Service";
@@ -114,7 +114,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 //https://react-bootstrap.github.io/components/forms/
-function AddressCard(props) {
+function Address(props) {
     const {address, primary, alert, setalert} = props;
     const classes = useStyles();
 
@@ -144,7 +144,7 @@ function AddressCard(props) {
         const userId = localStorage.getItem("id")
         const data = JSON.stringify({ id: userId, primaryAddress: id });
 
-        axiosInstance.post('/customer/primary', data)
+        axiosInstance.put('/customer/primary', data)
             .then(res => {
                 let data = res.data;
                 if(res.status === 200) {
@@ -185,7 +185,7 @@ function AddressCard(props) {
             <div></div>
 
             <div>
-                <ShippingCard address={address} insert={false} setalert={setalert}/>
+                <AddressCard address={address} insert={false} setalert={setalert}/>
                 <span className={classes.divider}></span>
                 <button onClick={() => {handleDelete(address)}} className="edit-address">Remove</button>
                 <span className={classes.divider}></span>
@@ -229,11 +229,11 @@ function Addresses(props) {
 
                 <div className={classes.cardContainer}>
                     <div className={classes.add}>
-                        <ShippingCard insert={true} setalert={props.setalert}/>
+                        <AddressCard insert={true} setalert={props.setalert}/>
                     </div>
 
                     {addresses.map(address => (
-                        <AddressCard key={address.id} address={address} primary={(primaryAddress == address.id)? true: false} alert={props.alert} setalert={props.setalert}></AddressCard>
+                        <Address key={address.id} address={address} primary={(primaryAddress == address.id)? true: false} alert={props.alert} setalert={props.setalert}></Address>
                     ))}
                 </div>
 

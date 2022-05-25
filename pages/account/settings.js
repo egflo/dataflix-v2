@@ -69,7 +69,7 @@ function User(props) {
     const router = useRouter();
     const classes = useStyles();
     const { data, error } = useGetUser();
-
+    console.log(data);
     if (error) return(
         <Card>
             <CardHeader

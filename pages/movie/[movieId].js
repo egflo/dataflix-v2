@@ -127,7 +127,7 @@ const useStyles = makeStyles((theme) => ({
          <Card>
              <CardHeader
                  title= "Error"
-                 subheader={"Status Code: " + error.status}
+                 subheader={"Status Code: "  + error.status}
              />
              <Divider />
              <CardContent>
@@ -157,7 +157,7 @@ const useStyles = makeStyles((theme) => ({
     }
 
     async function handleAddCart() {
-        axiosInstance.put('/cart/', {
+        axiosInstance.post('/cart/', {
             //userId: getUserId(),
             movieId:id,
             qty: 1

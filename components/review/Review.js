@@ -164,7 +164,7 @@ export default function Review({ review }) {
 
     return (
         <>
-        <Card onClick={handleToggle} className={classes.reviewCard} ref={ref}>
+            <Card onClick={handleToggle} className={classes.reviewCard} ref={ref}>
                 <CardHeader
                     title={
                         <h4 className={classes.reviewTitle}>
@@ -188,7 +188,12 @@ export default function Review({ review }) {
                 </CardContent>
             </Card>
 
-            <Backdrop className={classes.backdrop} open={open} onClick={handleClose} ref={refOverlay}>
+            <Backdrop
+                sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+                open={open}
+                onClick={handleClose}
+                ref={refOverlay}>
+
                 <div className={classes.reviewExpanded}>
                     <Card>
                         <CardHeader

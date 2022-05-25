@@ -16,6 +16,7 @@ import ReviewCard from '../../components/review/ReviewCard'
 import NoBackground from '/public/BACKGROUND.png'
 import { SeverityPill } from '/components/severity-pill'
 import CriticsRow from "../../components/movie/CrticsRow";
+import ReviewCardDetailed from "../review/ReviewCardDetailed";
 
 const useStyles = makeStyles((theme) => ({
     background: {

@@ -39,7 +39,6 @@ export default function Bookmark(props) {
 
     async function handleBookmark() {
         // POST request using fetch with set headers
-
         axiosInstance.post('/bookmark/', {
             customerId: getUserId(),
             movieId: props.id
@@ -61,7 +60,6 @@ export default function Bookmark(props) {
             }
             mutate(data)
         }).catch(err => {
-            console.log(err)
             props.setalert({
                 open: true,
                 type: 'error',

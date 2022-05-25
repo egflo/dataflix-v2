@@ -23,7 +23,7 @@ const useStyles = makeStyles((theme) => ({
 
         [theme.breakpoints.up('md')]: {
             boxShadow: '0 4px 8px 0 rgba(0,0,0,0.2)',
-            gridTemplateColumns: '10vw 50vw auto',
+            gridTemplateColumns: '10rem 35rem auto',
             marginBottom: '2vh',
         },
     },

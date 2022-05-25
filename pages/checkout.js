@@ -16,7 +16,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import Select from 'react-select';
 import Backdrop from '@mui/material/Backdrop';
 import CircularProgress from '@mui/material/CircularProgress';
-import ShippingCard from "../components/account/ShippingCard";
+import AddressCard from "../components/account/AddressCard";
 import {Card, CardContent, CardHeader, Divider} from "@mui/material";
 import {checkCookies, getCookies} from "cookies-next";
 
@@ -155,35 +155,6 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 
-async function handleAddressChange(address) {
-    // POST request using fetch with set headers
-
-    const options = {
-        id: address.id,
-        firstName: address.firstname,
-        lastName: address.lastname,
-        street: address.street,
-        unit: address.unit,
-        city: address.city,
-        state: address.state,
-        postcode: address.postcode
-    }
-
-    axiosInstance.post('/checkout/', options)
-        .then(res => {
-            if (res.status === 200 || res.status === 201) {
-                setCheckout(res.data);
-            }
-        })
-        .catch(err => {
-            props.setalert({
-                open: true,
-                type: 'error',
-                message: err.data ? err.data.message : 'Unable to process sale. Try again later.'
-            })
-        })
-}
-
 const CARD_ELEMENT_OPTIONS = {
     iconStyle: "solid",
     hidePostalCode: false,
@@ -235,39 +206,7 @@ function CheckoutForm(props) {
         if (data) {
             //Once we have the data, we can set the checkout state
             //Get a payment intent from the server and set the intent state
-            setLoading(true);
-            setCheckout(data);
-            axiosInstance.post('/checkout/charge', {
-                amount: total,
-                currency: 'USD',
-                description: 'Test Charge for user id: ' + getUserId(),
-            })
-                .then(response => {
-                    if (response.error) {
-                        // Handle error here
-                        props.setalert(
-                            {
-                                open: true,
-                                message: response.error.message,
-                                type: "error",
-                            }
-                        );
-
-                    }
-                    setIntent(response.data);
-                })
-                .catch(function (error) {
-                    setLoading(false)
-                    props.setalert(
-                        {
-                            open: true,
-                            message: error.message,
-                            type: "error",
-                        }
-                    );
-                });
-
-            setLoading(false);
+            createCharge()
         }
     }, [data]);
 
@@ -295,6 +234,71 @@ function CheckoutForm(props) {
 
     if (addresses.length === 0) {
         router.push('/shipping');
+    }
+
+    function createCharge() {
+        //Once we have the data, we can set the checkout state
+        //Get a payment intent from the server and set the intent state
+        setLoading(true);
+        axiosInstance.post('/checkout/charge', {
+            amount: total,
+            currency: 'USD',
+            description: 'Test Charge for user id: ' + getUserId(),
+        })
+            .then(response => {
+                if (response.error) {
+                    // Handle error here
+                    props.setalert(
+                        {
+                            open: true,
+                            message: response.error.message,
+                            type: "error",
+                        }
+                    );
+
+                }
+                setIntent(response.data);
+            })
+            .catch(function (error) {
+                props.setalert(
+                    {
+                        open: true,
+                        message: error.message,
+                        type: "error",
+                    }
+                );
+            });
+
+        setLoading(false);
+    }
+
+    async function handleAddressChange(address) {
+        // POST request using fetch with set headers
+        const options = {
+            id: address.id,
+            firstName: address.firstname,
+            lastName: address.lastname,
+            street: address.street,
+            unit: address.unit,
+            city: address.city,
+            state: address.state,
+            postcode: address.postcode
+        }
+
+        axiosInstance.post('/checkout/', options)
+            .then(res => {
+                if (res.status === 200 || res.status === 201) {
+                    setCheckout(res.data);
+                    createCharge()
+                }
+            })
+            .catch(err => {
+                props.setalert({
+                    open: true,
+                    type: 'error',
+                    message: err.data ? err.data.message : err.message
+                })
+            })
     }
 
     function processPayment() {
@@ -455,7 +459,7 @@ function CheckoutForm(props) {
                     <h4>1 Shipping Address</h4>
                     <div className={classes.add}>
                         <FontAwesomeIcon style={{color:'lightgray', position: 'absolute', marginLeft: '28%',marginTop:'8%'}} icon={faPlus} size="2x" />
-                        <ShippingCard insert={true}/>
+                        <AddressCard insert={true}/>
                     </div>
                 </div>
             );
@@ -502,8 +506,7 @@ function CheckoutForm(props) {
         const selectedAddress = (element) => element.id == selectedOptions.value;
         const selectedAddressIndex = addresses.findIndex(selectedAddress);
         const address = addresses[selectedAddressIndex];
-        //handleAddressChange(address).then(r => onChange(r) );
-        handleAddressChange(address).then(r => console.log(r));
+        handleAddressChange(address);
     }
 
     return (

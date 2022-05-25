@@ -103,9 +103,7 @@ export default function EmailCard(props) {
 
     async function handleSubmit(values) {
         values['id'] = getUserId();
-        const form_object = JSON.stringify(values, null, 2);
-
-        axiosInstance.post('/customer/email', values)
+        axiosInstance.put('/customer/email', values)
             .then(res => {
                 let response = res.data;
                 mutate("/customer/");

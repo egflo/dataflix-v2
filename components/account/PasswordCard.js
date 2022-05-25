@@ -20,6 +20,7 @@ import {
     Divider,
     Backdrop,
 } from '@mui/material';
+import {axiosInstance} from "../../service/Service";
 
 
 const useStyles = makeStyles((theme) => ({
@@ -105,38 +106,23 @@ export default function PasswordCard() {
 
     async function handleSubmit(values) {
         values['id'] = getUserId();
-        const form_object = JSON.stringify(values, null, 2);
-        //alert(form_object)
-        //alert(object)
+        axiosInstance.put('/customer/password', values)
+            .then(res => {
+                let response = res.data;
+                mutate("/customer/");
+                props.setalert({
+                    open: true,
+                    type: 'success',
+                    message: response.message
+                })
 
-        // POST request using fetch with set headers
-        const requestOptions = {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + token,
-                'My-Custom-Header': 'dataflix'
-            },
-            body: form_object
-        };
-        const res = await fetch(process.env.NEXT_PUBLIC_API_URL + '/customer/update/password', requestOptions)
-        const data = await  res.json()
-
-        if(res.status < 300) {
-            mutate("/customer/");
-            props.setalert({
-                open: true,
-                type: 'success',
-                message: 'Password Updated'
-            })
-        }
-        else {
+            }).catch (error => {
             props.setalert({
                 open: true,
                 type: 'error',
-                message: 'Error Updating Password'
-            })
-        }
+                message: error.message
+            } )
+        });
     }
 
     function handleSwitch(event) {

@@ -19,6 +19,7 @@ import {
     CardHeader,
     Divider}
     from "@mui/material";
+import {axiosInstance} from "../../service/Service";
 
 
 const useStyles = makeStyles((theme) => ({
@@ -71,6 +72,7 @@ export default function ReviewCard(props) {
     };
 
     const handleToggle = () => {
+        handleReset();
         setOpen(!open);
     };
 
@@ -95,40 +97,36 @@ export default function ReviewCard(props) {
     }, [ref, open]);
 
     async function handleSubmit(values) {
-        const token = localStorage.getItem("token")
+
         values['movieId'] = props.id;
         values['customerId'] = getUserId();
-        const form_object = JSON.stringify(values, null, 2);
-        console.log(form_object);
-        // POST request using fetch with set headers
-        const requestOptions = {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + token,
-                'My-Custom-Header': 'dataflix'
-            },
-            body: form_object
-        };
-        const res = await fetch(process.env.NEXT_PUBLIC_API_URL + '/review/', requestOptions)
-        const data = await  res.json()
 
-        if(res.status < 300) {
-            await mutate("/movie/");
-            props.setalert({
-                open: true,
-                type: 'success',
-                message: 'Review Added.'
-            })
-
-        }
-        else {
-            props.setalert({
+        axiosInstance.post('/review/', values)
+            .then(res => {
+                if (res.status === 201) {
+                    mutate("/movie/" + props.id);
+                    props.setalert({
+                        open: true,
+                        type: 'success',
+                        message: 'Review Added.'
+                    })
+                }
+                else {
+                    props.setalert({
+                        open: true,
+                        type: 'error',
+                        message: res.data.message || 'Something went wrong.'
+                    })
+                }
+            }) .catch(err => {
+                props.setalert({
                 open: true,
                 type: 'error',
-                message: 'Unable to add review. Try again later.'
+                message: err.data ? err.data.message : 'Review not added.'
             })
-        }
+        });
+
+        handleToggle();
     }
 
     let initalValues = {
@@ -166,7 +164,10 @@ export default function ReviewCard(props) {
     return (
         <div>
             <ToggleType></ToggleType>
-            <Backdrop className={classes.backdrop}  open={open}>
+            <Backdrop
+                sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+                open={open}
+            >
                     <Card className={classes.card} ref={ref}>
                         <CardHeader title="Write a Review" subheader="Information can be edited" />
                         <Divider />
