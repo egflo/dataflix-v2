@@ -288,6 +288,7 @@ function CheckoutForm(props) {
         axiosInstance.post('/checkout/', options)
             .then(res => {
                 if (res.status === 200 || res.status === 201) {
+                    console.log(res.data);
                     setCheckout(res.data);
                     createCharge()
                 }

@@ -187,7 +187,7 @@ export default function CartRow(props) {
 
         setQty(value);
 
-        axiosInstance.post('/cart/', {
+        axiosInstance.put('/cart/', {
             id: id,
             userId:userId,
             movieId:movieId,
@@ -199,7 +199,7 @@ export default function CartRow(props) {
                 props.setalert({
                     open: true,
                     type: 'success',
-                    message: 'Cart updated successfully'
+                    message: response.data.message
                 })
             }
 

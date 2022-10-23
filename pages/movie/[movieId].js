@@ -166,10 +166,9 @@ const useStyles = makeStyles((theme) => ({
             let data = res.data
             props.setalert({
                 open: true,
-                message: "Added to cart",
-                type: "success"
+                message: data.message,
+                type: data.success ? "success" : "error"
             })
-
         }).catch(error => {
 
            let response = error.response
